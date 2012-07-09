@@ -1,0 +1,58 @@
+1. download newest mplayer, all codecs, skin(Corelian), font(arial-iso-8859-1).
+
+2. unzip all codecs and move them to /usr/lib/mplayer/codecs
+
+3. install libdvdcss:
+./configure --prefix=/usr &&
+make && make install
+
+4. install libdvdread
+./configure --prefix=/usr --with-libdvdcss &&
+make && make install
+
+5. install mplayer
+
+a. install codecs
+
+   install -v -d -m755 /usr/lib/mplayer/codecs &&
+      tar -xvf ../all-20071007.tar.bz2 \
+      -C /usr/lib/mplayer/codecs --strip-components=1 &&
+      chown -v -R root:root /usr/lib/mplayer/codecs
+
+b. install GUI
+
+install -v -d -m755 /usr/share/mplayer/skins &&
+tar -xvf Corelian-1.1.tar.bz2 \
+    -C /usr/share/mplayer/skins &&
+chown -v -R root:root /usr/share/mplayer/skins/Corelian &&
+chmod -v 755 /usr/share/mplayer/skins/Corelian &&
+ln -sfv Corelian /usr/share/mplayer/skins/default
+
+c. install Mplayer
+(If you install Xorg in other place not /usr or /usr/X11R5, change configure
+ file using your owner directory like my /usr/X11R7, and change codecs directory from /usr/lib/codecs to /usr/lib/mplayer/codecs)
+
+./configure --prefix=/usr --confdir=/etc/mplayer  --enable-largefiles --enable-dynamic-plugins --enable-gui --enable-menu --codecsdir=/usr/lib/mplayer/codecs --win32codecsdir=/usr/lib/mplayer/codecs/ --realcodecsdir=/usr/lib/mplayer/codecs/
+make && make install
+ln -v -s libdha.so.1.0 /usr/lib/libdha.so
+install -m644 etc/codecs.conf /etc/mplayer
+install -m644 etc/*.conf /etc/mplayer
+
+
+d. install fonts
+
+install -v -d -m755 /usr/share/mplayer/font
+tar -xvf ../font-arial-iso-8859-1.tar.bz2     -C /usr/share/mplayer/font && chown -v -R root:root /usr/share/mplayer/font && cd /usr/share/mplayer/font && ln -v -sf font-arial-iso-8859-1/font-arial-24-iso-8859-1/* .
+
+install -v -m750 -d ~/.mplayer &&
+ln -v -sf /usr/share/fonts/wqy-ttf/wqy-zenhei.ttf \
+    ~/.mplayer/subfont.ttf
+
+6. use chinese substitle:
+run gmplayer, select perference.
+set Subtitles & OSD->Encoding as Unicode.
+set Font->Encoding as Unicode.
+install a chinese TTF font into ~/.mplayer/subfont.ttf
+
+
+

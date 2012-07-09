@@ -1,0 +1,95 @@
+##
+#	Apache 2.2.21 configure file
+#
+
+LoadModule php5_module        modules/libphp5.so
+
+<IfModule !mpm_netware_module>
+<IfModule !mpm_winnt_module>
+	User daemon
+	Group daemon
+</IfModule>
+</IfModule>
+
+<IfModule ssl_module>
+	SSLRandomSeed startup builtin
+	SSLRandomSeed connect builtin
+</IfModule>
+
+<IfModule dir_module>
+    DirectoryIndex index.html
+</IfModule>
+
+<IfModule mime_module>
+    TypesConfig conf/mime.types
+    AddType application/x-compress .Z
+    AddType application/x-gzip .gz .tgz
+    AddType application/x-httpd-php .php
+</IfModule>
+
+<IfModule log_config_module>
+    LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+    LogFormat "%h %l %u %t \"%r\" %>s %b" common
+
+    <IfModule logio_module>
+      LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O" combinedio
+    </IfModule>
+
+    CustomLog "logs/access_log" common
+</IfModule>
+
+<IfModule alias_module>
+    ScriptAlias /cgi-bin/ "/opt/httpd-2.2.21/cgi-bin/"
+</IfModule>
+
+
+<FilesMatch "^\.ht">
+    Order allow,deny
+    Deny from all
+    Satisfy All
+</FilesMatch>
+
+
+Listen 80
+ErrorLog "logs/error_log"
+LogLevel warn
+DefaultType text/plain
+ServerAdmin root@devsvr11.org
+ServerName www.devsvr11.org:80
+ServerRoot "/opt/httpd-2.2.21"
+DocumentRoot "/opt/httpd-2.2.21/www-data"
+
+
+<Directory />
+    Options FollowSymLinks
+    AllowOverride None
+    Order deny,allow
+    Deny from all
+</Directory>
+<Directory "/opt/httpd-2.2.21/www-data">
+    Options Indexes FollowSymLinks
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>
+
+<Directory "/opt/httpd-2.2.21/cgi-bin">
+    AllowOverride None
+    Options None
+    Order allow,deny
+    Allow from all
+</Directory>
+
+# Virtual hosts
+#Include conf/extra/httpd-vhosts.conf
+
+# Local access to the Apache HTTP Server Manual
+#Include conf/extra/httpd-manual.conf
+
+# Distributed authoring and versioning (WebDAV)
+#Include conf/extra/httpd-dav.conf
+
+# Various default settings
+#Include conf/extra/httpd-default.conf
+
+

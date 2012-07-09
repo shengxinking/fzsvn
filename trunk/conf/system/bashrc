@@ -1,0 +1,26 @@
+# Begin of ~/.bashrc
+
+# set PS1
+GREEN="\[\e[1;32;40m\]"
+RED="\[\e[1;31;40m\]"
+YELLOW="\[\e[1;33;40m\]"
+CYAN="\[\e[1;36;40m\]"
+NULL="\[\e[0m\]"
+if [ "$TERM" = "linux" ]; then
+	#we're on the system console or maybe telnetting in
+	export PS1='\[\e[1;31;40m\][\[\e[1;32;40m\]\l\[\e[1;31;40m\]]\[\e[1;32;40m\]\u\[\e[1;31;40m\]@\[\e[1;32;40m\]\H\[\e[1;31;40m\]:\[\e[1;32;40m\]\w\[\e[1;36;40m\] \$ \[\e[0m\]'
+else
+	#we're not on the console, assume an xterm
+	export PS1='\[\e]2;\u@\H \w\a\e[32;1m\]\$ \[\e[0m\]'
+fi
+
+# set color
+
+
+# set alias
+alias ls='ls --color=auto'
+alias ll='ls -l'
+alias rm='rm -i'
+alias mv='mv -i'
+alias cp='cp -i'
+

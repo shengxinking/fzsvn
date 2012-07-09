@@ -1,0 +1,8 @@
+# fetchmail setting
+
+defaults
+mda "/usr/bin/procmail -d %T"
+set postmaster "XXXX"
+
+poll mail.fortinet.com with proto POP3 port 995 user "XXXX" with pass "XXXX" is XXXX here options keep ssl 
+

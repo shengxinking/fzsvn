@@ -1,0 +1,4 @@
+1. using intel ac97 driver in kernel
+2. using alsamixer, close(M) "Headphone" and "Line Jac"
+
+

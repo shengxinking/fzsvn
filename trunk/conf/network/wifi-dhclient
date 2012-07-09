@@ -1,0 +1,7 @@
+ONBOOT=yes
+SERVICE=wifi-dhclient
+MODE=managed
+ESSID=Forrest
+CHANNEL=1
+ENC=0C255056DF
+

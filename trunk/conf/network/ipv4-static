@@ -1,0 +1,15 @@
+## Begin of /etc/sysconfig/network-device/ifconfig.eth0/ipv4-static
+
+
+ONBOOT="yes"
+SERVICE="ipv4-static"
+IP=172.22.14.65
+PREFIX=24
+BROADCAST=172.22.14.255
+GATEWAY=172.22.14.1
+PRINTIP="no"
+PRINTALL="no"
+
+
+## End of /etc/sysconfig/network-device/ifconfig.eth0/ipv4-static
+

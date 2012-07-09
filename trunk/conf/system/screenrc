@@ -1,0 +1,34 @@
+## Begin of ~/.screenrc
+
+# set shell to bash
+shell bash
+
+# set term 
+term xterm
+
+# skip the startup message 
+startup_message off
+
+# set scroll line 
+defscrollback   10000
+
+# close visual bell
+vbell           off
+
+# set caption on second line of button-area
+#caption always "%{+b rk}%H%{gk} | %c %{yk}%Y.%m.%d | %72=Load: %l %{wk}"
+caption always "%{+b bk} %H | %c %Y.%m.%d | %72=Load: %l"
+
+# set hardstatus on button line
+hardstatus alwayslastline "%?%{yk}%-Lw%?%{wb}%n*%f %t%?(%u)%?%?%{yk}%+Lw%?"
+
+# set urxvt title
+termcapinfo xterm 'hs:ts=\E]2;:fs=\007:ds=\E]2;screen\007'
+
+# set keybinding
+bindkey -k F1 prev
+bindkey -k F2 next
+
+
+## End of ~/.screenrc
+

@@ -1,0 +1,43 @@
+1. install httpd.
+
+./configure --prefix=/opt/httpd-2.2.21 --enable-modules=most --enable-mods-shared=most --enable-ssl
+make
+make install
+
+2. install php with httpd module.
+
+./configure --prefix=/opt/php-5.3.8 --with-apxs2=/opt/httpd-2.2.21/bin/apxs
+make
+make install
+
+
+3. install php with fastcgi support.
+
+./configure --prefix=/opt/php-5.3.8-fastcgi --enable-fastcgi  --enable-force-cgi-redirect
+make
+make install
+cp php.ini-production /opt/php-5.3.8-fastcgi/lib/php.ini
+
+Change /opt/php-5.3.8-fastcgi/lib/php.ini, uncomment the following line:
+cgi.fix_pathinfo=1
+
+
+4. install lighttpd
+
+./configure --prefix=/opt/lighttpd-1.4.30 --with-openssl
+make
+make install
+
+
+5. install nginx
+
+./configure --prefix=/opt/nginx-1.1.11 --with-http_ssl_module
+make
+make install
+
+6. run php daemon for fastcgi in nginx
+
+/opt/php-5.3.8-fastcgi/bin/php-cgi -b 9000 -q &
+
+
+

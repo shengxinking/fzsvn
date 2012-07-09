@@ -1,0 +1,52 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 3 (0x3)
+        Signature Algorithm: md5WithRSAEncryption
+        Issuer: C=CN, ST=Beijing, L=Beijing, O=Haidian, OU=FZ, CN=FZ/emailAddress=100000@fz.org
+        Validity
+            Not Before: Feb  8 09:51:32 2012 GMT
+            Not After : Feb  5 09:51:32 2022 GMT
+        Subject: C=CN, ST=100003, O=100003, OU=100003, CN=100003
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (512 bit)
+                Modulus:
+                    00:ab:6e:5f:80:b7:4d:e6:43:d2:4a:72:d8:b6:c4:
+                    9b:06:0d:0f:b7:3c:2f:a0:ef:ff:7c:87:c0:ba:a4:
+                    37:98:db:6e:fc:f9:56:0f:bb:bd:50:78:fe:ec:12:
+                    4c:93:70:ac:19:cf:9e:49:c5:2d:d1:d0:5a:79:8b:
+                    0c:a6:88:f9:af
+                Exponent: 65537 (0x10001)
+    Signature Algorithm: md5WithRSAEncryption
+        3d:36:2a:c6:ed:ec:be:3e:2f:ed:b8:25:6e:92:93:54:94:7e:
+        c6:15:1c:07:80:96:fe:8d:16:f1:45:15:d8:64:06:6f:da:92:
+        c6:a4:91:9f:27:ed:f1:d9:45:55:b5:44:61:78:4f:bb:41:80:
+        b0:3a:2b:a9:14:5a:4d:fd:59:7a:3e:b0:ba:9a:97:1a:52:f9:
+        28:4e:68:ab:a2:cf:5e:76:9a:21:fe:7a:9c:0b:e5:0c:86:d3:
+        32:d0:0c:0c:f1:4c:e8:38:02:ee:ab:77:65:2a:17:25:f7:e2:
+        e3:b7:20:27:fc:0e:1b:43:a8:7e:21:74:4c:6a:e9:67:b0:07:
+        44:83:a1:95:06:19:0f:77:a1:5a:82:8a:43:70:8e:c6:04:b3:
+        90:b1:96:c6:a0:55:26:72:d9:f6:53:60:bc:ca:0b:5a:dd:fe:
+        5e:e9:78:75:76:df:c7:c6:4e:96:2b:79:bc:b5:12:10:2a:a1:
+        ba:b9:3d:2d:62:03:9d:80:d7:a5:18:20:d1:1f:e9:b0:01:4e:
+        01:78:19:d6:fc:35:55:5a:be:57:4e:56:8f:7e:2c:99:43:1f:
+        83:e6:9a:6e:c9:c3:5f:5d:9a:3e:9b:d0:88:36:9f:83:ba:e0:
+        fe:d4:b3:69:72:6f:88:69:f6:a2:c7:3e:35:49:e1:2c:56:04:
+        c9:3c:af:2f
+-----BEGIN CERTIFICATE-----
+MIICfTCCAWWgAwIBAgIBAzANBgkqhkiG9w0BAQQFADB7MQswCQYDVQQGEwJDTjEQ
+MA4GA1UECAwHQmVpamluZzEQMA4GA1UEBwwHQmVpamluZzEQMA4GA1UECgwHSGFp
+ZGlhbjELMAkGA1UECwwCRloxCzAJBgNVBAMMAkZaMRwwGgYJKoZIhvcNAQkBFg0x
+MDAwMDBAZnoub3JnMB4XDTEyMDIwODA5NTEzMloXDTIyMDIwNTA5NTEzMlowUTEL
+MAkGA1UEBhMCQ04xDzANBgNVBAgMBjEwMDAwMzEPMA0GA1UECgwGMTAwMDAzMQ8w
+DQYDVQQLDAYxMDAwMDMxDzANBgNVBAMMBjEwMDAwMzBcMA0GCSqGSIb3DQEBAQUA
+A0sAMEgCQQCrbl+At03mQ9JKcti2xJsGDQ+3PC+g7/98h8C6pDeY2278+VYPu71Q
+eP7sEkyTcKwZz55JxS3R0Fp5iwymiPmvAgMBAAEwDQYJKoZIhvcNAQEEBQADggEB
+AD02Ksbt7L4+L+24JW6Sk1SUfsYVHAeAlv6NFvFFFdhkBm/aksakkZ8n7fHZRVW1
+RGF4T7tBgLA6K6kUWk39WXo+sLqalxpS+ShOaKuiz152miH+epwL5QyG0zLQDAzx
+TOg4Au6rd2UqFyX34uO3ICf8DhtDqH4hdExq6WewB0SDoZUGGQ93oVqCikNwjsYE
+s5CxlsagVSZy2fZTYLzKC1rd/l7peHV238fGTpYreby1EhAqobq5PS1iA52A16UY
+INEf6bABTgF4Gdb8NVVavldOVo9+LJlDH4Pmmm7Jw19dmj6b0Ig2n4O64P7Us2ly
+b4hp9qLHPjVJ4SxWBMk8ry8=
+-----END CERTIFICATE-----

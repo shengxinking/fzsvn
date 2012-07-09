@@ -1,0 +1,8 @@
+app-i18n/fcitx		~amd64
+x11-misc/lightdm	~amd64
+x11-misc/lightdm-gtk-greeter ~amd64
+app-emulation/virtualbox-bin ~amd64
+app-emulation/virtualbox-additions ~amd64
+app-emulation/virtualbox-modules ~amd64
+
+

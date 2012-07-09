@@ -1,0 +1,52 @@
+" Begin /etc/vimrc
+
+set nocompatible
+syntax on
+set showcmd
+set ruler
+set backspace=2
+
+" set the background color
+if (&term == "iterm") || (&term == "putty")
+  set background=dark
+endif
+
+" set ctags support
+set tags=tags;
+set autochdir
+
+" Uncomment the following to have Vim jump to the last position when
+" reopening a file
+if has("autocmd")
+	au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$")
+	\| exe "normal g'\"" | endif
+endif
+
+" Uncomment the following to have Vim load indentation rules according to the
+" detected filetype. Per default Debian Vim only load filetype specific
+" plugins.
+if has("autocmd")
+   filetype indent on
+endif
+
+" Add C language templator when create a new *.c file or *.h file
+autocmd BufNewFile main.c 0r ~/fzsvn/code/templator/main.c
+autocmd BufNewFile m.c,[^m]*.c,ma.c,m[^a]*.c,mai.c,ma[^i]*.c,mai[^n]*.c,main?*.c 0r ~/fzsvn/code/templator/templator.c
+autocmd BufNewFile *.h 0r ~/fzsvn/code/templator/templator.h
+autocmd BufNewFile *_test.c 0r ~/fzsvn/code/templator/main.c
+
+" expand "//" to "/* */" in C language and expand "/**" to "/**<cr>*<cr>*/" mode
+au BufNewFile,BufRead *.[ch] iabbrev // /*!cursor! */<esc>:call search('!cursor!', 'b')<cr>cf!
+au BufNewFile,BufRead *.[ch] iabbrev /** /**<cr>*<tab>!cursor! <cr>*/<esc>:call search ('!cursor!', 'b')<cr>cf!
+
+" set number line at left and set max number is 4
+" set number
+" set numberwidth=4
+
+" set status bar at buttom.
+set laststatus=2
+set statusline=%F\ [TYPE=%Y]\ [ASCII:HEX=\%03.3b:%02.2B]\ [POS=%04l,%04v][%p%%]\ [LINES=%L]
+
+
+" End /etc/vimrc
+

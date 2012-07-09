@@ -1,0 +1,41 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 9 (0x9)
+        Signature Algorithm: md5WithRSAEncryption
+        Issuer: C=US, ST=110000, O=110000, OU=110000, CN=110000
+        Validity
+            Not Before: Feb  8 09:53:33 2012 GMT
+            Not After : Feb  5 09:53:33 2022 GMT
+        Subject: C=VV, ST=112000, O=112000, OU=112000, CN=112000
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (1024 bit)
+                Modulus:
+                    00:9e:d5:4c:b3:94:20:81:c2:02:74:36:89:c0:2a:
+                    ed:aa:6a:a1:2e:43:f2:36:d5:71:ff:b0:00:9e:c5:
+                    a2:f7:8c:9e:d5:57:b7:47:50:89:f4:fe:63:b4:c2:
+                    b2:b6:03:f6:b4:1a:24:fe:92:af:2a:9a:4e:0d:4b:
+                    a9:18:70:83:50:91:12:48:59:19:48:66:f7:6b:a9:
+                    a8:51:46:96:0c:55:f3:76:91:58:e7:82:7d:e5:0d:
+                    18:bc:fa:32:05:ef:53:1f:54:70:a4:7f:9e:04:5f:
+                    dd:69:c3:db:15:97:64:d3:18:ed:52:87:67:b5:3e:
+                    26:19:2a:dd:c2:0c:5c:b2:3d
+                Exponent: 65537 (0x10001)
+    Signature Algorithm: md5WithRSAEncryption
+        50:44:bb:2f:5b:6e:e9:36:52:0a:8d:9e:13:65:47:9a:b2:77:
+        ab:32:95:19:25:fc:6a:87:c2:33:25:91:dd:1d:be:20:f9:55:
+        e3:f0:43:74:83:14:da:ca:fd:96:98:d5:5e:de:e9:26:32:5b:
+        4c:c3:a8:fb:eb:d2:9a:cf:d7:5a
+-----BEGIN CERTIFICATE-----
+MIIB1TCCAX+gAwIBAgIBCTANBgkqhkiG9w0BAQQFADBRMQswCQYDVQQGEwJVUzEP
+MA0GA1UECAwGMTEwMDAwMQ8wDQYDVQQKDAYxMTAwMDAxDzANBgNVBAsMBjExMDAw
+MDEPMA0GA1UEAwwGMTEwMDAwMB4XDTEyMDIwODA5NTMzM1oXDTIyMDIwNTA5NTMz
+M1owUTELMAkGA1UEBhMCVlYxDzANBgNVBAgMBjExMjAwMDEPMA0GA1UECgwGMTEy
+MDAwMQ8wDQYDVQQLDAYxMTIwMDAxDzANBgNVBAMMBjExMjAwMDCBnzANBgkqhkiG
+9w0BAQEFAAOBjQAwgYkCgYEAntVMs5QggcICdDaJwCrtqmqhLkPyNtVx/7AAnsWi
+94ye1Ve3R1CJ9P5jtMKytgP2tBok/pKvKppODUupGHCDUJESSFkZSGb3a6moUUaW
+DFXzdpFY54J95Q0YvPoyBe9TH1RwpH+eBF/dacPbFZdk0xjtUodntT4mGSrdwgxc
+sj0CAwEAATANBgkqhkiG9w0BAQQFAANBAFBEuy9bbuk2UgqNnhNlR5qyd6sylRkl
+/GqHwjMlkd0dviD5VePwQ3SDFNrK/ZaY1V7e6SYyW0zDqPvr0prP11o=
+-----END CERTIFICATE-----

@@ -1,0 +1,15 @@
+# Begin of ~/.xrofile
+
+# start ibus in gnome3 desktop
+
+export LC_ALL=zh_CN.utf8
+
+export GTK_IM_MODULE=ibus
+export XMODIFIERS=@im=ibus
+export QT_IM_MODULE=ibus
+
+ibus-daemon -d -x
+
+
+# End of .profile
+

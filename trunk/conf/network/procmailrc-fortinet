@@ -1,0 +1,119 @@
+# Begin of ~/.procmailrc
+#
+# Fortinet company's email config.
+
+VERBOSE=no
+MAILDIR=$HOME/.mail
+LOGFILE=$HOME/.mail/procmail.log
+
+###########################################################
+#	mails to update directory
+###########################################################
+
+:0
+* ^From:.*(submitvirus|ips_qa)@fortinet.com
+$MAILDIR/update/
+
+:0
+* ^Subject:.*BUILD ANNOUNCEMENT
+$MAILDIR/update/
+
+###########################################################
+#	mails to canada directory
+###########################################################
+:0
+* ^From:.*(alau|atan|bzhu|xlchen|cwang|conman|dhorng)@fortinet.com
+$MAILDIR/canada/
+
+:0
+* ^From:.*(dturnbull|dchen|dshieh|echen|gcsaba|isoen)@fortinet.com
+$MAILDIR/canada
+
+:0
+* ^From:.*(jxue|jqu|jzhou|johnlu|kxie|lhuang|mxie)@fortinet.com
+$MAILDIR/canada
+
+:0
+* ^From:.*(pzhou|rliao|vzhu|yanlin|zlu|nding|pliu)@fortinet.com
+$MAILDIR/canada
+
+:0
+* ^From:.*(nguo|huiliu)@fortinet.com
+$MAILDIR/canada
+
+
+###########################################################
+#	mails to beijing directory
+###########################################################
+
+:0
+* ^From:.*(dongliang|fengcheng|fxliu|hyan|wuhao)@fortinet.com
+$MAILDIR/beijing/
+
+:0
+* ^From:.*(jshao|mguo|pxli|xbweng|xyzhu|zwshang)@fortinet.com
+$MAILDIR/beijing/
+
+:0
+* ^From:.*(ruiliu|sliu|ttang|wljia|wgtang)@fortinet.com
+$MAILDIR/beijing/
+
+
+###########################################################
+#	mails to fortiweb directory
+###########################################################
+
+:0
+* ^From:.*(zhangjw|sqxu|haoxu|kailiu|guozhang)@fortinet.com
+$MAILDIR/fortiweb/
+
+:0
+* ^From:.*(kangchen|zhihuiliu|xhwang|shqiu|zyyu)@fortinet.com
+$MAILDIR/fortiweb/
+
+:0
+* ^From:.*(jianjiangyan|xpxu|jgma)@fortinet.com
+$MAILDIR/fortiweb/
+
+:0
+* ^From:.*(gangwang|qinlu|sxwang|xiyao|yaowu)@fortinet.com
+$MAILDIR/fortiweb/
+
+:0
+* ^From:.*noreply@employease.com
+$MAILDIR/fortiweb/
+
+
+###########################################################
+##       mails to FortiWeb-QA directory
+############################################################
+
+:0
+* ^From:.*(shijili|shchen|jyzhen|yansong)@fortinet.com
+$MAILDIR/fortiweb-qa/
+
+:0
+* ^From:.*(dysong|clzhen|dwguo)@fortinet.com
+$MAILDIR/fortiweb-qa/
+
+
+###########################################################
+##       mails to mantis directory
+############################################################
+
+:0
+* ^From:.*noreply@fortinet.com
+* ^To:.*bugtracker@fortinet.com
+$MAILDIR/mantis/
+
+
+###########################################################
+#	mails to inbox directory
+###########################################################
+
+:0
+* ^From:.*
+$MAILDIR/inbox/
+
+
+

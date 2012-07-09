@@ -1,0 +1,20 @@
+! Begin of ~/.Xmodmap
+
+keycode 162 = XF86AudioPlay
+keycode 164 = XF86AudioStop
+keycode 160 = XF86AudioMute
+keycode 144 = XF86AudioPrev
+keycode 153 = XF86AudioNext
+keycode 176 = XF86AudioRaiseVolume
+keycode 174 = XF86AudioLowerVolume
+
+keycode 233 = XF86Forward
+keycode 234 = XF86Back
+
+keycode 130 = XF86WWW
+keycode	122 = XF86Search
+keycode 236 = XF86Mail
+keycode 161 = XF86Calculator
+
+! End of ~/.Xmodmap
+

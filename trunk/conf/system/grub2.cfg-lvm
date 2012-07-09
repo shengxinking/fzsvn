@@ -1,0 +1,50 @@
+### BEGIN /etc/grub/grub.cfg ###
+
+insmod lvm
+insmod ext2
+insmod gfxterm
+insmod vbe
+insmod png
+
+loadfont /grub/unicode.pf2
+
+set default=1
+set timeout=10
+set root=(linux-boot)
+
+search --no-floppy --fs-uuid --set ae70a36a-62d9-446d-a0fc-9bf7d5a3d21f
+
+set gfxmode=1280x1024
+terminal_output gfxterm 
+background_image /grub/meihua.png
+
+set menu_color_normal=white/black
+set menu_color_highlight=black/white
+
+### BEGIN OF MENU ###
+
+menuentry "Microsoft Windows7" {
+	insmod ntfs
+	set root=(hd1,1)
+	search --no-floppy --fs-uuid --set D29E67B79E679331
+	drivemap -s (hd1) ${root}
+	chainloader +1
+}
+
+
+menuentry "Archlinux" {
+	linux	/vmlinuz26 root=/dev/mapper/linux-sys ro quiet 
+	initrd	/kernel26.img
+}
+
+menuentry "Archlinux mykernel" {
+	linux	/vmlinuz-2.6.38.6 root=/dev/mapper/linux-sys ro  
+	initrd	/initrd-2.6.38.6
+}
+
+menuentry "Memory test (memtest86+)" {
+	linux16	/memtest86+.bin
+}
+
+### END OF MENU ###
+

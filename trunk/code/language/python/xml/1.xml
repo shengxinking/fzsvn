@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <person>
+    <name>Forrest</name>
+    <age>29</age>
+    <comment>Hello world</comment>
+  </person>
+</root>

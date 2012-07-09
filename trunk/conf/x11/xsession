@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# for KDE UTF-8 locale support
+
+export LC_ALL=zh_CN.utf8
+
+
+startkde
+
+

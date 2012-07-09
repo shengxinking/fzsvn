@@ -1,0 +1,63 @@
+## Begin of /boot/grub/grub.cfg
+
+
+## Common setting ##
+set default=1
+set timeout=5
+insmod reiserfs
+set root=(hd0,1)
+search --no-floppy --fs-uuid --set 9e771a4a-44ad-4120-b42d-90847d8f3223
+if loadfont /grub/unicode.pf2 ; then
+	insmod gfxterm
+	insmod vbe
+	insmod png
+
+	set gfxmode=1024x768
+	terminal_output gfxterm
+
+	# load background images
+
+	if background_image /grub/mycooldesktop.png ; then
+		set color_normal=green/black
+		set color_highlight=magenta/black
+	else
+		set menu_color_normal=cyan/blue
+		set menu_color_highlight=white/blue
+	fi
+fi
+
+## The entry of OS ##
+
+menuentry "LFS-6.4, Linux 2.6.26" {
+	insmod reiserfs
+	set root=(hd0,1)
+	search --no-floppy --fs-uuid --set 9e771a4a-44ad-4120-b42d-90847d8f3223
+	linux	/lfs/vmlinuz-2.6.26 root=/dev/sda2 ro quiet vga=792
+}
+
+menuentry "Debian-AMD64, Linux 2.6.30-1-amd64" {
+	insmod reiserfs
+	set root=(hd0,1)
+	search --no-floppy --fs-uuid --set 9e771a4a-44ad-4120-b42d-90847d8f3223
+	linux	/debian64/vmlinuz-2.6.30-1-amd64 root=UUID=6528ea44-84ce-4d40-ba12-bb52c749596b ro  quiet vga=792
+	initrd	/debian64/initrd.img-2.6.30-1-amd64
+}
+
+menuentry "Arch-AMD64, Linux 2.6.30" {
+	insmod reiserfs
+	set root=(hd0,1)
+	search --no-floppy --fs-uuid --set 9e771a4a-44ad-4120-b42d-90847d8f3223
+	linux	/arch64/vmlinuz26 root=/dev/sda5 ro  quiet vga=792
+	initrd	/arch64/kernel26.img
+}
+
+
+menuentry "Debian-AMD64, Linux 2.6.30-1-amd64 (recovery mode)" {
+	insmod reiserfs
+	set root=(hd0,1)
+	search --no-floppy --fs-uuid --set 9e771a4a-44ad-4120-b42d-90847d8f3223
+	linux	/debian64/vmlinuz-2.6.30-1-amd64 root=UUID=6528ea44-84ce-4d40-ba12-bb52c749596b ro single 
+	initrd	/debian64/initrd.img-2.6.30-1-amd64
+}
+
+## End of /boot/grub/grub.cfg ##

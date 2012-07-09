@@ -1,0 +1,15 @@
+#
+#	The netrc file is used to store FTP site information
+#
+
+machine ftp login ftp password ftp
+machine 172.22.14.200 login ftp password ftp
+machine ftp2.fortinet.com login fw_eng password $fortiweb!$
+#machine ftp2.fortinet.com login fw_guest password guest123!$
+machine support.fortinet.com login ftp-tadmin password Fr0mMe2U
+#machine ftp.apsecure.com login fortinetse password info2007ap
+machine ftp.apsecure.com login qc password fortinetqc
+machine 59.108.29.5 login fortiweb password fortiweb123
+machine 172.16.100.71 login test password test
+
+

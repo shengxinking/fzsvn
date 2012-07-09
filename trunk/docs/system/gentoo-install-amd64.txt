@@ -1,0 +1,118 @@
+Gentoo安装指南
+
+A. 安装基本系统:
+
+1. 准备安装分区:
+   #> mkreiserfs /dev/sdaX
+   #> mkdir -p /mnt/gentoo
+   #> mount -t reiserfs /dev/sdaX /mnt/gentoo
+   #> mkdir -p /mnt/gentoo/boot
+   #> mount -t reiserfs /dev/sda1 /mnt/gentoo/boot
+
+2. 安装Stage3
+   #> cd /mnt/gentoo
+   #> tar xvjpf stage3-amd64-20120216.tar.bz
+   #> tar xvjp portage-latest.tar.bz2 -C /mnt/gentoo/usr
+   #> tar xvjp distfiles.tar.gz -C /mnt/gentoo/usr/portage
+
+3. 配置编译选项
+   #> vim /mnt/gentoo/etc/make.conf
+   ...
+   CHOST="x86_64-pc-linux-gnu"
+
+   CFLAGS="-O2 -pipe -march=k8"		#for AMD64 CPU
+   CFLAGS="-O2 -pipe -march=core2"	#for Intel Core CPU
+
+   CXXFLAGS="${CFLAGS}" 
+
+   MAKEOPTS="-j3"			# cpu number + 1
+   USE="mmx sse sse2"
+   ...
+
+
+4. 进入基本系统
+
+   拷贝DNS信息
+   #> cp -L /etc/resolv.conf /mnt/gentoo/etc/
+
+   安装/proc和/dev
+   #> mount -t proc none /mnt/gentoo/proc
+   #> mount -o bind /dev /mnt/gentoo/dev
+
+   进入chroot
+   #> chroot /mnt/gentoo /bin/bash
+   #> env-update
+   #> source /etc/profile
+   #> export PS1="(chroot)$PS1"
+
+   更新Portage
+   #> emerge --sync
+
+   修改USE变量, 显卡,设备参数, qemu-kvm体系结构
+   #> nano /etc/make.conf
+   ...
+   INPUT_DEVICES="evdev synaptics"
+   VIDEO_CARDS="nouveau radeon intel"
+   QEMU_SOFTMMU_TARGETS="x86_64 i386"
+   QEMU_USER_TARGETS="x86_64 i386"
+   ...
+
+   修改Locale
+   #> nano /etc/locale.gen
+   ...
+   en_US.UTF-8 UTF-8
+   zh_CN.UTF-8 UTF-8
+   ...
+
+   配置时区
+   #> cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+   #> nano /etc/conf.d/hwclock
+   ...
+   CLOCK="local"
+   ...
+   
+   配置内核
+   #> emerge gentoo-sources
+   #> make menuconfig
+
+   自动加载模块
+   #> nano /etc/conf.d/modules
+   ...
+   modules_3="nouveau"
+   ...
+
+
+B. 重新编译整个基本系统.
+
+   #> cd /usr/portage/scripts
+   #> ./bootstrap.sh
+   #> emerge -e system
+
+   更新系统
+   #> emerge --update --deep --newuse --ask world
+   #> emerge -avuDN world
+   
+   清除不需要的包, 或者是没有被引用的包
+   #> emerge --depclean
+
+   更新库函数的依赖关系
+   #> emerge gentoolkit
+   #> revdep-rebuild
+
+C. USE keywords 使用:
+   在/etc/portage/package.use里定义单个软件的USE, LINGUAS
+   www-client/chromium	linguas_zh_CN -cups
+
+   在/etc/portage/package.keywords里定义keywords:
+   app-i18n/fcitx		~amd64
+
+D. 修改ebuild并且重新生成digest(gentookit).
+  cd usr/portage/xxx/xxxx/
+  修改xxxx.ebuild
+  ebuild xxxxx.ebuild digest
+
+E. 查看文件属于那个软件包.
+  equery belongs /xxx/xxx/xxx
+
+
+

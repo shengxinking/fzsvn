@@ -1,0 +1,24 @@
+#
+#	Makefile for AT&T assemble language
+#
+
+AS = as
+AS_FLAGS = -gstabs
+
+LD = ld
+LD_FLAGS = -dynamic-linker /lib/ld-linux.so.2 -lc
+
+ifneq (".deps", "$(wildcard .deps)")
+	DEPS = .deps
+endif
+
+%.o : %.s $(DEPS)
+	$(AS) $(AS_FLAGS) -o $@ $< --MD $(DEPS)/$(<:.s=.d)
+
+
+$(DEPS) :
+	@ [ -d $@ ] || mkdir -p $@
+
+
+-include $(DEPS)/*.d
+

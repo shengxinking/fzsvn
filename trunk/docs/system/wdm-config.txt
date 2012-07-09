@@ -1,0 +1,59 @@
+1. wdm 是WindowMaker自带的一个小型的登陆管理器, 快速小巧.
+
+2. 在wdm中增加窗口管理器:
+
+   1. 在wdm的配置文件里面(/etc/X11/wdm-config)的 DisplayManager*wdmWm 改成:
+   DisplayManager*wdmWm:           OpenBox:WindowMake:NNN
+   的形式, 窗口管理器之间用':'分割.
+   2. 找到起动WM的脚本Xclients, 在里面添加一个新的窗口管理器的起动脚本如下:
+   
+        openbox*|OpenBox)
+                # startup blackbox
+                OPENBOX_PATH=openbox
+                if ! test -x $OPENBOX_PATH ; then
+                        FindInPath $OPENBOX_PATH
+                        if test -n "$result" -a -x "$result"; then
+                                OPENBOX_PATH="$result";
+                        fi
+                fi
+                if [ -x $OPENBOX_PATH ] ; then
+                        echo Starting OpenBox >$HOME/.xwm.msgs
+                        exec $OPENBOX_PATH >>$HOME/.xwm.msgs 2>&1
+                fi
+                ;;
+		
+	....
+
+3. 环境变量的设置.
+   
+   wdm 起动窗口管理器以后, 一般都是英文环境, 在/etc/X11/wdm/Xclients的脚本里面加上:
+   
+	openbox*|OpenBox)
+                # startup blackbox
+                OPENBOX_PATH=openbox
+                if ! test -x $OPENBOX_PATH ; then
+                        FindInPath $OPENBOX_PATH
+                        if test -n "$result" -a -x "$result"; then
+                                OPENBOX_PATH="$result";
+                        fi
+                fi
+                if [ -x $OPENBOX_PATH ] ; then
+                        echo Starting OpenBox >$HOME/.xwm.msgs
+			...
+			# the init startup script
+			source $HOME/.xsession
+			...
+                        exec $OPENBOX_PATH >>$HOME/.xwm.msgs 2>&1
+                fi
+                ;;
+   在用户目录里面建立.xsession文件, 内容如下:
+
+   ...
+   xrdb ~/.Xdefaults
+   export LC_ALL=zh_CN.UTF-8
+   export XMODIFIERS="@im=fcitx"
+   export XIM=fcitx
+   ...
+
+
+
