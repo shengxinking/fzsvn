@@ -373,6 +373,13 @@ typedef struct http_state {
 } http_state_t;
 
 
+typedef struct http_barg {
+	http_arg_s_t	args[HTTP_MAX_ARG];/* body arguments */
+	u_int16_t	nargs;		/* number of args */
+	http_buf_t	buf;
+} http_barg_t;
+
+
 /**
  * 	HTTP upload file struct.
  */
