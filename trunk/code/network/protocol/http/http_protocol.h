@@ -158,6 +158,12 @@
 
 #define HTTP_HST_EXTENSION              255
 
+/* HTTP body form state */
+#define	HTTP_BST_FORM_BEGIN		1
+#define	HTTP_BST_FORM_HNAME		2
+#define	HTTP_BST_FORM_HVALUE		3
+#define	HTTP_BST_FORM_BODY		4
+#define	HTTP_BST_FORM_END		5
 
 /* http Content-Type */
 #define HTTP_CTE_TEXT_HTML              0
@@ -169,10 +175,10 @@
 #define HTTP_RESPONSE			1
 
 /* http modify type */
-#define	HTTP_ADD			1
-#define	HTTP_DEL			2
-#define	HTTP_APPEND			3
-#define	HTTP_EDIT			4
+#define	HTTP_ADD			1	/* add to first position */
+#define	HTTP_DEL			2	/* delete */
+#define	HTTP_APPEND			3	/* append to tail position */
+#define	HTTP_EDIT			4	/* edit */
 
 
 /* http error */
@@ -232,7 +238,10 @@ enum {
 	HTTP_IS_WAFSID,		/* have fortiwaf sid */
 	HTTP_IS_GZIP,		/* content is gziped */
 	HTTP_IS_ONLYGZIP,	/* only gziped */
+	HTTP_IS_XML,		/* xml content */
+	HTTP_IS_WAF,		/* waf content */
 };
+
 
 /**
  *	HTTP buffer, stored all http parameters: \
@@ -254,26 +263,42 @@ typedef struct http_buffer {
 typedef struct http_string {
 	u_int16_t	is_encoded:1;	/* is HTTP encoded ? 1: 0 */
 	u_int16_t	have_arg:1;	/* have args in URL */
-	u_int16_t	oristart;	/* the start position in origin HTTP message */
-	u_int16_t	orilen;		/* the origin length */
+	u_int16_t	not_fin:1;	/* this token is finished or not */
+	u_int16_t	ori_start;	/* the start position in origin HTTP message */
+	u_int16_t	ori_len;	/* the origin length */
 	u_int16_t	start;		/* the start position in cache */
 	u_int16_t	len;		/* the string length in cache */
 } http_string_t ;
 
 
 /**
- *	HTTP name-value pair, HTTP cookie/argument using name-value pair.
+ *	HTTP argument structure
  */
-typedef struct http_pair {
-	http_string_t	name;		/* the name of pair */
-	http_string_t	value;		/* the value of pair */
-} http_pair_t;
+typedef struct http_arg_s {
+	http_string_t	name;		/* the argument name */
+	http_string_t	value;		/* the argument value */
+} http_arg_s_t;
+
+
+/**
+ * 	HTTP cookie struct
+ */
+typedef struct http_cookie_s {
+	http_string_t	name;		/* cookie name */
+	http_string_t	value;		/* cookie value */
+	http_string_t	domain;		/* cookie domain */
+} http_cookie_s_t;
 
 
 /**
  *	All http parameters.
  */
 typedef struct http_parameter {
+	u_int32_t	is_svrclosed:1;	/* is sever-closed */
+	u_int32_t	is_keepalive:1;	/* is keep-alive */
+	u_int32_t	is_waf:1;	/* is waf message */
+	u_int32_t	is_xml:1;	/* is xml message */
+
 	u_int8_t	atype;		/* Accept-Type */
 	u_int8_t	req_ctype;	/* Request Content-Type */
 	u_int8_t	res_ctype;	/* Response Content-Type */
@@ -281,7 +306,6 @@ typedef struct http_parameter {
 	u_int8_t	res_version;	/* Response HTTP version */
 	u_int8_t	method;		/* request method */
 	u_int16_t	range;		/* Request Range number */
-	u_int16_t	hlen;		/* Header length */
 	u_int16_t	retcode;	/* Response code */
 	u_int16_t	ncookie;	/* number of cookie */
 	u_int16_t	nargument;	/* number of argument */
@@ -289,8 +313,9 @@ typedef struct http_parameter {
 	u_int16_t	arglen;		/* all argument length */
 	u_int16_t	maxhlen;	/* max header line length */
 	u_int16_t	urlarglen;	/* URL argument length */
-	u_int16_t	blen;		/* Body length */
 	u_int32_t	clen;		/* Content-Length */	
+	u_int32_t	blen;		/* Body length */
+	u_int32_t	hlen;		/* Header length */
 
 	http_string_t	oriurl;		/* origin URL */
 	http_string_t	decurl;		/* decoded URL */
@@ -317,10 +342,11 @@ typedef struct http_parameter {
 	http_string_t	postboundary;	/* Post boundary */
 	http_string_t	js_arg;		/* Javascript argument */
 	http_string_t	originip;	/* the origin IP */
-	http_pair_t	arguments[HTTP_ARGUMENT_MAX];	/* arguments */
+	http_arg_s_t	arguments[HTTP_ARGUMENT_MAX];	/* arguments */
+	http_string_t	tmp;		/* temp string for cookie, argument */
 
 	/* the following is need remove when response is coming */
-	http_pair_t	cookies[HTTP_COOKIE_MAX];	/* cookies */
+	http_cookie_s_t	cookies[HTTP_COOKIE_MAX];	/* cookies */
 	http_string_t	headlines[HTTP_HEADLINE_MAX];	/* head lines */
 	http_string_t	ctype;		/* The content-Type string */
 } http_parameter_t;
@@ -333,6 +359,7 @@ typedef struct http_state {
 	u_int8_t	mstate;		/* main state */
 	u_int8_t	pstate;		/* previous main state */
 	u_int8_t	hstate;		/* header field state */
+	u_int8_t	bstate;		/* the body state, now just form use it */
 	u_int8_t	tstate;		/* token state */
 	u_int16_t	tokpos;		/* the position in token */
 	u_int8_t	inquote:1;	/* in quoted */
@@ -347,13 +374,24 @@ typedef struct http_state {
 
 
 /**
+ * 	HTTP upload file struct.
+ */
+typedef struct http_upfile {
+	struct http_upfile *next;	/* list to next upfile */
+	char		*name;		/* the uploaded file name, stored in @buf */
+	size_t		filelen;	/* the file length */
+	char		*sig;		/* the uploaded file first 512 bytes as file signature */
+	size_t		len;		/* the buffer length */
+	char		buf[0];		/* the buffer stored name, value */
+} http_upfile_t;
+
+
+/**
  *	HTTP all parsed information structure.
  */
 typedef struct http_info {
 	u_int8_t	msg_type:1;	/* message type: 0 Req, 1 Res */
 	u_int8_t	is_closed:1;	/* Connection: close */
-	u_int8_t	is_keepalive:1;	/* Keep-Alive */
-	u_int8_t	is_trunk:1;	/* is Trunk message */
 
 	/* for state machine, one for main state, one for header state */
 	http_state_t	state;
@@ -366,9 +404,22 @@ typedef struct http_info {
 	u_int32_t	bstart;
 	u_int32_t	bremain;
 
-	http_parameter_t parameter;	/* all http parameter */
+	http_parameter_t para;		/* all http parameter */
+	http_upfile_t	*upfile;	/* the uploaded file list */
 	http_buffer_t	buffer;		/* buffer for store parameter */
 } http_info_t;
+
+
+typedef struct http_arg {
+	char		*name;
+	char		*value;
+} http_arg_t;
+
+typedef struct http_cookie {
+	char		*name;
+	char		*value;
+	char		*domain;
+} http_cookie_t;
 
 
 /** 
@@ -389,8 +440,7 @@ http_parse_request(http_info_t *req, const char *buf,
  *	Return 0 if success, -1 on error.
  */
 extern int 
-http_parse_response(http_info_t *res, const char *buf, 
-		    size_t siz, size_t start);
+http_parse_response(http_info_t *res, const char *buf, size_t siz, size_t start);
 
 
 /**
@@ -418,7 +468,7 @@ http_clear_info(http_info_t *info);
  *	Return string if success, NULL not found.
  */
 extern const char * 
-http_get_string(http_info_t *info, int type, int *len);
+http_get_str(http_info_t *info, int type);
 
 
 /**
@@ -428,7 +478,15 @@ http_get_string(http_info_t *info, int type, int *len);
  *	Return regular integer if success, -1 on error.
  */
 extern int 
-http_get_integer(http_info_t *info, int type);
+http_get_int(http_info_t *info, int type);
+
+
+/**
+ * 	Get the bool value from @info, the type is @type	
+ *	See macro HTTP_BOOL_XXX
+ */
+extern int
+http_get_bool(http_info_t *info, int type);
 
 
 /**
@@ -446,7 +504,7 @@ http_get_cookie_number(http_info_t *info);
  *	Return 0 if success, -1 on error.
  */
 extern int 
-http_get_cookie(http_info_t *info, int index, char **name, char **value);
+http_get_cookie(http_info_t *info, int index, http_cookie_t *cookie);
 
 
 /**
@@ -464,7 +522,7 @@ http_get_argument_number(http_info_t *info);
  *	Return 0 if success, -1 on error.
  */
 extern int 
-http_get_argument(http_info_t *info, int index, char **name, char **value);
+http_get_argument(http_info_t *info, int index, http_arg_t *arg);
 
 
 #endif /* end of HTTP_PROTOCOL_H */

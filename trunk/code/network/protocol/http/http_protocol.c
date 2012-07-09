@@ -239,65 +239,65 @@ _http_check_METHOD(http_info_t *info)
 	case 'O':
 
 		if (state->csize != 7 || strncmp(state->cache, "OPTIONS", 7))
-			info->method = HTTP_MED_EXTENSION;
+			info->para.method = HTTP_MED_EXTENSION;
 		else
-			info->method = HTTP_MED_OPTIONS;
+			info->para.method = HTTP_MED_OPTIONS;
 		break;
 
 	case 'G':
 		
 		if (state->csize != 3 || strncmp(state->cache, "GET", 3))
-			info->method = HTTP_MED_EXTENSION;
+			info->para.method = HTTP_MED_EXTENSION;
 		else
-			info->method = HTTP_MED_GET;
+			info->para.method = HTTP_MED_GET;
 		break;
 
 	case 'H':
 
 		if (state->csize != 4 || strncmp(state->cache, "HEAD", 4))
-			info->method = HTTP_MED_EXTENSION;
+			info->para.method = HTTP_MED_EXTENSION;
 		else
-			info->method = HTTP_MED_HEAD;
+			info->para.method = HTTP_MED_HEAD;
 
 		break;
 
 	case 'P':
 		
 		if (state->csize == 3 && !strncmp(state->cache, "PUT", 3))
-			info->method = HTTP_MED_PUT;
+			info->para.method = HTTP_MED_PUT;
 		else if (state->csize == 4&&!strncmp(state->cache, "POST", 4))
-			info->method = HTTP_MED_POST;
+			info->para.method = HTTP_MED_POST;
 		else
-			info->method = HTTP_MED_EXTENSION;
+			info->para.method = HTTP_MED_EXTENSION;
 		break;
 
 	case 'D':
 
 		if (state->csize != 6 || strncmp(state->cache, "DELETE", 6))
-			info->method = HTTP_MED_EXTENSION;
+			info->para.method = HTTP_MED_EXTENSION;
 		else
-			info->method = HTTP_MED_DELETE;
+			info->para.method = HTTP_MED_DELETE;
 		break;
 
 	case 'T':
 
 		if (state->csize != 5 || strncmp(state->cache, "TRACE", 5))
-			info->method = HTTP_MED_EXTENSION;
+			info->para.method = HTTP_MED_EXTENSION;
 		else
-			info->method = HTTP_MED_TRACE;
+			info->para.method = HTTP_MED_TRACE;
 		break;
 
 	case 'C':
 
 		if (state->csize != 7 || strncmp(state->cache, "CONNECT", 7))
-			info->method = HTTP_MED_EXTENSION;
+			info->para.method = HTTP_MED_EXTENSION;
 		else
-			info->method = HTTP_MED_CONNECT;
+			info->para.method = HTTP_MED_CONNECT;
 		break;
 
 	default:
 
-		info->method = HTTP_MED_EXTENSION;
+		info->para.method = HTTP_MED_EXTENSION;
 		break;
 	}
 }
@@ -393,7 +393,7 @@ _http_METHOD(http_info_t *info, const char *buf, size_t siz)
 	state->cache[state->csize] = 0;
 	_http_check_METHOD(info);
 
-	_HTTP_STATE("method(%u): %s\n", info->method, state->cache);
+	_HTTP_STATE("method(%u): %s\n", info->para.method, state->cache);
 
 	/* change state */
 	state->pstate = info->state.mstate;
@@ -428,7 +428,7 @@ _http_URL(http_info_t *info, const char *buf, size_t siz)
 
 	state = &info->state;
 	b = &info->buffer;
-	url = &info->parameter.url;
+	url = &info->para.oriurl;
 
 	ptr = buf;
 	begin = buf;
@@ -467,10 +467,10 @@ _http_URL(http_info_t *info, const char *buf, size_t siz)
 			}
 
 			if (*ptr == '?')
-				url->question = 1;
+				url->have_arg = 1;
 
 			if (*ptr == '%')
-				url->percent = 1;
+				url->is_encoded = 1;
 
 			break;
 
@@ -592,9 +592,9 @@ _http_CODE(http_info_t *info, const char *buf, size_t siz)
 		return ptr;
 
 	state->cache[state->csize] = 0;
-	info->code = atoi(state->cache);
+	info->para.retcode = atoi(state->cache);
 
-	_HTTP_STATE("response code is %d\n", info->code);
+	_HTTP_STATE("response code is %d\n", info->para.retcode);
 
 	state->pstate = state->mstate;
 	state->mstate = HTTP_STE_REASON;
@@ -701,12 +701,18 @@ _http_VERSION(http_info_t *info, const char *buf, size_t siz)
 	const char *ptr;
 	int remain;
 	http_state_t *state;
+	u_int8_t *ver;
 
 	assert(info);
 	assert(buf);
 	assert(siz > 0);
 	
 	state = &info->state;
+
+	if (info->msg_type == HTTP_REQUEST)
+		ver = &info->para.req_version;
+	else
+		ver = &info->para.res_version;
 
 	info->line = 1;
 	info->col = 1;
@@ -769,27 +775,27 @@ _http_VERSION(http_info_t *info, const char *buf, size_t siz)
 	state->cache[state->csize] = 0;	
 	if (state->csize == 8 && state->cache[5] == '1') {
 		if (state->cache[7] == '0') {
-			info->version = HTTP_VER_10;
+			*ver = HTTP_VER_10;
 		}
 		else if (state->cache[7] == '1') {
-			info->version = HTTP_VER_11;
+			*ver = HTTP_VER_11;
 		}
 		else {
-			info->version = HTTP_VER_UNKOWNED;
+			*ver = HTTP_VER_UNKOWNED;
 		}
 	}
 	else {
-		info->version = HTTP_VER_UNKOWNED;
+		*ver = HTTP_VER_UNKOWNED;
 	}
 
-	_HTTP_STATE("version(%d): %s\n", info->version, state->cache);
+	_HTTP_STATE("version(%d): %s\n", *ver, state->cache);
 
 	state->pstate = state->mstate;
 	state->tstate = HTTP_TST_BEGIN;
 	state->csize = 0;
 	state->tokpos = 0;
 
-	if (info->type == HTTP_REQUEST)
+	if (info->msg_type == HTTP_REQUEST)
 		state->mstate = HTTP_STE_CRLF;
 	else
 		state->mstate = HTTP_STE_CODE;
@@ -809,12 +815,18 @@ _http_CRLF(http_info_t *info, const char *buf, size_t siz)
 	int remain;
 	const char *ptr;
 	http_state_t *state;
+	int version;
 
 	assert(info);
 	assert(buf);
 	assert(siz > 0);
 
 	state = &info->state;
+
+	if (info->msg_type == HTTP_REQUEST)
+		version = info->para.req_version;
+	else
+		version = info->para.res_version;
 
 	remain = siz;
 	ptr = buf;
@@ -875,9 +887,9 @@ _http_CRLF(http_info_t *info, const char *buf, size_t siz)
 	if (state->pstate == HTTP_STE_CRLF) {
 		_HTTP_STATE("header finished\n");
 		state->mstate = HTTP_STE_BODY;
-		if (info->blen == 0 && 
-		    info->version == HTTP_VER_11 && 
-		    info->closed == 0) 
+		if (info->para.blen == 0 && 
+		    version == HTTP_VER_11 && 
+		    info->para.is_svrclosed == 0) 
 		{
 			_HTTP_STATE("message finished\n");
 			state->mstate = HTTP_STE_FIN;
@@ -1078,23 +1090,23 @@ _http_get_HVALUE_string(http_info_t *info)
 	switch (state->hstate) {
 
 	case HTTP_HST_HOST:
-		s = &info->parameter.host;
+		s = &info->para.host;
 		break;
 	case HTTP_HST_REFERENCE:
-		s = &info->parameter.reference;
+		s = &info->para.reference;
 		break;
 	case HTTP_HST_USER_AGENT:
-		s = &info->parameter.agent;
+		s = &info->para.agent;
 		break;
 	case HTTP_HST_LOCATION:
-		s = &info->parameter.location;
+		s = &info->para.location;
 		break;
 	case HTTP_HST_COOKIE:
 	case HTTP_HST_SET_COOKIE:
-		s = &info->parameter.tmp;
+		s = &info->para.tmp;
 		break;
 	case HTTP_HST_XFF:
-		s = &info->parameter.xff;
+		s = &info->para.xff;
 		break;
 	default:
 		s = NULL;
@@ -1111,7 +1123,7 @@ static void
 _http_decode_cookie(http_info_t *info, http_string_t *s)
 {
 	int ncookie;
-	http_pair_t *cookie;
+	http_cookie_s_t *cookie;
 	http_string_t *str;
 	char *ptr;
 	int start;
@@ -1120,9 +1132,9 @@ _http_decode_cookie(http_info_t *info, http_string_t *s)
 
 	assert(info);
 	assert(s);
-	assert(info->parameter.ncookie >= 0);
+	assert(info->para.ncookie >= 0);
 
-	ncookie = info->parameter.ncookie;
+	ncookie = info->para.ncookie;
 	if (ncookie >= HTTP_COOKIE_MAX)
 		return;
 
@@ -1131,7 +1143,7 @@ _http_decode_cookie(http_info_t *info, http_string_t *s)
 	len = s->len;
 	start = s->start;
 	ptr = _http_string_ptr(&info->buffer, s);
-	cookie = &info->parameter.cookies[ncookie];
+	cookie = &info->para.cookies[ncookie];
 	while (len > 0) {
 
 		switch (*ptr) {
@@ -1153,7 +1165,7 @@ _http_decode_cookie(http_info_t *info, http_string_t *s)
 			if (ncookie >= HTTP_COOKIE_MAX)
 				break;
 
-			cookie = &info->parameter.cookies[ncookie];
+			cookie = &info->para.cookies[ncookie];
 			state = 0;
 			*ptr = 0;
 			str = NULL;
@@ -1162,7 +1174,7 @@ _http_decode_cookie(http_info_t *info, http_string_t *s)
 		case HTTP_CHR_PERCENT:
 
 			if (str) {
-				str->percent = 1;
+				str->is_encoded = 1;
 			}
 			break;
 
@@ -1193,7 +1205,7 @@ _http_decode_cookie(http_info_t *info, http_string_t *s)
 		start++;
 	}
 
-	info->parameter.ncookie = ncookie;
+	info->para.ncookie = ncookie;
 }
 
 
@@ -1201,9 +1213,17 @@ static void
 _http_check_HVALUE(http_info_t *info, http_string_t *s)
 {
 	http_state_t *state;
+	u_int8_t *ctype;
 	
 	assert(info);
 	state = &info->state;
+
+	if (info->msg_type == HTTP_REQUEST) {
+		ctype = &info->para.req_ctype;
+	}
+	else {
+		ctype = &info->para.res_ctype;
+	}
 
 	if (s) {
 		_HTTP_STATE("value string is: %s\n", 
@@ -1214,13 +1234,12 @@ _http_check_HVALUE(http_info_t *info, http_string_t *s)
 		
 	case HTTP_HST_CONTENT_LENGTH:
 
-		info->blen = atoi(state->cache);
-		info->bremain = info->blen;
+		info->para.blen = atoi(state->cache);
+		info->bremain = info->para.blen;
 		break;
 
 	case HTTP_HST_CONTENT_TYPE:
-		
-		info->ctype = _http_CTYPE(state->cache, state->csize);
+		*ctype = _http_CTYPE(state->cache, state->csize);
 		break;
 
 	case HTTP_HST_CONNECTION:
@@ -1228,7 +1247,7 @@ _http_check_HVALUE(http_info_t *info, http_string_t *s)
 		if (state->csize == 5 && 
 		    strncasecmp(state->cache, "close", 5) == 0) 
 		{
-			info->closed = 1;
+			info->para.is_svrclosed = 1;
 		}
 		break;
 		
@@ -1424,7 +1443,7 @@ _http_BODY(http_info_t *info, const char *buf, size_t siz)
 	assert(buf);
 	assert(siz > 0);
 
-	if (info->blen > 0) {
+	if (info->para.blen > 0) {
 		if (info->bremain > siz) {
 			info->bremain -= siz;
 			ptr = buf + siz;
@@ -1457,9 +1476,9 @@ http_parse_request(http_info_t *info, const char *buf, size_t siz, size_t start)
 	if (!info || !buf || siz < 1)
 		return -1;
 
-	if (info->type != HTTP_REQUEST) {
+	if (info->msg_type != HTTP_REQUEST) {
 		memset(info, 0, sizeof(http_info_t));
-		info->type = HTTP_REQUEST;
+		info->msg_type = HTTP_REQUEST;
 	}
 
 	if (info->state.mstate != HTTP_STE_FIN && 
@@ -1475,7 +1494,7 @@ http_parse_request(http_info_t *info, const char *buf, size_t siz, size_t start)
 
 		if (info->state.mstate == HTTP_STE_FIN) {
 			memset(info, 0, sizeof(http_info_t));
-			info->type = HTTP_REQUEST;
+			info->msg_type = HTTP_REQUEST;
 		}
 
 		switch (info->state.mstate) {
@@ -1552,9 +1571,9 @@ http_parse_response(http_info_t *info, const char *buf,
 		return -1;
 
 	/* init info if need */
-	if (info->type != HTTP_RESPONSE) {
+	if (info->msg_type != HTTP_RESPONSE) {
 		memset(info, 0, sizeof(http_info_t));
-		info->type = HTTP_RESPONSE;
+		info->msg_type = HTTP_RESPONSE;
 	}
 
 	if (info->state.mstate != HTTP_STE_FIN && 
@@ -1570,7 +1589,7 @@ http_parse_response(http_info_t *info, const char *buf,
 
 		if (info->state.mstate == HTTP_STE_FIN) {
 			memset(info, 0, sizeof(http_info_t) );
-			info->type = HTTP_RESPONSE;
+			info->msg_type = HTTP_RESPONSE;
 		}
 
 		switch (info->state.mstate) {
@@ -1727,7 +1746,7 @@ http_clear_info(http_info_t *info)
 
 
 const char * 
-http_get_string(http_info_t *info, int type)
+http_get_str(http_info_t *info, int type)
 {
 	if (!info)
 		return NULL;
@@ -1735,22 +1754,22 @@ http_get_string(http_info_t *info, int type)
 	switch (type) {
 
 	case HTTP_STR_URL:
-		return _http_string_ptr(&info->buffer, &info->parameter.url);
+		return _http_string_ptr(&info->buffer, &info->para.oriurl);
 		
 	case HTTP_STR_DECURL:
-		return _http_string_ptr(&info->buffer, &info->parameter.decurl);
+		return _http_string_ptr(&info->buffer, &info->para.decurl);
 
 	case HTTP_STR_HOST:
-		return _http_string_ptr(&info->buffer, &info->parameter.host);
+		return _http_string_ptr(&info->buffer, &info->para.host);
 
 	case HTTP_STR_REFERENCE:
-		return _http_string_ptr(&info->buffer, &info->parameter.reference);
+		return _http_string_ptr(&info->buffer, &info->para.reference);
 
 	case HTTP_STR_LOCATION:
-		return _http_string_ptr(&info->buffer, &info->parameter.location);
+		return _http_string_ptr(&info->buffer, &info->para.location);
 
 	case HTTP_STR_USER_AGENT:
-		return _http_string_ptr(&info->buffer, &info->parameter.agent);
+		return _http_string_ptr(&info->buffer, &info->para.agent);
 
 	default:
 		break;
@@ -1761,7 +1780,7 @@ http_get_string(http_info_t *info, int type)
 
 
 int 
-http_get_integer(http_info_t *info, int type)
+http_get_int(http_info_t *info, int type)
 {
 	if (!info)
 		return -1;
@@ -1772,7 +1791,7 @@ http_get_integer(http_info_t *info, int type)
 		return info->version;
 
 	case HTTP_INT_METHOD:
-		return info->method;
+		return info->para.method;
 
 	case HTTP_INT_RETCODE:
 		return info->code;
@@ -1786,36 +1805,23 @@ http_get_integer(http_info_t *info, int type)
 
 
 int 
-http_get_cookie_number(http_info_t *info)
+http_get_cookie(http_info_t *info, int index, http_cookie_t *cookie)
 {
-	if (!info)
+	http_cookie_s_t *cookie1;
+
+	if (!info || !cookie)
 		return -1;
 
-	return info->parameter.ncookie;
-}
-
-
-int 
-http_get_cookie(http_info_t *info, int index, char **name, char **value)
-{
-	http_pair_t *cookie;
-
-	if (!info)
+	if (index >= info->para.ncookie)
 		return -1;
 
-	if (index >= info->parameter.ncookie)
-		return -1;
+	cookie1 = &info->parameter.cookies[index];
 
-	if (!name || !value)
-		return -1;
-
-	cookie = &info->parameter.cookies[index];
-
-	if (name) 
-		*name = _http_string_ptr(&info->buffer, &cookie->name);
-
-	if (value)
-		*value = _http_string_ptr(&info->buffer, &cookie->value);
+	cookie->name = _http_string_ptr(&info->buffer, &cookie->name);
+	cookie->value = _http_string_ptr(&info->buffer, &cookie->value);
+	cookie->domain = _http_string_ptr(&info->buffer, &cookie->domain);
+	cookie->path = _http_string_ptr(&info->buffer, &cookie->path);
+	cookie->expire = _http_string_ptr(&info->buffer, &cookie->expire);
 
 	return 0;
 }
