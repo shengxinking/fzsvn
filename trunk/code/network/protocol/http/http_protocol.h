@@ -264,7 +264,7 @@ typedef struct http_string {
 	u_int16_t	is_encoded:1;	/* is HTTP encoded ? 1: 0 */
 	u_int16_t	have_arg:1;	/* have args in URL */
 	u_int16_t	not_fin:1;	/* this token is finished or not */
-	u_int16_t	ori_start;	/* the start position in origin HTTP message */
+	u_int16_t	ori_start;	/* the start position in origin message */
 	u_int16_t	ori_len;	/* the origin length */
 	u_int16_t	start;		/* the start position in cache */
 	u_int16_t	len;		/* the string length in cache */
@@ -287,6 +287,8 @@ typedef struct http_cookie_s {
 	http_string_t	name;		/* cookie name */
 	http_string_t	value;		/* cookie value */
 	http_string_t	domain;		/* cookie domain */
+	http_string_t	path;		/* cookie path */
+	http_string_t	expire;		/* cookie expire */
 } http_cookie_s_t;
 
 
@@ -398,7 +400,6 @@ typedef struct http_upfile {
  */
 typedef struct http_info {
 	u_int8_t	msg_type:1;	/* message type: 0 Req, 1 Res */
-	u_int8_t	is_closed:1;	/* Connection: close */
 
 	/* for state machine, one for main state, one for header state */
 	http_state_t	state;
@@ -426,6 +427,8 @@ typedef struct http_cookie {
 	char		*name;
 	char		*value;
 	char		*domain;
+	char		*path;
+	char		*expire;
 } http_cookie_t;
 
 

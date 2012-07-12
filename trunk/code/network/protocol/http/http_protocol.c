@@ -1787,14 +1787,17 @@ http_get_int(http_info_t *info, int type)
 
 	switch(type) {
 
-	case HTTP_INT_VERSION:
-		return info->version;
+	case HTTP_INT_REQVER:
+		return info->para.req_version;
+
+	case HTTP_INT_RESVER:
+		return info->para.res_version;
 
 	case HTTP_INT_METHOD:
 		return info->para.method;
 
 	case HTTP_INT_RETCODE:
-		return info->code;
+		return info->para.retcode;
 
 	default:
 		break;
@@ -1815,13 +1818,13 @@ http_get_cookie(http_info_t *info, int index, http_cookie_t *cookie)
 	if (index >= info->para.ncookie)
 		return -1;
 
-	cookie1 = &info->parameter.cookies[index];
+	cookie1 = &info->para.cookies[index];
 
-	cookie->name = _http_string_ptr(&info->buffer, &cookie->name);
-	cookie->value = _http_string_ptr(&info->buffer, &cookie->value);
-	cookie->domain = _http_string_ptr(&info->buffer, &cookie->domain);
-	cookie->path = _http_string_ptr(&info->buffer, &cookie->path);
-	cookie->expire = _http_string_ptr(&info->buffer, &cookie->expire);
+	cookie->name = _http_string_ptr(&info->buffer, &cookie1->name);
+	cookie->value = _http_string_ptr(&info->buffer, &cookie1->value);
+	cookie->domain = _http_string_ptr(&info->buffer, &cookie1->domain);
+	cookie->path = _http_string_ptr(&info->buffer, &cookie1->path);
+	cookie->expire = _http_string_ptr(&info->buffer, &cookie1->expire);
 
 	return 0;
 }
@@ -1835,7 +1838,7 @@ http_argument_number(http_info_t *info)
 
 
 int 
-http_get_argument(http_info_t *info, int index, char **name, char **value)
+http_get_argument(http_info_t *info, int index, http_arg_t *arg)
 {
 	return 0;
 }
