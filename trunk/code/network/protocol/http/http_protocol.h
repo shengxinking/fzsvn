@@ -15,12 +15,13 @@
 #define	_HTTP_DEBUG	1
 
 
-#define HTTP_CACHE_MAX                  32	/* http state-machine cache */
-#define	HTTP_BUF_MAX			8192	/* buffer for parameters */
-#define HTTP_METHOD_MAX                 8	/* the max method */
-#define	HTTP_COOKIE_MAX			32	/* the max cookie number */
-#define	HTTP_ARGUMENT_MAX		32	/* the max argument number */
-#define	HTTP_HEADLINE_MAX		32	/* the max headline number */
+#define HTTP_MAX_CACHE                  32	/* http state-machine cache */
+#define	HTTP_MAX_BUF			8192	/* buffer for parameters */
+#define HTTP_MAX_METHOD                 8	/* the max method */
+#define	HTTP_MAX_COOKIE			32	/* the max cookie number */
+#define	HTTP_MAX_URLARG			32	/* the max URL argument */
+#define	HTTP_MAX_BODYARG		32	/* the max Body argument */
+#define	HTTP_MAX_HEADLINE		32	/* the max headline */
 
 
 /**
@@ -315,6 +316,7 @@ typedef struct http_parameter {
 	u_int16_t	arglen;		/* all argument length */
 	u_int16_t	maxhlen;	/* max header line length */
 	u_int16_t	urlarglen;	/* URL argument length */
+	u_int16_t	freepos;	/* the free pos when response start */
 	u_int32_t	clen;		/* Content-Length */	
 	u_int32_t	blen;		/* Body length */
 	u_int32_t	hlen;		/* Header length */
@@ -341,16 +343,16 @@ typedef struct http_parameter {
 	http_string_t	server;		/* Server value */
 	http_string_t	aspnet;		/* Asp-Net value */
 	http_string_t	ret_code;	/* Ret-Code string */
-	http_string_t	postboundary;	/* Post boundary */
 	http_string_t	js_arg;		/* Javascript argument */
 	http_string_t	originip;	/* the origin IP */
-	http_arg_s_t	arguments[HTTP_ARGUMENT_MAX];	/* arguments */
+	http_arg_s_t	arguments[HTTP_MAX_URLARG]; /* URL arguments */
 	http_string_t	tmp;		/* temp string for cookie, argument */
 
 	/* the following is need remove when response is coming */
-	http_cookie_s_t	cookies[HTTP_COOKIE_MAX];	/* cookies */
-	http_string_t	headlines[HTTP_HEADLINE_MAX];	/* head lines */
+	http_cookie_s_t	cookies[HTTP_MAX_COOKIE];	/* cookies */
+	http_string_t	headlines[HTTP_MAX_HEADLINE];	/* head lines */
 	http_string_t	ctype;		/* The content-Type string */
+	http_string_t	postboundary;	/* Post boundary */
 } http_parameter_t;
 
 
@@ -371,14 +373,14 @@ typedef struct http_state {
 
 	/* cache some token char for parse */
 	u_int8_t	csize;
-	char		cache[HTTP_CACHE_MAX];
+	char		cache[HTTP_MAX_CACHE];
 } http_state_t;
 
 
 typedef struct http_barg {
-	http_arg_s_t	args[HTTP_MAX_ARG];/* body arguments */
+	http_arg_s_t	args[HTTP_MAX_BODYARG];/* body arguments */
 	u_int16_t	nargs;		/* number of args */
-	http_buf_t	buf;
+	http_buffer_t	buf;		/* the buffer for body args */
 } http_barg_t;
 
 

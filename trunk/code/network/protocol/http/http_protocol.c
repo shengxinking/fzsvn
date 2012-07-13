@@ -29,7 +29,7 @@
 
 
 #define _HTTP_CACHE_CHAR(state, ptr)	     \
-	if (state->csize < HTTP_CACHE_MAX - 1) { \
+	if (state->csize < HTTP_MAX_CACHE - 1) { \
 		state->cache[state->csize] = *ptr;	\
 		state->csize++;				\
 	}
@@ -118,7 +118,7 @@ _http_CTYPE(const char *buf, size_t siz)
 static int 
 _http_alloc_memory(http_buffer_t *b, http_string_t *s)
 {
-	if (b->start >= HTTP_BUF_MAX)
+	if (b->start >= HTTP_MAX_BUF)
 		return -1;
 
 	s->start = b->start;
@@ -136,7 +136,7 @@ _http_alloc_memory(http_buffer_t *b, http_string_t *s)
 static int 
 _http_alloc_memory2(http_buffer_t *b, http_string_t *s, int len)
 {
-	if ( (b->start + len) >= HTTP_BUF_MAX)
+	if ( (b->start + len) >= HTTP_MAX_BUF)
 		return -1;
 
 	s->start = b->start;
@@ -161,7 +161,7 @@ _http_copy_memory(http_buffer_t *b, http_string_t *s,
 	if (!b || !s || !str || len < 1)
 		return -1;
 
-	if (b->start + len >= HTTP_BUF_MAX) {
+	if (b->start + len >= HTTP_MAX_BUF) {
 		_HTTP_ERR("no memory for buffer\n");
 		return -1;
 	}
@@ -179,7 +179,7 @@ _http_copy_memory(http_buffer_t *b, http_string_t *s,
 	b->start += len;
 	s->len += len;
 
-	if (end && b->start <= HTTP_BUF_MAX) {
+	if (end && b->start <= HTTP_MAX_BUF) {
 		b->buffer[b->start] = 0;
 		b->start++;
 	}
@@ -218,7 +218,7 @@ _http_string_ptr(http_buffer_t *b, http_string_t *s)
 	if (s->len < 1)
 		return NULL;
 
-	if (s->start >= HTTP_BUF_MAX)
+	if (s->start >= HTTP_MAX_BUF)
 		return NULL;
 
 	return (b->buffer + s->start);
@@ -1135,7 +1135,7 @@ _http_decode_cookie(http_info_t *info, http_string_t *s)
 	assert(info->para.ncookie >= 0);
 
 	ncookie = info->para.ncookie;
-	if (ncookie >= HTTP_COOKIE_MAX)
+	if (ncookie >= HTTP_MAX_COOKIE)
 		return;
 
 	str = NULL;
@@ -1162,7 +1162,7 @@ _http_decode_cookie(http_info_t *info, http_string_t *s)
 		case HTTP_CHR_HT:
 		case HTTP_CHR_SP:
 			ncookie++;
-			if (ncookie >= HTTP_COOKIE_MAX)
+			if (ncookie >= HTTP_MAX_COOKIE)
 				break;
 
 			cookie = &info->para.cookies[ncookie];
@@ -1196,7 +1196,7 @@ _http_decode_cookie(http_info_t *info, http_string_t *s)
 			break;
 		}
 
-		if (ncookie >= HTTP_COOKIE_MAX) {
+		if (ncookie >= HTTP_MAX_COOKIE) {
 			break;
 		}
 

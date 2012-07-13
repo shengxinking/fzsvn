@@ -14,7 +14,7 @@ endif
 TARGET = httpcli httpsvr
 TEST = http_protocol_test
 
-.PHONY : all test clean distclean
+.PHONY : all test clean depclean
 
 all : $(TARGET)
 
@@ -38,7 +38,7 @@ clean :
 	rm -f *.o $(TARGET) $(TEST)
 
 
-distclean:
+depclean:
 	rm -rf *.o $(TARGET) $(TEST) .deps
 
 -include .deps/*.d
