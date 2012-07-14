@@ -12,20 +12,20 @@ endif
 
 
 TARGET = httpcli httpsvr
-TEST = http_protocol_test
+TEST = http_parse_test
 
 .PHONY : all test clean depclean
 
 all : $(TARGET)
 
-httpcli : httpcli.o http_protocol.o sock.o
+httpcli : httpcli.o http_parse.o sock.o
 
-httpsvr : httpsvr.o http_protocol.o sock.o
+httpsvr : httpsvr.o http_parse.o sock.o
 
 
 test : $(TEST)
 
-http_protocol_test : http_protocol.o http_protocol_test.o
+http_protocol_test : http_parse.o http_parse_test.o
 
 
 %.o : %.c $(DEPS)

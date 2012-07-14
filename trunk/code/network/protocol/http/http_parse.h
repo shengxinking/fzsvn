@@ -6,8 +6,8 @@
  * author       Forrest.zhang
  */
 
-#ifndef FZ_HTTP_PROTOCOL_H
-#define FZ_HTTP_PROTOCOL_H
+#ifndef FZ_HTTP_PARSE_H
+#define FZ_HTTP_PARSE_H
 
 #include <sys/types.h>
 
@@ -316,7 +316,7 @@ typedef struct http_parameter {
 	u_int16_t	arglen;		/* all argument length */
 	u_int16_t	maxhlen;	/* max header line length */
 	u_int16_t	urlarglen;	/* URL argument length */
-	u_int16_t	freepos;	/* the free pos when response start */
+	u_int16_t	freepos;	/* the freepos for free */
 	u_int32_t	clen;		/* Content-Length */	
 	u_int32_t	blen;		/* Body length */
 	u_int32_t	hlen;		/* Header length */
@@ -346,7 +346,6 @@ typedef struct http_parameter {
 	http_string_t	js_arg;		/* Javascript argument */
 	http_string_t	originip;	/* the origin IP */
 	http_arg_s_t	arguments[HTTP_MAX_URLARG]; /* URL arguments */
-	http_string_t	tmp;		/* temp string for cookie, argument */
 
 	/* the following is need remove when response is coming */
 	http_cookie_s_t	cookies[HTTP_MAX_COOKIE];	/* cookies */
@@ -363,7 +362,7 @@ typedef struct http_state {
 	u_int8_t	mstate;		/* main state */
 	u_int8_t	pstate;		/* previous main state */
 	u_int8_t	hstate;		/* header field state */
-	u_int8_t	bstate;		/* the body state, now just form use it */
+	u_int8_t	bstate;		/* the body state */
 	u_int8_t	tstate;		/* token state */
 	u_int16_t	tokpos;		/* the position in token */
 	u_int8_t	inquote:1;	/* in quoted */
@@ -384,16 +383,17 @@ typedef struct http_barg {
 } http_barg_t;
 
 
+#define	HTTP_MAX_FILENAME	128
+#define	HTTP_MAX_FILESIG	512 /*first 512 bytes in file is signature*/ 
+
 /**
  * 	HTTP upload file struct.
  */
 typedef struct http_upfile {
 	struct http_upfile *next;	/* list to next upfile */
-	char		*name;		/* the uploaded file name, stored in @buf */
+	char		name[HTTP_MAX_FILENAME];/* the uploaded file name */
 	size_t		filelen;	/* the file length */
-	char		*sig;		/* the uploaded file first 512 bytes as file signature */
-	size_t		len;		/* the buffer length */
-	char		buf[0];		/* the buffer stored name, value */
+	char		sig[HTTP_MAX_FILESIG];/* the file signature */
 } http_upfile_t;
 
 
@@ -442,7 +442,7 @@ typedef struct http_cookie {
  *	in @req->errno.
  */
 extern int 
-http_parse_request(http_info_t *req, const char *buf, 
+http_parse_request(http_info_t *hi, const char *buf, 
 		   size_t siz, size_t start);
 
 /**
@@ -452,7 +452,8 @@ http_parse_request(http_info_t *req, const char *buf,
  *	Return 0 if success, -1 on error.
  */
 extern int 
-http_parse_response(http_info_t *res, const char *buf, size_t siz, size_t start);
+http_parse_response(http_info_t *hi, const char *buf, 
+		    size_t siz, size_t start);
 
 
 /**
@@ -480,7 +481,7 @@ http_clear_info(http_info_t *info);
  *	Return string if success, NULL not found.
  */
 extern const char * 
-http_get_str(http_info_t *info, int type);
+http_get_str(http_info_t *hi, int type);
 
 
 /**
@@ -490,7 +491,7 @@ http_get_str(http_info_t *info, int type);
  *	Return regular integer if success, -1 on error.
  */
 extern int 
-http_get_int(http_info_t *info, int type);
+http_get_int(http_info_t *hi, int type);
 
 
 /**
@@ -498,16 +499,7 @@ http_get_int(http_info_t *info, int type);
  *	See macro HTTP_BOOL_XXX
  */
 extern int
-http_get_bool(http_info_t *info, int type);
-
-
-/**
- *	Get cookie number in @info.
- *
- *	Return the cookie number.
- */
-extern int 
-http_get_cookie_number(http_info_t *info);
+http_get_bool(http_info_t *hi, int type);
 
 
 /**
@@ -516,16 +508,7 @@ http_get_cookie_number(http_info_t *info);
  *	Return 0 if success, -1 on error.
  */
 extern int 
-http_get_cookie(http_info_t *info, int index, http_cookie_t *cookie);
-
-
-/**
- *	Get the argument number in @info
- *
- *	Return the argument number.
- */
-extern int 
-http_get_argument_number(http_info_t *info);
+http_get_cookie(http_info_t *hi, int index, http_cookie_t *cookie);
 
 
 /**
@@ -534,7 +517,7 @@ http_get_argument_number(http_info_t *info);
  *	Return 0 if success, -1 on error.
  */
 extern int 
-http_get_argument(http_info_t *info, int index, http_arg_t *arg);
+http_get_argument(http_info_t *hi, int index, http_arg_t *arg);
 
 
-#endif /* end of HTTP_PROTOCOL_H */
+#endif /* end of HTTP_PARSE_H */

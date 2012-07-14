@@ -1,7 +1,7 @@
 /**
- *	@file
+ *	@file	http_decode.h
  *
- *	@brief
+ *	@brief	HTTP decode function.
  *	
  *	@author	Forrest.zhang
  *
@@ -18,7 +18,7 @@
  *	Return 0 if success, -1 on error.
  */
 extern int 
-http_decode_str(const char *str, size_t len, char *decstr, size_t declen);
+http_decode_str(const char *str, size_t len, char *decstr, size_t *declen);
 
 
 /**
@@ -28,7 +28,7 @@ http_decode_str(const char *str, size_t len, char *decstr, size_t declen);
  * 	Return 0 if success, -1 on error.
  */
 extern int 
-http_decode_str2(const char *str, size_t len, char *decstr, size_t declen);
+http_decode_str2(const char *str, size_t len, char *decstr, size_t *declen);
 
 /**
  * 	Decode amf buffer @buf and save it to @decbuf.
@@ -36,8 +36,16 @@ http_decode_str2(const char *str, size_t len, char *decstr, size_t declen);
  * 	Return 0 if success, -1 on error.
  */
 extern int 
-http_decode_amf(const void *buf, size_t len, void *decbuf, size_t declen);
+http_decode_amf(const void *buf, size_t len, void *decbuf, size_t *declen);
 
+
+/**
+ * 	Decode URL path @buf and save it to @decbuf.
+ *
+ * 	Return 0 if successs, -1 on error.
+ */
+extern int 
+http_decode_urlpath(const void *buf, size_t len, void *decbuf, size_t *declen);
 
 
 #endif /* end of FZ_DECODE_H  */

@@ -20,7 +20,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 
-#include "http_protocol.h"
+#include "http_parse.h"
 #include "sock.h"
 
 /**
