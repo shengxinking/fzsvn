@@ -1,9 +1,9 @@
 /**
- *	@file	sesspool.c
+ *	@file	session.c
  *
- *	@brief	The session pool implement.
+ *	@brief	The session/session table implement.
  *	
- *	@author	Forrest.zhang	
+ *	@author	Forrest.zhang
  *
  *	@date	2010-02-05
  */
@@ -17,15 +17,23 @@
 #include <netinet/in.h>
 
 #include "session.h"
-#include "mempool.h"
+#include "objpool.h"
 
+#define _SESSION_MAGIC		0x87654321
 
-#define _SESSTBL_MAGIC		0x87654321
+/* likely()/unlikely() for performance */
+#ifndef unlikely
+#define unlikely(x)  __builtin_expect(!!(x), 0)
+#endif
+
+#ifndef likely
+#define likely(x)    __builtin_expect(!!(x), 1)
+#endif
 
 /**
  *	Define debug MACRO to print debug information
  */
-#define _SESSION_DBG	1
+//#define _SESSION_DBG	1
 #ifdef _SESSION_DBG
 #define _SSN_ERR(fmt, args...)	fprintf(stderr, "%s:%d: "fmt,\
 					__FILE__, __LINE__, ##args)
@@ -46,9 +54,10 @@
 #define NIPQUAD_FMT "%u.%u.%u.%u"
 #endif
 
+
 /**
- * 	Find a free id in session table @st. and update the @st->freeid
- * 	to next position of find id.
+ * 	Find a free id in session table @st. and update the 
+ *	@st->freeid to next position..
  *
  *	Return the id if success, -1 on error.
  */
@@ -61,7 +70,7 @@ _st_get_free_id(session_table_t *st)
 
 	id = st->freeid;
 	do {
-		if (id >= st->capacity)
+		if (id >= (int)st->max)
 			id = 0;
 
 		if (st->table[id] == NULL) {
@@ -75,13 +84,13 @@ _st_get_free_id(session_table_t *st)
 	return -1;
 }
 
-
-
 int 
 session_tup_compare(session_tup_t *tup1, session_tup_t *tup2)
 {
-	if (!tup1 || !tup2)
+	if (unlikely(!tup1 || !tup2)) {
+		_SSN_ERR("invalid argument\n");
 		return -1;
+	}
 
 	/* inline mode */
 	if (tup1->clifd > 0 && tup1->clifd > 0) {
@@ -89,57 +98,49 @@ session_tup_compare(session_tup_t *tup1, session_tup_t *tup2)
 	}
 	
 	/* offline mode */
-	if (tup1->sip == tup2->sip &&
-	    tup1->dip == tup2->dip &&
-	    tup1->sport == tup2->sport &&
-	    tup1->dport == tup2->dport)
-		return 0;
-	else
-		return -1;
-
+	return ip_port_compare(&tup1->cliaddr, &tup2->cliaddr);
 }
 
-
 session_table_t *
-session_table_alloc(int capacity)
+session_table_alloc(size_t max)
 {
 	session_table_t *t = NULL;
 
-	if (capacity < 1) {
-		_SSN_ERR("invalid argument capacity %d\n", capacity);
+	if (unlikely(max < 1)) {
+		_SSN_ERR("invalid argument\n");
 		return NULL;
 	}
 
 	/* alloc sesspool object */
 	t = malloc(sizeof(session_table_t));
 	if (!t) {
-		_SSN_ERR("malloc memory failed: %s\n", strerror(errno));
+		_SSN_ERR("malloc memory failed: %s\n", 
+			 strerror(errno));
 		return NULL;
 	}
 	memset(t, 0, sizeof(session_table_t));
 
 	/* alloc session map */
-	t->table = malloc(sizeof(session_t *) * capacity);
+	t->table = malloc(sizeof(session_t *) * max);
 	if (!t->table) {
-		_SSN_ERR("malloc memory failed: %s\n", strerror(errno));
+		_SSN_ERR("malloc memory failed: %s\n", 
+			 strerror(errno));
 		free(t);
 		return NULL;
 	}
-	memset(t->table, 0, sizeof(session_t *) * capacity);
-
+	memset(t->table, 0, sizeof(session_t *) * max);
 	
-	t->capacity = capacity;
-	t->nfreed = capacity;
+	t->max = max;
+	t->nfreed = max;
 	pthread_mutex_init(&t->lock, NULL);
 
 	return t;
 }
 
-
 void 
 session_table_free(session_table_t *t)
 {
-	if (!t)
+	if (unlikely(!t))
 		return;
 
 	if (t->table) {
@@ -149,11 +150,10 @@ session_table_free(session_table_t *t)
 	free(t);
 }
 
-
 void 
 session_table_lock(session_table_t *t)
 {
-	if (!t)
+	if (unlikely(!t))
 		return;
 
 	if (pthread_mutex_lock(&t->lock)) {
@@ -161,11 +161,10 @@ session_table_lock(session_table_t *t)
 	}
 }
 
-
 void 
 session_table_unlock(session_table_t *t)
 {
-	if (!t)
+	if (unlikely(!t))
 		return;
 
 	if (pthread_mutex_unlock(&t->lock)) {
@@ -173,13 +172,13 @@ session_table_unlock(session_table_t *t)
 	}
 }
 
-
 int  
 session_table_add(session_table_t *t, session_t *s)
 {
 	int id;
 
-	if (!t || !t->table || !s) {
+	if (unlikely(!t || !t->table || !s)) {
+		_SSN_ERR("invalid argument\n");
 		return -1;
 	}
 	
@@ -198,7 +197,7 @@ session_table_add(session_table_t *t, session_t *s)
 	}
 
 	s->id = id;
-	s->magic = SESSION_MAGIC;
+	s->magic = _SESSION_MAGIC;
 	t->table[id] = s;
 	t->nfreed--;
 
@@ -207,18 +206,12 @@ session_table_add(session_table_t *t, session_t *s)
 	return 0;
 }
 
-
 session_t * 
 session_table_find(session_table_t *t, int id)
 {
 	session_t *s = NULL;
 
-	if (!t || !t->table) {
-		_SSN_ERR("invalid parameter\n");
-		return NULL;
-	}
-
-	if (id < 0 || id >= t->capacity) {
+	if (unlikely(!t || !t->table || id < 0 || id >= (int)t->max)) {
 		_SSN_ERR("invalid parameter\n");
 		return NULL;
 	}
@@ -229,19 +222,18 @@ session_table_find(session_table_t *t, int id)
 		return NULL;
 	}
 
-	assert(s->magic == SESSION_MAGIC);
+	assert(s->magic == _SESSION_MAGIC);
 
 	return s;
 }
-
 
 int 
 session_table_del(session_table_t *t, int id)
 {
 	session_t *s = NULL;
 	
-	if (!t || !t->table || id < 0 || id >= t->capacity) {
-		_SSN_ERR("invalid parameter\n");
+	if (unlikely(!t || !t->table || id < 0 || id >= (int)t->max)) {
+		_SSN_ERR("invalid argument\n");
 		return -1;
 	}
 
@@ -255,6 +247,7 @@ session_table_del(session_table_t *t, int id)
 		return -1;
 	}
 	
+	s->magic = 0;
 	t->table[id] = NULL;
 	t->nfreed++;
 
@@ -263,21 +256,20 @@ session_table_del(session_table_t *t, int id)
 	return 0;
 }
 
-
 void 
 session_table_print(session_table_t *t)
 {
 	int i;
 
-	if (!t)
+	if (unlikely(!t))
 		return;
 
 	pthread_mutex_lock(&t->lock);
 		
-	printf("sesstbl(%p) table %p capacity %u, nfreed %d\n", 
-	       t, t->table, t->capacity, t->nfreed);
+	printf("sesstbl(%p) table %p max %lu, nfreed %lu\n", 
+	       t, t->table, t->max, t->nfreed);
 	
-	for (i = 0; i < t->capacity; i++) {
+	for (i = 0; i < (int)t->max; i++) {
 		if (t->table[i]) 
 			printf("%d:", i);
 			session_print(t->table[i]);
@@ -286,20 +278,20 @@ session_table_print(session_table_t *t)
 	pthread_mutex_unlock(&t->lock);
 }
 
-
 void 
-session_print(session_t *s)
+session_print(const session_t *s)
 {
-	if (!s)
+	char cstr[512];
+	char sstr[512];
+
+	if (unlikely(!s))
 		return;
 
 	printf("\tsession(%p) id %d, clifd %d, svrfd %d\n", 
 	       s, s->id, s->clifd, s->svrfd);
-	printf("\t\t%u.%u.%u.%u:%u->%u.%u.%u.%u:%u\n", 
-	       NIPQUAD(s->sip), ntohs(s->sport), 
-	       NIPQUAD(s->dip), ntohs(s->dport));
+	printf("\t\t%s->%s\n", 
+	       ip_port_to_str(&s->cliaddr, cstr, sizeof(cstr)), 
+	       ip_port_to_str(&s->svraddr, sstr, sizeof(sstr)));
 }
-
-
 
 

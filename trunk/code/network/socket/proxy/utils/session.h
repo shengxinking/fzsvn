@@ -13,86 +13,83 @@
 
 #include <openssl/ssl.h>
 
+#include "epoll_event.h"
 #include "packet.h"
-
-#define SESSION_MAGIC	0x12345678
-
-/**
- *	the parse information 
- */
-typedef struct parse_info {
-	void		*clihttp;	/* client http parse info */
-	void		*svrhttp;	/* server http parse info */
-} parse_info_t;
+#include "ip_addr.h"
 
 
 /**
- *	The packet cache.
+ *	The session packet queue.
  */
-typedef struct sesscache {
-	pktq_t		input;		/* the input queue */
-	pktq_t		output;		/* the output queue */
-	packet_t	*pkt;		/* the cache queue */
+typedef struct session_queue {
+	pktq_t		inq;		/* the input queue */
+	pktq_t		outq;		/* the output queue */
+	packet_t	*pkt;		/* the current queue */
 	packet_t	*blkpkt;	/* blocked packet */
-	u_int32_t	pos;		/* the pos of next recv byte */
-} sesscache_t;
-
+	u_int32_t	pos;		/* pos of next recv byte */
+	u_int32_t	nbyte;		/* number of bytes in queue */
+} session_queue_t;
 
 /**
  *	Session structure.
  */
 typedef struct session {
         int		id;		/* session id */
-	int		index;		/* the index of work thread */
-	u_int32_t	magic;		/* the session magic number */
-	u_int32_t	sip, dip;	/* source/dest IP */
-	u_int16_t	sport, dport;	/* source/dest port */
-	int		clifd, svrfd;	/* client/server socket */
+	u_int8_t	index;		/* index of work thread */
+	u_int32_t	magic;		/* session magic number */
+
+	ip_port_t	cliaddr;	/* the client address */
+	int		clifd;		/* client socket */
 	SSL		*clissl;	/* client SSL */
+	session_queue_t	cliq;		/* client packet queue */
+	ep_event_t	cliev;		/* client read event */
+
+	ip_port_t	svraddr;	/* the server address */
+	int		svrfd;		/* server socket */
 	SSL		*svrssl;	/* server SSL */
-	sesscache_t	clicache;	/* client packet cache */
-	sesscache_t	svrcache;	/* the server packet cache */
-	int		nalloced;	/* number of alloced packet in session */
-
-	u_int32_t	is_clierror:1;	/* client side error */
-	u_int32_t	is_cliclose:1;	/* client side closed */
-	u_int32_t	is_clisslwait:1;/* client side need wait SSL connection */
-	u_int32_t	is_cliblock:1;	/* client side is blocked to send data */
+	session_queue_t	svrq;		/* server packet queue */
+	ep_event_t	svrev;		/* server read event */
 	
-	u_int32_t	is_svrerror:1;	/* server side error */
-	u_int32_t	is_svrclose:1;	/* server side closed */
-	u_int32_t	is_svrwait:1;	/* server side need wait TCP connection */
-	u_int32_t	is_svrsslwait:1;/* server side need wait SSL connection */
-	u_int32_t	is_svrblock:1;	/* server side is blocked to send data */
+	int		read_pipe;	/* read pipe for splice */
+	int		write_pipe;	/* write pipe for splice */
 
-	parse_info_t 	pinfo;		/* the private data for parse */
+	int		nalloced;	/* alloced packet number */
+
+	/* session flags */
+	u_int32_t	is_clierror:1;	/* client error */
+	u_int32_t	is_cliclose:1;	/* client closed */
+	u_int32_t	is_clisslwait:1;/* client need wait SSL */
+	u_int32_t	is_cliblock:1;	/* client side is blocked*/
+	
+	u_int32_t	is_svrerror:1;	/* server error */
+	u_int32_t	is_svrclose:1;	/* server closed */
+	u_int32_t	is_svrwait:1;	/* wait TCP connection */
+	u_int32_t	is_svrsslwait:1;/* server wait SSL */
+	u_int32_t	is_svrblock:1;	/* server is blocked */
 } session_t;
 
-
 /**
- * 	The session tup, using in inline/offline hash find.
+ * 	The session tup, using in offline hash find.
  */
 typedef struct session_tup {
-	int		id;		/* the session id for inline */
-	u_int32_t	sip, dip;	/* source/dest ip for offline */
-	u_int16_t	sport, dport;	/* source/dest port for offline */
+	int		id;		/* session id for inline */
+	ip_port_t	svraddr;	/* server address */
+	ip_port_t	cliaddr;	/* client address */
 	int		clifd;		/* the client fd */
 	int		svrfd;		/* the server fd */
-	u_int16_t	index;		/* the index, for offline */
+	u_int16_t	index;		/* the index for offline */
 } session_tup_t;
-
 
 /**
  *	Session table
  */
 typedef struct session_table {
 	session_t	**table;	/* the session table */
-	int		capacity;	/* the max table size */
-	int		nfreed;		/* number of freed entry */
-	int		freeid;		/* the current freed index */
+	size_t		max;		/* the max table size */
+	size_t		nfreed;		/* number of freed entry */
+	int		freeid;		/* the freed index */
 	pthread_mutex_t	lock;		/* lock for table */
 } session_table_t;
-
 
 /**
  * 	Compair 2 session_tup_t object is same or not.
@@ -105,15 +102,13 @@ typedef struct session_table {
 extern int 
 session_tup_compare(session_tup_t *tup1, session_tup_t *tup2);
 
-
 /**
  *	Alloc a session table and return it.
  *
  *	Return object ptr if success, NULL on error.
  */
 extern session_table_t * 
-session_table_alloc(int capacity);
-
+session_table_alloc(size_t max);
 
 /**
  *	Free session map @m.
@@ -123,7 +118,6 @@ session_table_alloc(int capacity);
 extern void 
 session_table_free(session_table_t *st);
 
-
 /**
  *	Lock session map @m.
  *
@@ -131,7 +125,6 @@ session_table_free(session_table_t *st);
  */
 extern void 
 session_table_lock(session_table_t *st);
-
 
 /**
  *	Unlock session map @m.
@@ -141,25 +134,21 @@ session_table_lock(session_table_t *st);
 extern void 
 session_table_unlock(session_table_t *st);
 
-
 /**
- *	Get a free id for a new session, the return id range is 
- *	(@low <= @id < @high).
+ *	Add new session into session table 
  *
- *	Return the id if success, -1 on error.
+ *	Return the 0 if success, -1 on error.
  */
 extern int 
 session_table_add(session_table_t *st, session_t *s);
 
-
 /**
- *	Free the id @id in session map @m
+ *	Delete session which id=@id from session table @st.
  *
  *	Return 0 if success, -1 on error.
  */
 extern int 
 session_table_del(session_table_t *st, int id);
-
 
 /**
  * 	Find a session from session table @st acording
@@ -170,7 +159,6 @@ session_table_del(session_table_t *st, int id);
 extern session_t *  
 session_table_find(session_table_t *st, int id);
 
-
 /**
  *	Print the whole session table
  *
@@ -179,14 +167,13 @@ session_table_find(session_table_t *st, int id);
 extern void 
 session_table_print(session_table_t *st);
 
-
 /**
  *	Print the session information.
  *
  *	No return.
  */
 extern void 
-session_print(session_t *s);
+session_print(const session_t *s);
 
 
 #endif /* end of FZ_SESSION_H  */

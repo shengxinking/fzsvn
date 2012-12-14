@@ -16,6 +16,7 @@
 #include <pthread.h>
 #include <sys/socket.h>
 
+#include "ip_addr.h"
 #include "session.h"
 
 #define MAX_THREADS		100
@@ -137,7 +138,6 @@ _inline_test(int index)
 		printf("malloc memory for session failed\n");
 		goto out_free;
 	}
-	s->magic = SESSION_MAGIC;
 
 	/* simulate (recv/parse first packet) */
 	clifd = socket(AF_INET, SOCK_STREAM, 0);
@@ -248,11 +248,9 @@ _offline_test()
 		goto out_free;
 	}
 	s->id = id;
-	s->sip = sip;
-	s->sport = sport;
-	s->dip = dip;
-	s->dport = dport;
-	s->magic = SESSION_MAGIC;
+	IP_PORT_SET_V4(&s->cliaddr, sip, htons(sport));
+	(&s->cliaddr)->family = AF_INET;
+	IP_PORT_SET_V4(&s->svraddr, dip, htons(dport));
 
 	if (session_table_add(_g_sesstbl, s)) {
 		printf("add session %d failed\n", id);
