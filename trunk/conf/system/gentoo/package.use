@@ -11,18 +11,21 @@ dev-vcs/subversion	bash-completion emacs python vim-syntax
 dev-vcs/git		bash-completion
 dev-libs/libxml2	icu python
 dev-util/cscope		emacs
+dev-games/cegui		opengl
 
 app-text/asciidoc	vim-syntax
 app-emacs/emacs-common-gentoo X
-app-editors/emacs	X gtk gif jpeg png svg tiff xft alsa gzip-el -gpm dbus
+app-editors/emacs	X gif jpeg png svg tiff xft alsa gzip-el -gpm dbus imagemagick libxml2 gtk gtk3
 app-text/ghostscript-gpl   X dbus gtk -cups
+app-text/epdfview	-cups
 app-editors/vim		cscope vim-pager python -gpm
 app-editors/gvim	python cscope gtk -gpm
 app-i18n/fcitx		cairo gtk gtk3 pango
 app-editors/leafpad	emacs
 app-text/poppler	cairo cjk jpeg png
 app-emulation/libvirt	qemu virt-network python
-app-emulation/qemu-kvm	alsa ssl jpeg png qemu-ifup threads vde sdl spice
+app-emulation/qemu	alsa ssl jpeg png qemu-ifup threads vde sdl spice
+app-office/dia		cairo python
 
 media-fonts/liberation-fonts X
 media-libs/freetype	X
@@ -35,22 +38,23 @@ media-libs/imlib2	X gif jpeg mmx mp3 tiff png
 media-fonts/dejavu	X 
 media-fonts/wqy-bitmapfont X
 media-fonts/wqy-zenhei	X
+media-fonts/wqy-microhei	X
 media-fonts/ttf-bitstream-vera	X
 media-gfx/geeqie	exif
 media-libs/libsdl	X
-media-plugins/audacious-plugins alsa mp3 wavpack
+media-plugins/audacious-plugins alsa mp3 wavpack flac vorbis
 media-sound/mpg123	alsa 
 media-libs/gd		fontconfig jpeg png truetype xpm
 
 x11-libs/cairo		opengl drm X xcb
 x11-wm/awesome		dbus
 x11-libs/gdk-pixbuf	jpeg tiff
-x11-libs/gtk+		vim-syntax -cups
+x11-libs/gtk+		vim-syntax X -cups
 x11-libs/pango		X
 x11-terms/rxvt-unicode	256-color xft unicode3 pixbuf
 x11-libs/vte		python
 x11-libs/fltk		cairo opengl threads xft
-<=x11-misc/lightdm-1.10	-introspection
+x11-misc/lightdm	-introspection
 
 net-libs/gnutls		lzo
 net-im/pidgin		gnutls python perl dbus -gstreamer -xscreensaver -ncurses 
@@ -62,6 +66,8 @@ net-misc/openssh	X509
 net-analyzer/wireshark	python gcrypt gtk threads
 net-im/centerim		jpeg
 net-wireless/wpa_supplicant dbus wps
+net-misc/curl		threads
+net-misc/spice-gtk	python
 
 gnome-base/librsvg	gtk3
 
@@ -74,4 +80,5 @@ mail-client/mutt	gnutls gpg imap mbox pop sidebar smime smtp
 mail-filter/procmail	mbox
 mail-mta/msmtp		gnutls vim-syntax
 
+rox-base/rox		-svg -video
 
