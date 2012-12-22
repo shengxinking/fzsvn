@@ -68,6 +68,7 @@ net-im/centerim		jpeg
 net-wireless/wpa_supplicant dbus wps
 net-misc/curl		threads
 net-misc/spice-gtk	python
+net-misc/iperf		threads
 
 gnome-base/librsvg	gtk3
 
