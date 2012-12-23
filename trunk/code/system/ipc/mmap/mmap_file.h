@@ -11,31 +11,35 @@
 #ifndef FZ_MMAP_SHM_H
 #define FZ_MMAP_SHM_H
 
-#define	MMAP_CTLFILE		"ctlfile"
-#define	MMAP_INVALID_ID		-1
-#define	MMAP_NAMELEN		16	/* the name length */
+#define	MMAP_CTLFILE	"ctlfile"
+#define	MMAP_INVALID_ID	-1
+#define	MMAP_NAMELEN	16		/* the name length */
+#define	MMAP_MAX_OBJ	1024		/* max objects in file */
+#define	MMAP_INC_OBJ	10		/* the increase object number */
+#define	MMAP_MIN_OBJSIZE 64		/* the mimum object size */	
 
-typedef	int			mmap_oid_t
-typedef	short			mmap_fid_t
+typedef	int		mmap_oid_t	/* the object id */
+typedef	short		mmap_fid_t	/* the file id */
 
 /**
  *	The object control object 	
  *
  */
 typedef mmap_obj_ctl {
-	
+	size_t		objsize;	/* the object length */
+	size_t		nfreed;		/* number of freed objects */
+	int		max;		/* the max objects in file */
+	u_int8_t	map[MMAP_MAX_OBJ];/* the max object in file */
 } mmap_obj_ctl_t;
 
 /**
  *	the file of mmap objects.
  */
 typedef mmap_file_ctl {
-	mmap_fid_t	fileid;		/* the file id */
+	mmap_fid_t	fid;		/* the file id */
 	void		*mptr;		/* mapped address */
 	size_t		len;		/* the file length */
-	size_t		objsize;	/* the object size */
-	size_t		nobj;		/* the number of objects */
-	size_t		nfreed;		/* number of freed objects */
+	mmap_obj_ctl_t	objctl;		/* the object control data */
 } mmap_file_ctl_t;
 
 /**
@@ -47,10 +51,10 @@ typedef	mmap_ctl {
 	char		dir[MMAP_NAMELEN];/* the directory of mmap files */
 	int		nfile;		/* array @files number */
 	mmap_file_ctl_t	files[0];	/* mmaped files, sorted by objsize */
-} mmap_ctl_t
+} mmap_ctl_t;
 
 extern mmap_ctl_t * 
-mmap_create(size_t gap, const char *dir);
+mmap_create(const char *dir);
 
 extern int 
 mmap_destroy(mmap_ctl_t *ctl);
