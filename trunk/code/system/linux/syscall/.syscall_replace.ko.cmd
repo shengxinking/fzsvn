@@ -1,1 +1,0 @@
-cmd_/home/forrest/fz-repos/code/system/linux/syscall/syscall_replace.ko := ld -r -m elf_x86_64 -T /usr/src/linux-3.2.12-gentoo/scripts/module-common.lds --build-id  -o /home/forrest/fz-repos/code/system/linux/syscall/syscall_replace.ko /home/forrest/fz-repos/code/system/linux/syscall/syscall_replace.o /home/forrest/fz-repos/code/system/linux/syscall/syscall_replace.mod.o
