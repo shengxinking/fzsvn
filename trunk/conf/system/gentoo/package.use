@@ -3,6 +3,7 @@ sys-libs/ncurses	-gpm
 sys-apps/dbus		X
 sys-auth/pambase	consolekit
 sys-auth/consolekit	policykit
+sys-libs/zlib		minizip
 
 dev-lang/python		xml ipv6
 dev-util/cmake		vim-syntax
@@ -15,7 +16,7 @@ dev-games/cegui		opengl
 
 app-text/asciidoc	vim-syntax
 app-emacs/emacs-common-gentoo X
-app-editors/emacs	X gif jpeg png svg tiff xft alsa gzip-el -gpm dbus imagemagick libxml2 gtk gtk3
+app-editors/emacs	X gif jpeg png svg tiff xft alsa gzip-el dbus imagemagick libxml2 gtk gtk3 -gpm
 app-text/ghostscript-gpl   X dbus gtk -cups
 app-text/epdfview	-cups
 app-editors/vim		cscope vim-pager python -gpm
@@ -67,7 +68,7 @@ net-analyzer/wireshark	python gcrypt gtk threads
 net-im/centerim		jpeg
 net-wireless/wpa_supplicant dbus wps
 net-misc/curl		threads
-net-misc/spice-gtk	python
+net-misc/spice-gtk	python gtk3
 net-misc/iperf		threads
 
 gnome-base/librsvg	gtk3
