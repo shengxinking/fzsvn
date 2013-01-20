@@ -15,19 +15,19 @@
 #include "sysutil.h"
 
 int 
-pidf_exist(const char *pname)
+pid_file_exist(const char *pname)
 {
 
 }
 
 int 
-pidf_new(const char *pname)
+pid_file_new(const char *pname)
 {
 
 }
 
 pid_t 
-pidf_get_pid(const char *pname)
+pid_get_pid(const char *pname)
 {
 
 

@@ -16,7 +16,7 @@
  *	Return >= 0 if success, -1 on error.
  */
 extern int 
-fz_cpu_usage(void);
+cpu_usage(void);
 
 /**
  *	Get each CPU usage and stored in @cpus, if ncpu > CPU nunber,
@@ -25,7 +25,7 @@ fz_cpu_usage(void);
  *	Return >= 0 if success, -1 on error.
  */
 extern int 
-fz_cpus_usage(int *cpus, int ncpu);
+cpus_usage(int *cpus, int ncpu);
 
 /**
  *	Get the CPU number in runing system.
@@ -33,14 +33,14 @@ fz_cpus_usage(int *cpus, int ncpu);
  *	Return > 0 if success, -1 on error.
  */
 extern int 
-fz_cpu_number(void);
+cpu_number(void);
 
 /**
  *	Get the CPU frequence. using HZ as meter.
  *	Return > 0 if success, -1 on error
  */
 extern int 
-fz_cpu_freq(void);
+cpu_freq(void);
 
 
 
@@ -50,7 +50,7 @@ fz_cpu_freq(void);
  *	Return > 0 if success, -1 on error.
  */
 extern int 
-fz_mem_total(void);
+mem_total(void);
 
 /**
  *	Get the freed memory(MB) in system.
@@ -58,7 +58,7 @@ fz_mem_total(void);
  *	Return > 0 if success, -1 on error
  */
 extern int 
-fz_mem_freed(void);
+mem_freed(void);
 
 /**
  *	Get the used memory(MB) in system.
@@ -66,7 +66,7 @@ fz_mem_freed(void);
  *	Return > 0 if success, -1 on error.
  */
 extern int 
-fz_mem_used(void);
+mem_used(void);
 
 /**
  *	Get the memory usage in system
@@ -74,9 +74,7 @@ fz_mem_used(void);
  *	Return > 0 if success, -1 on error.
  */
 extern int 
-fz_mem_usage(void);
-
-
+mem_usage(void);
 
 /**
  *	Set the process name to @newname
@@ -84,7 +82,7 @@ fz_mem_usage(void);
  *	Return 0 if success, -1 on error.
  */
 extern int 
-fz_proc_rename(const char *newname, char **argv);
+proc_rename(const char *newname, char **argv);
 
 /**
  *	Return the pid of process which name is @procname
@@ -92,7 +90,7 @@ fz_proc_rename(const char *newname, char **argv);
  *	Return > 0 if success, -1 if not exist.
  */
 extern pid_t 
-fz_proc_find(const char *procname);
+proc_find(const char *procname);
 
 /**
  *	Return the RSS memory size(KB) of running process.
@@ -100,7 +98,7 @@ fz_proc_find(const char *procname);
  *
  */
 extern u_int64_t 
-fz_proc_rss(void);
+proc_rss(void);
 
 /**
  *	Check the process is exist or not.
@@ -108,7 +106,7 @@ fz_proc_rss(void);
  *	return 0 if exist, -1 if not exist
  */
 extern int 
-fz_proc_exist(pid_t pid);
+proc_exist(pid_t pid);
 
 /**
  *	Create a new pidfile on /var/run/@pname.pid 	
@@ -116,7 +114,7 @@ fz_proc_exist(pid_t pid);
  * 	Return 0 if success, -1 on error.
  */
 extern int 
-fz_pidf_new(const char *pname);
+pid_file_new(const char *pname);
 
 /**
  * 	Remove a old pidfile on /var/run/@pname.pid
@@ -124,7 +122,7 @@ fz_pidf_new(const char *pname);
  * 	Return 0 if success, -1 on error.
  */
 extern int 
-fz_pidf_del(const char *pname);
+pid_file_del(const char *pname);
 
 /**
  * 	Check a program is exist by pidfile /var/run/@pname.pid.
@@ -132,7 +130,7 @@ fz_pidf_del(const char *pname);
  * 	Return 1 if exist, 0 not found.
  */
 extern int 
-fz_pidf_exist(const char *pname);
+pid_file_exist(const char *pname);
 
 
 #endif	/* end of FZ_SYSUTIL_H */
