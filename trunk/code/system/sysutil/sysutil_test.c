@@ -17,13 +17,14 @@
 #include <getopt.h>
 #include <sys/types.h>
 
-
 #include "sysutil.h"
+
 
 enum {
 	CPU_TEST = 0,
 	MEM_TEST,
 	PROC_TEST,
+	PID_FILE_TEST,
 };
 
 static int _g_type = CPU_TEST;
@@ -40,6 +41,7 @@ _usage(void)
 	printf("\t-c\tcpu API test\n");
 	printf("\t-m\tmemory API test\n");
 	printf("\t-p\tprocess API test\n");
+	printf("\t-f\tpid file API test\n");
 	printf("\t-h\tshow help message\n");
 }
 
@@ -70,6 +72,10 @@ _parse_cmd(int argc, char **argv)
 
 		case 'p':
 			_g_type = PROC_TEST;
+			break;
+			
+		case 'f':
+			_g_type = PID_FILE_TEST;
 			break;
 			
 		case 'h':
@@ -181,6 +187,11 @@ _proc_test(char **argv)
 	printf("rss is %lu KB\n", proc_rss());
 }
 
+static void 
+_pid_file_test(void)
+{
+
+}
 
 /**
  *	The main entry of program.	
@@ -211,6 +222,11 @@ main(int argc, char **argv)
 
 	case PROC_TEST:
 		_proc_test(argv);
+		break;
+
+	case PID_FILE_TEST:
+		_pid_file_test();
+		break;
 
 	default:
 		break;

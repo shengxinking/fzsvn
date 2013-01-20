@@ -85,7 +85,7 @@ extern int
 proc_rename(const char *newname, char **argv);
 
 /**
- *	Return the pid of process which name is @procname
+ *	Return the first pid of process which name is @procname
  *
  *	Return > 0 if success, -1 if not exist.
  */
@@ -95,7 +95,7 @@ proc_find(const char *procname);
 /**
  *	Return the RSS memory size(KB) of running process.
  *
- *
+ *	
  */
 extern u_int64_t 
 proc_rss(void);
@@ -108,13 +108,32 @@ proc_rss(void);
 extern int 
 proc_exist(pid_t pid);
 
+#define	PID_FILE_NAMELEN	128
+
+/**
+ * 	Check a pid file /var/run/@pname.pid exist or not.
+ *
+ * 	Return 1 if exist, 0 not exist.
+ */
+extern int 
+pid_file_exist(const char *pname);
+
 /**
  *	Create a new pidfile on /var/run/@pname.pid 	
  *
  * 	Return 0 if success, -1 on error.
  */
 extern int 
-pid_file_new(const char *pname);
+pid_file_new(const char *pname, pid_t pid);
+
+/**
+ *	Read the pid file /var/run/@pname.pid and return 	
+ *	the pid value.
+ *
+ * 	Return > 0 is the pid, -1 on error.
+ */
+extern pid_t 
+pid_file_read(const char *pname);
 
 /**
  * 	Remove a old pidfile on /var/run/@pname.pid
@@ -124,13 +143,6 @@ pid_file_new(const char *pname);
 extern int 
 pid_file_del(const char *pname);
 
-/**
- * 	Check a program is exist by pidfile /var/run/@pname.pid.
- *
- * 	Return 1 if exist, 0 not found.
- */
-extern int 
-pid_file_exist(const char *pname);
 
 
 #endif	/* end of FZ_SYSUTIL_H */

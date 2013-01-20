@@ -17,6 +17,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <dirent.h>
+#include <signal.h>
 
 extern char **environ;
 
@@ -109,7 +110,6 @@ _proc_filter(const struct dirent *dir)
 pid_t * 
 proc_find(const char *name)
 {
-	int ret = 0;
 	pid_t *pids = NULL;
 	struct dirent **items = NULL;
 	int n;
@@ -131,6 +131,9 @@ proc_find(const char *name)
 int 
 proc_exist(pid_t pid)
 {
+	if (pid < 0)
+		return 0;
+
 	if (kill(pid, 0))
 		return 0;
 
