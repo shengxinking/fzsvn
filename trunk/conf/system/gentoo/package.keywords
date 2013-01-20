@@ -1,5 +1,5 @@
 x11-misc/lightdm	~amd64
 x11-misc/lightdm-gtk-greeter ~amd64
-dev-libs/glib		~amd64
+#dev-libs/glib		~amd64
 sys-boot/grub:2		~amd64
 
