@@ -1,5 +1,6 @@
 /*
- *	filedes_limit.c:	open a file many times until it error, to test how many file can open
+ *	filedes_limit.c:	open a file many times until it error, 
+ *				to test how many file can open
  *				in a process
  *
  *	author:			forrest.zhang
@@ -13,7 +14,7 @@
 #include <errno.h>
 #include <sys/resource.h>
 
-#define TMPFILE		".filedes_limit"
+#define TMPFILE		"/dev/null"
 
 static void _usage(void)
 {
@@ -31,8 +32,8 @@ static int _init(void)
 {
 	struct rlimit rlim;
 
-	rlim.rlim_cur = 10000;
-	rlim.rlim_max = 10000;
+	rlim.rlim_cur = 500000;
+	rlim.rlim_max = 500000;
 
 	if (setrlimit(RLIMIT_NOFILE, &rlim)) {
 		printf("setrlimit error: %s\n", strerror(errno));
@@ -60,10 +61,13 @@ int main(int argc, char **argv)
 			printf("open error: %s\n", strerror(errno));
 			break;
 		}
+		else {
+			printf("the fd is %d\n", fd);
+		}
 		i++;
 	}
 
-	printf("open %d file descriptor in one process\n", i);
+	printf("open %d file descriptor in one process, fd is %d\n", i, fd);
 
 	return 0;
 }
