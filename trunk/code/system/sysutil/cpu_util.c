@@ -17,6 +17,10 @@
 
 //#include "sysutil.h"
 
+/**
+ *	using rdtsc instruction to get CPU frequency. 	
+ *
+ */
 static int64_t 
 _rdtsc(void)
 {
@@ -27,8 +31,9 @@ _rdtsc(void)
 	return ((int64_t) j << 32) + (int64_t)i;
 }
 
+
 int 
-fz_cpu_freq(void)
+cpu_freq(void)
 {
 	int64_t tsc_start, tsc_end;
 	struct timeval tv_start, tv_end;
@@ -50,7 +55,7 @@ fz_cpu_freq(void)
 
 
 int 
-fz_cpu_number()
+cpu_number()
 {
 	int ncpu;
 	
@@ -70,7 +75,7 @@ typedef struct _cpu_stat {
 
 
 static int 
-_get_cpu_stat(_cpu_stat_t *cpus, int ncpu) 
+_cpu_get_stat(_cpu_stat_t *cpus, int ncpu) 
 {
 	FILE *fp = NULL;
 	char line[1024];
@@ -102,19 +107,19 @@ _get_cpu_stat(_cpu_stat_t *cpus, int ncpu)
 }
 
 int 
-fz_cpu_usage(void)
+cpu_usage(void)
 {
 	_cpu_stat_t cpu_begin, cpu_end;
 	long long kern, user, nice, idle, total;
 	int usage;
 
-	if (_get_cpu_stat(&cpu_begin, 1)) {
+	if (_cpu_get_stat(&cpu_begin, 1)) {
 		return -1;
 	}
 	
 	usleep(10000);
 
-	if (_get_cpu_stat(&cpu_end, 1)) {
+	if (_cpu_get_stat(&cpu_end, 1)) {
 		return -1;
 	}
 
@@ -129,7 +134,7 @@ fz_cpu_usage(void)
 	return usage;
 }
 
-int fz_cpus_usage(int *cpus, int ncpu)
+int cpus_usage(int *cpus, int ncpu)
 {
 	int n = 0;
 	int i;
@@ -139,7 +144,7 @@ int fz_cpus_usage(int *cpus, int ncpu)
 
 	memset(cpus, 0, sizeof(int) * ncpu);
 
-	n = fz_cpu_number() + 1;
+	n = cpu_number() + 1;
 	if (n < 1)
 		return -1;
 
@@ -156,13 +161,13 @@ int fz_cpus_usage(int *cpus, int ncpu)
 		return -1;
 	}
 
-	if (_get_cpu_stat(cpu_begin, n)) {
+	if (_cpu_get_stat(cpu_begin, n)) {
 		free(cpu_begin);
 		free(cpu_end);
 		return -1;
 	}
 	usleep(500000);
-	if (_get_cpu_stat(cpu_end, n)) {
+	if (_cpu_get_stat(cpu_end, n)) {
 		free(cpu_begin);
 		free(cpu_end);
 		return -1;

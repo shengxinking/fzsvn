@@ -18,7 +18,7 @@
 #include "sysutil.h"
 
 int 
-fz_mem_total(void)
+mem_total(void)
 {
 	struct sysinfo info;
 
@@ -30,7 +30,7 @@ fz_mem_total(void)
 }
 
 int   
-fz_mem_freed(void)
+mem_freed(void)
 {
 	FILE            *fp; 
         unsigned long   mem_total = 0; 
@@ -84,13 +84,13 @@ fz_mem_freed(void)
 }
 
 int 
-fz_mem_used(void)
+mem_used(void)
 {
 	int total;
 	int freed;
 
-	total = fz_mem_total();
-	freed = fz_mem_freed();
+	total = mem_total();
+	freed = mem_freed();
 	
 	if (total < 1 || freed < 1)
 		return -1;
@@ -99,13 +99,13 @@ fz_mem_used(void)
 }
 
 int 
-fz_mem_usage(void)
+mem_usage(void)
 {
 	int total = 0;
 	int freed = 0;
 
-	total = fz_mem_total();
-	freed = fz_mem_freed();
+	total = mem_total();
+	freed = mem_freed();
 
 	if (total < 1 || freed < 1)
 		return -1;

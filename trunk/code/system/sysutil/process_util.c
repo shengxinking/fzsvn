@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <sys/time.h>
@@ -20,7 +21,7 @@
 extern char **environ;
 
 int 
-fz_proc_rename(const char *newname, char **argv)
+proc_rename(const char *newname, char **argv)
 {
 	char *new_env;
 	char *argv_last;
@@ -76,7 +77,7 @@ fz_proc_rename(const char *newname, char **argv)
 }
 
 u_int64_t  
-fz_proc_rss(void)
+proc_rss(void)
 {
 	struct rusage ru;
 	
@@ -91,12 +92,12 @@ fz_proc_rss(void)
 static int 
 _proc_filter(const struct dirent *dir)
 {
-	char *ptr;
+	const char *ptr;
 
 	if (!dir)
 		return 0;
 
-	ptr = dir->dname;
+	ptr = dir->d_name;
 	while (*ptr++)
 		if (!isdigit(*ptr))
 			return 0;
@@ -106,26 +107,29 @@ _proc_filter(const struct dirent *dir)
 
 
 pid_t * 
-fz_proc_find(const char *name)
+proc_find(const char *name)
 {
 	int ret = 0;
 	pid_t *pids = NULL;
-	char **namelist = NULL:
-		
-	ret = scandir("proc", &namelist, _proc_filter, alphasort);
-	if (ret < 0)
+	struct dirent **items = NULL;
+	int n;
+
+	n = scandir("/proc", &items, _proc_filter, alphasort);
+	if (n < 0 || items == NULL)
 		return NULL;
 
 	while (n--) {
-		printf("%s\n", namelist[n]->dname);
+		printf("%s\n", items[n]->d_name);
 	}
+
+	free(items);
 	
 	return pids;
 }
 
 
 int 
-fz_proc_exist(pid_t pid)
+proc_exist(pid_t pid)
 {
 	if (kill(pid, 0))
 		return 0;

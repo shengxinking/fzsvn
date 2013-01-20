@@ -24,7 +24,6 @@ enum {
 	CPU_TEST = 0,
 	MEM_TEST,
 	PROC_TEST,
-	SIG_TEST,
 };
 
 static int _g_type = CPU_TEST;
@@ -122,24 +121,24 @@ _cpu_test(void)
 	int ncpu;
 	int i;
 
-	ncpu = fz_cpu_number();
+	ncpu = cpu_number();
 
-	printf("cpu usage is: %d%%\n", fz_cpu_usage());
-	fz_cpus_usage(cpus, ncpu);
+	printf("cpu usage is: %d%%\n", cpu_usage());
+	cpus_usage(cpus, ncpu);
 	for (i = 0; i < ncpu; i++) {
 		printf("  cpu%d: %d%%\n", i + 1, cpus[i]);
 	}
-	printf("cpu freq is %dMHz\n", fz_cpu_freq());
+	printf("cpu freq is %dMHz\n", cpu_freq());
 	printf("cpu number is %d\n", ncpu);
 }
 
 static void 
 _mem_test(void)
 {
-	printf("mem total %dMB\n", fz_mem_total());
-	printf("mem free %dMB\n", fz_mem_freed());
-	printf("mem used %dMB\n", fz_mem_used());
-	printf("mem usage %d%%\n", fz_mem_usage());
+	printf("mem total %dMB\n", mem_total());
+	printf("mem free %dMB\n", mem_freed());
+	printf("mem used %dMB\n", mem_used());
+	printf("mem usage %d%%\n", mem_usage());
 
 	return;
 }
@@ -152,17 +151,20 @@ _proc_test(char **argv)
 
 	printf("pid is %d\n", getpid());
 
-	if (fz_proc_rename("renamed_process", argv)) {
+	if (proc_rename("renamed_process", argv)) {
 		printf("change process name failed");
 	}
+	else {
+		printf("renamed to renamed_process\n");
+	}
 
-	printf("rss is %lu KB\n", fz_proc_rss());
+	printf("rss is %lu KB\n", proc_rss());
 
 	ptr = malloc(40960);
 	memset(ptr, 0, 40960);
 	
 	sleep(10);
-	printf("rss is %lu KB\n", fz_proc_rss());
+	printf("rss is %lu KB\n", proc_rss());
 
 	ptr1 = malloc(4096);
 	memset(ptr1, 0, 4096);
@@ -170,20 +172,13 @@ _proc_test(char **argv)
 	memset(ptr2, 0, 4096);
 
 	sleep(10);
-	printf("rss is %lu KB\n", fz_proc_rss());
+	printf("rss is %lu KB\n", proc_rss());
 
 	free(ptr);
 	free(ptr1);
 	free(ptr2);
 	sleep(10);
-	printf("rss is %lu KB\n", fz_proc_rss());
-}
-
-
-static void 
-_sig_test(void)
-{
-	return;
+	printf("rss is %lu KB\n", proc_rss());
 }
 
 
@@ -216,10 +211,6 @@ main(int argc, char **argv)
 
 	case PROC_TEST:
 		_proc_test(argv);
-
-	case SIG_TEST:
-		_sig_test();
-		break;
 
 	default:
 		break;
