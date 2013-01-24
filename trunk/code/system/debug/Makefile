@@ -10,7 +10,7 @@ ifneq (".deps", "$(wildcard .deps)")
 	DEPS = .deps
 endif
 
-OBJS = dbg_file.o dbg_print.o segfault.o
+OBJS = dbg_file.o dbg_print.o dbg_segfault.o
 
 
 TARGET = debug_test

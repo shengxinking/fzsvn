@@ -12,26 +12,33 @@
 #ifndef FZ_DEBUG_H
 #define FZ_DEBUG_H
 
-#define	DBG_LOG_FILE	"/var/log/debug.log"	/* the log file name */
+#define	DBG_LOG_FILE	"/var/log/crash.log"	/* the log file name */
 #define	DBG_LOG_NUM	8096		/* the max log record */
 #define	DBG_LOG_LINELEN	1024		/* the record line length */
+
+
+/**
+ *	Clear the crash log.
+ *
+ *	Return 0 if success, -1 on error.
+ */
+extern int 
+dbg_clear_log(void);
+
+
+/**
+ *	Read the  log
+ *
+ */
+extern int 
+dbg_read_log(int index, char *buf, size_t len);
 
 /**
  *
  *
- *
  */
 extern int 
-dbg_print_log(const char *fmt...);
-
-extern int 
-dbg_read_log(void);
-
-extern int 
 dbg_write_log(const char *record, size_t len);
-
-extern int 
-dbg_clear_log(void);
 
 /**
  *	log the segfault register value and call-stack 

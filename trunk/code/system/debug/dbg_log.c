@@ -59,6 +59,17 @@ _dbg_log_ltime_stamp()
 	return stamp;
 }
 
+dbg_log_lock(void)
+{
+
+}
+
+
+dbg_log_unlock(void)
+{
+
+}
+
 
 static int 
 _dbg_log_write(char *buf)
@@ -278,17 +289,6 @@ dbg_log_clear(void)
 		ret = -1;
 
 	return ret;
-}
-
-dbg_log_lock(void)
-{
-
-}
-
-
-dbg_log_unlock(void)
-{
-
 }
 
 void 
