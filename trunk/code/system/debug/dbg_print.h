@@ -21,10 +21,8 @@
 extern void 
 dbg_print(const char *fmt, ...);
 
-
 extern void 
 dbg_console(const char *fmt, ...);
-
 
 extern void 
 dbg_pts(const char *fmt, ...);
@@ -32,14 +30,11 @@ dbg_pts(const char *fmt, ...);
 extern void 
 dbg_enable_pts(int pts);
 
-
 extern void 
 dbg_disable_pts(int pts);
 
-
 extern void 
 dbg_enable_console(void);
-
 
 extern void 
 dbg_disable_console(void);
