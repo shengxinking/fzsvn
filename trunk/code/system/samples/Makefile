@@ -10,36 +10,27 @@ ifneq (".deps", "$(wildcard .deps)")
 DEPS = .deps
 endif
 
-TARGET = backtrace segfault coredump sysctl
+TARGET = static_o2_test static_o0_test
 
 
-.PHONY : all clean distclean
+.PHONY : all clean depclean
 
 all : $(TARGET)
 
+static_o2_test : static_o2_test.c
+	$(CC) -O2 -c -o static_o2_test.o static_o2_test.c
+	$(CC) -o static_o2_test static_o2_test.o
 
-backtrace : backtrace.o
-	$(CC) -o $@ $^ -rdynamic $(LDFLAGS)
-
-
-segfault : segfault.o
-	$(CC) -o $@ $^ $(LDFLAGS)
-
-
-coredump : coredump.o
-	$(CC) -o $@ $^ $(LDFLAGS)
-
-sysctl : sysctl.o
-	$(CC) -o $@ $^ 
+static_o0_test : static_o2_test.c
+	$(CC) -O0 -c -o static_o0_test.o static_o2_test.c
+	$(CC) -o static_o0_test static_o0_test.o
 
 clean :
 	rm -f *.o $(TARGET)
 
 
-distclean:
+depclean:
 	rm -rf *.o $(TARGET) .deps
-
-
 
 
 
