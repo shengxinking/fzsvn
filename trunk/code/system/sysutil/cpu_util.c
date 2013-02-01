@@ -107,7 +107,7 @@ _cpu_get_stat(_cpu_stat_t *cpus, int ncpu)
 }
 
 int 
-cpu_usage(void)
+cpu_total_usage(void)
 {
 	_cpu_stat_t cpu_begin, cpu_end;
 	long long kern, user, nice, idle, total;
@@ -134,7 +134,7 @@ cpu_usage(void)
 	return usage;
 }
 
-int cpus_usage(int *cpus, int ncpu)
+int cpu_all_usage(int *cpus, int ncpu)
 {
 	int n = 0;
 	int i;

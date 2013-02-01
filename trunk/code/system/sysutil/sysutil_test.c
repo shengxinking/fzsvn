@@ -24,7 +24,8 @@ enum {
 	CPU_TEST = 0,
 	MEM_TEST,
 	PROC_TEST,
-	PID_FILE_TEST,
+	PIDFILE_TEST,
+	PROCFILE_TEST,
 };
 
 static int _g_type = CPU_TEST;
@@ -41,7 +42,8 @@ _usage(void)
 	printf("\t-c\tcpu API test\n");
 	printf("\t-m\tmemory API test\n");
 	printf("\t-p\tprocess API test\n");
-	printf("\t-f\tpid file API test\n");
+	printf("\t-f\tpidfile API test\n");
+	printf("\t-o\tprocfile API test\n");
 	printf("\t-h\tshow help message\n");
 }
 
@@ -55,7 +57,7 @@ static int
 _parse_cmd(int argc, char **argv)
 {
 	char opt;
-	char optstr[] = ":cmph";
+	char optstr[] = ":cmpfoh";
 	
 	opterr = 0;
 	while ( (opt = getopt(argc, argv, optstr)) != -1) {
@@ -75,7 +77,11 @@ _parse_cmd(int argc, char **argv)
 			break;
 			
 		case 'f':
-			_g_type = PID_FILE_TEST;
+			_g_type = PIDFILE_TEST;
+			break;
+			
+		case 'o':
+			_g_type = PROCFILE_TEST;
 			break;
 			
 		case 'h':
@@ -129,8 +135,8 @@ _cpu_test(void)
 
 	ncpu = cpu_number();
 
-	printf("cpu usage is: %d%%\n", cpu_usage());
-	cpus_usage(cpus, ncpu);
+	printf("cpu usage is: %d%%\n", cpu_total_usage());
+	cpu_all_usage(cpus, ncpu);
 	for (i = 0; i < ncpu; i++) {
 		printf("  cpu%d: %d%%\n", i + 1, cpus[i]);
 	}
@@ -188,9 +194,19 @@ _proc_test(char **argv)
 }
 
 static void 
-_pid_file_test(void)
+_pidfile_test(void)
 {
 
+}
+
+static void 
+_procfile_test(void)
+{
+	int rss = 0;
+
+	rss = procfile_get_rss(1);
+
+	printf("rss is %d\n", rss);
 }
 
 /**
@@ -224,9 +240,12 @@ main(int argc, char **argv)
 		_proc_test(argv);
 		break;
 
-	case PID_FILE_TEST:
-		_pid_file_test();
+	case PIDFILE_TEST:
+		_pidfile_test();
 		break;
+
+	case PROCFILE_TEST:
+		_procfile_test();
 
 	default:
 		break;

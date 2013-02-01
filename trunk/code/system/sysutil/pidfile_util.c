@@ -21,7 +21,7 @@
 #define	PID_FILE_FMT	"/var/log/%s.pid"
 
 int 
-pid_file_exist(const char *pname)
+pidfile_exist(const char *pname)
 {
 	char pidfile[PID_FILE_NAMELEN];
 
@@ -38,7 +38,7 @@ pid_file_exist(const char *pname)
 
 
 int 
-pid_file_new(const char *pname, pid_t pid)
+pidfile_new(const char *pname, pid_t pid)
 {
 	char pidfile[PID_FILE_NAMELEN];
 	char pid_str[10];
@@ -71,7 +71,7 @@ pid_file_new(const char *pname, pid_t pid)
 
 
 int 
-pid_file_del(const char *pname)
+pidfile_del(const char *pname)
 {
 	char pidfile[PID_FILE_NAMELEN];
 
@@ -90,7 +90,7 @@ pid_file_del(const char *pname)
 
 
 pid_t 
-pid_file_read(const char *pname)
+pidfile_read(const char *pname)
 {
 	char pidfile[PID_FILE_NAMELEN];
 	char pid_str[10];

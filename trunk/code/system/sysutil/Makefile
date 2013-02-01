@@ -17,7 +17,8 @@ TARGET = sysutil_test
 # for all target
 all : $(TARGET)
 
-sysutil_test : cpu_util.o mem_util.o process_util.o pidfile_util.o
+sysutil_test : cpu_util.o mem_util.o process_util.o pidfile_util.o \
+	       procfile_util.o
 
 
 # for test target

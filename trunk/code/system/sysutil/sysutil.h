@@ -10,13 +10,15 @@
 #ifndef	FZ_SYSUTIL_H
 #define	FZ_SYSUTIL_H
 
+#include <sys/types.h>
+
 /**
  *	Get the CPU usage, if have many CPU, it's all cpus usage.
  *
  *	Return >= 0 if success, -1 on error.
  */
 extern int 
-cpu_usage(void);
+cpu_total_usage(void);
 
 /**
  *	Get each CPU usage and stored in @cpus, if ncpu > CPU nunber,
@@ -25,7 +27,7 @@ cpu_usage(void);
  *	Return >= 0 if success, -1 on error.
  */
 extern int 
-cpus_usage(int *cpus, int ncpu);
+cpu_all_usage(int *cpus, int ncpu);
 
 /**
  *	Get the CPU number in runing system.
@@ -116,7 +118,7 @@ proc_exist(pid_t pid);
  * 	Return 1 if exist, 0 not exist.
  */
 extern int 
-pid_file_exist(const char *pname);
+pidfile_exist(const char *pname);
 
 /**
  *	Create a new pidfile on /var/run/@pname.pid 	
@@ -124,7 +126,7 @@ pid_file_exist(const char *pname);
  * 	Return 0 if success, -1 on error.
  */
 extern int 
-pid_file_new(const char *pname, pid_t pid);
+pidfile_new(const char *pname, pid_t pid);
 
 /**
  *	Read the pid file /var/run/@pname.pid and return 	
@@ -133,7 +135,7 @@ pid_file_new(const char *pname, pid_t pid);
  * 	Return > 0 is the pid, -1 on error.
  */
 extern pid_t 
-pid_file_read(const char *pname);
+pidfile_read(const char *pname);
 
 /**
  * 	Remove a old pidfile on /var/run/@pname.pid
@@ -141,8 +143,17 @@ pid_file_read(const char *pname);
  * 	Return 0 if success, -1 on error.
  */
 extern int 
-pid_file_del(const char *pname);
+pidfile_del(const char *pname);
 
 
+#define	PROC_FILE_LEN	64
+
+/**
+ *	Get the RSS memory size of process @pid.
+ *
+ *	Return 0 if success, -1 on error.
+ */
+extern int 
+procfile_get_rss(pid_t pid);
 
 #endif	/* end of FZ_SYSUTIL_H */
