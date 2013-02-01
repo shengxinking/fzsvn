@@ -10,11 +10,11 @@ ifneq (".deps", "$(wildcard .deps)")
 	DEPS = .deps
 endif
 
-TARGET =
+TARGET = 
 
-TEST = strbm_test
+TEST = str_bm_test
 
-.PHONY : all test clean distclean
+.PHONY : all test clean depclean
 
 # for all target
 all : $(TARGET)
@@ -32,8 +32,8 @@ strbm_test : strbm.o strbm_test.o
 
 
 
-# for distclean target
-distclean:
+# for depclean target
+depclean:
 	rm -rf *.o $(TARGET) .deps
 
 
