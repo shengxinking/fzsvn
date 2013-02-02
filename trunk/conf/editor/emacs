@@ -2,9 +2,9 @@
 ;; it's using unicode encoding, require mule-ucs
 
 ;; emacs 23 using XFT font
-(set-default-font "Bitstream Vera Sans Mono-10")
+(set-default-font "WenQuanYi Micro Hei Mono-12")
 (set-fontset-font (frame-parameter nil 'font)
-     'han '("WenQuanYi Bitmap Song" . "unicode-bmp"))
+     'han '("WenQuanYi Micro Hei" . "unicode-bmp"))
 
 ;; set user name and mark
 (setq user-full-name "Forrest")
@@ -106,7 +106,7 @@
 (setq auto-insert-query nil)
 (add-hook 'find-file-hooks 'auto-insert)
 (setq auto-insert-query nil)
-(setq auto-insert-directory "~/fz-repos/code/templator/")
+(setq auto-insert-directory "~/fzsvn/code/templator/")
 (define-auto-insert "\\.c" "templator.c")
 (define-auto-insert "main.c" "main.c")
 (define-auto-insert "_test\\.c" "main.c")
