@@ -84,6 +84,10 @@ str_split(const char *str, size_t len, const char *delim);
 extern void 
 str_free(char **str);
 
+extern int 
+str_cmp(const char *str1, size_t len1, const char *str2, size_t len2);
+
+
 
 #endif /* end of FZ_  */
 
