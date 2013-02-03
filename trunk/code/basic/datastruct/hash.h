@@ -1,8 +1,8 @@
-/*
- * @file        recv_hash.h
- * @brief       recv thread need a hash to map fd to stream and work thread
+/**
+ *	@file	hash.h
+ *	@brief	hash implement.
  *
- * @author      Forrest.zhang
+ *	@author	Forrest.zhang
  */
 
 #ifndef FZ_HASH_H
