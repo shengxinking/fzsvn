@@ -17,7 +17,7 @@
  *	Binary compare function. If @a == @b return 0, 
  *	@a > @b return >0 value, @a < @b return <0 value.
  */
-typedef int (*bsearch_cmp_func)(const void *a, const void *b);
+typedef int (*bin_search_cmp_func)(const void *a, const void *b);
 
 
 /*
@@ -31,8 +31,8 @@ typedef int (*bsearch_cmp_func)(const void *a, const void *b);
  * 	return a pointer to the element if OK, NULL on error.
  */
 extern const void * 
-bsearch(const void *array, size_t objsize, size_t nobj, 
-	bsearch_cmp_func cmp, const void *val);
+bin_search(const void *array, size_t objsize, size_t nobj, 
+	   bin_search_cmp_func cmp, const void *val);
 
 /**
  *	Generator bad charactor array according the 

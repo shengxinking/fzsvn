@@ -9,11 +9,10 @@
 
 
 const void * 
-binarysearch(const void *array, size_t objsize, size_t nobj, 
-	     bsearch_cmp_func cmp, const void *val)
+bin_search(const void *array, size_t objsize, size_t nobj, 
+	   bin_search_cmp_func cmp, const void *val)
 {
 	int low, mid, high;
-
 	if (!array || !val)
 		return 0;
 
@@ -21,7 +20,7 @@ binarysearch(const void *array, size_t objsize, size_t nobj,
 		return 0;
 
 	low = 0; 
-	high = nobjs - 1;
+	high = nobj - 1;
 	while (low < high) {
 		mid = (high + low) / 2;
 		if (cmp(val, array + mid * objsize) < 0)

@@ -4,7 +4,7 @@
  *	author:		forrest.zhang
  */
 
-#include "gcd.h"
+#include "algorithm.h"
 
 unsigned long 
 gcd(unsigned long a, unsigned long b)

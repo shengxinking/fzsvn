@@ -3,22 +3,23 @@
 #
 
 CC = gcc
-CFLAGS = -Wall -ggdb
+CFLAGS = -Wall -O2 
 LDFLAGS = 
 
 ifneq (".deps", "$(wildcard .deps)")
 	DEPS = .deps
 endif
 
-TARGET = 
+TARGET = algorithm_test
 
-TEST = str_bm_test
+TEST = 
 
 .PHONY : all test clean depclean
 
 # for all target
 all : $(TARGET)
 
+algorithm_test : bsearch.o BM_search.o gcd.o algorithm_test.o
 
 # for test target
 test : $(TEST)
@@ -27,9 +28,6 @@ test : $(TEST)
 # for clean target
 clean :
 	rm -f *.o $(TARGET)
-
-strbm_test : strbm.o strbm_test.o
-
 
 
 # for depclean target
