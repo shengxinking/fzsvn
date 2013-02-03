@@ -13,11 +13,11 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "strbm.h"
+#include "algorithm.h"
 
 
 int 
-strbm_bc(const char *pat, int plen, int *bc, int bclen)
+BM_get_bc(const char *pat, size_t plen, int *bc, size_t bclen)
 {
 	int i;
 
@@ -39,7 +39,7 @@ strbm_bc(const char *pat, int plen, int *bc, int bclen)
 
 
 int 
-strbm_gs(const char *pat, int plen, int *gs, int gslen)
+BM_get_gs(const char *pat, size_t plen, int *gs, size_t gslen)
 {
 	char *pend;
 	char *pptr;
@@ -89,8 +89,10 @@ strbm_gs(const char *pat, int plen, int *gs, int gslen)
 
 
 char * 
-strbm_search(const char *buf, int blen, const char *pat, int plen, 
-	     const int *bc, int bclen, const int *gs, int gslen)
+BM_search(const char *buf, size_t blen, 
+	  const char *pat, size_t plen, 
+	  const int *bc, size_t bclen, 
+	  const int *gs, size_t gslen)
 {
 	int b_idx;
 	int p_idx;

@@ -6,7 +6,8 @@
 
 #include "gcd.h"
 
-unsigned long gcd(unsigned long a, unsigned long b)
+unsigned long 
+gcd(unsigned long a, unsigned long b)
 {
 	unsigned long r;
 
