@@ -10,49 +10,50 @@
 
 #include <sys/types.h>
 
-typedef int (*list_cmp_func)(const void *data1, const void *data2);
-typedef int (*list_find_func)(const void *data1, const void *data2);
-typedef void (*list_print_func)(const void *data);
-typedef void (*list_free_func)(void *data);
-typedef int (*list_iterator_func)(void *data, int pos);	/* this function is used to iterator all list */
+#define	LIST_HEAD_INIT(name) { &(name), &(name) }
+#define	LIST_HEAD(name) \
+	struct list_head name = LIST_HEAD_INIT(name)
 
-typedef struct list {
-	list_cmp_func	cmp_func;
-	list_find_func	find_func;
-	list_print_func print_func;
-	list_free_func	free_func;
-	u_int32_t	size;
-	u_int32_t	pos;
-	void		*front;
-	void		*rear;
-} list_t;
+typedef struct list_head {
+	struct list_head	*next;	/* the next object */
+	struct list_head	*prev;	/* the previous object */
+} list_head_t;
 
-extern list_t *list_alloc(list_cmp_func cmp_func, list_find_func find_func,
-			list_print_func print_func, list_free_func free_func);
-extern void list_free(list_t *list);
+typedef struct hlist_node {
+	struct hlist_node	*next;	/* the next object */
+	struct hlist_node	**prev;	/* the previous object address */
+} hlist_node_t;
 
-extern int list_empty(const list_t *list);
-extern int list_count(const list_t *list);
+typedef struct hlist_head {
+	struct hlist_node	*first;	/* the first object in hash list */
+} hlist_head_t;
 
-extern void *list_find(const list_t *list, void *data);
-extern void *list_get(const list_t *list, int pos);
-extern int list_iterator(list_t *list, list_iterator_func iterator_func);
 
-extern int list_add_next(list_t *list, int pos, void *data);
-extern int list_add_prev(list_t *list, int pos, void *data);
-extern int list_add_tail(list_t *list, void *data);
-extern int list_add_head(list_t *list, void *data);
+static inline void 
+list_add(list_head_t *list, list_head_t *item);
 
-extern int list_del(list_t *list, int pos);
-extern int list_del_head(list_t *list);
-extern int list_del_tail(list_t *list);
 
-extern int list_add_asc(list_t *list, void *data);
-extern int list_add_dsc(list_t *list, void *data);
-extern list_t *list_sort_asc(const list_t *list);
-extern list_t *list_sort_dsc(const list_t *list);
+static inline void 
+list_add_tail(list_head_t *head, list_head_t *item);
 
-extern void list_print(const list_t *list);
+static inline void 
+list_del(list_head_t *item);
+
+static inline void 
+list_replace(list_head_t *old, list_head_t *new);
+
+static inline void 
+list_join(list_head_t *list, list_head_t *new);
+
+static inline int 
+list_is_last(list_head_t *list, list_head_t *item);
+
+static inline int
+list_is_empty(list_head_t *list);
+
+static inline int 
+list_is_fist(list_head_t *list, list_head_t *new);
+
 
 #endif /* end of FZ_LIST_H */
 
