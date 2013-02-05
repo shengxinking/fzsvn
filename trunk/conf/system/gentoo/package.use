@@ -5,7 +5,7 @@ sys-auth/pambase	consolekit
 sys-auth/consolekit	policykit
 sys-libs/zlib		minizip
 
-dev-lang/python		xml ipv6
+dev-lang/python		xml ipv6 sqlite
 dev-util/cmake		vim-syntax
 dev-libs/libxslt	python
 dev-vcs/subversion	bash-completion emacs python vim-syntax
@@ -56,6 +56,7 @@ x11-terms/rxvt-unicode	256-color xft unicode3 pixbuf
 x11-libs/vte		python
 x11-libs/fltk		cairo opengl threads xft
 x11-misc/lightdm	-introspection
+x11-misc/dmenu		xft
 
 net-libs/gnutls		lzo
 net-im/pidgin		gnutls python perl dbus -gstreamer -xscreensaver -ncurses 

@@ -11,7 +11,16 @@
 #include <sys/types.h>
 
 #define	LIST_HEAD(name) \
-	struct list_head name = {.head = NULL, .tail = NULL, .size = 0}
+	list_head_t name = {.head = NULL, .tail = NULL, .size = 0,}
+
+#define	LIST_NODE_INIT(ptr) \
+	{(ptr)->prev = NULL; (ptr)->next = NULL;}
+
+#define	HLIST_HEAD(name) \
+	hlist_head_t name = {.head = NULL,}
+
+#define	HLIST_NODE_INIT(ptr) \
+	{(ptr)->pprev = NULL; (ptr)->next = NULL;}
 
 /**
  * 	List node structure.
@@ -35,14 +44,14 @@ typedef struct list_head {
  */
 typedef struct hlist_node {
 	struct hlist_node	*next;	/* the next object */
-	struct hlist_node	**prev;	/* the previous object address */
+	struct hlist_node	**prev;	/* the previous elem address */
 } hlist_node_t;
 
 /**
  * 	Hlist header struct.
  */
 typedef struct hlist_head {
-	struct hlist_node	*first;	/* the first object in hash list */
+	struct hlist_node	*head;	/* the first element */
 	size_t			size;
 } hlist_head_t;
 
@@ -169,21 +178,21 @@ list_join(list_head_t *dst, list_head_t *src)
 }
 
 /**
- * 	Justify element @item is last element of list @list or not.
+ * 	Justify element @item is last element of list @l or not.
  */
 static inline int 
-list_is_last(list_head_t *list, list_node_t *item);
+list_is_last(list_head_t *l, list_node_t *item);
 {
-	return (list->tail == item && item->next == NULL);
+	return (l->tail == item && item->next == NULL);
 }
 
 /**
- * 	Justify list @list is a empty list or not.
+ * 	Justify list @l is a empty list or not.
  */
 static inline int
-list_is_empty(list_head_t *list) 
+list_is_empty(list_head_t *l) 
 {
-	return (list->head == NULL && list->tail == NULL && list->size == 0);
+	return (l->head == NULL && l->tail == NULL && l->size == 0);
 }
 
 /**
@@ -194,6 +203,14 @@ list_is_fist(list_head_t *list, list_node_t *item)
 {
 	return (list->head == item && item->prev == NULL);
 }
+
+static inline void 
+hlist_add(hlist_head_t *hlist, hlist_node_t *item);
+
+static inline void 
+hlist_del(hlist_head_t *hlist, hlist_node_t *item);
+
+
 
 #endif /* end of FZ_LIST_H */
 
