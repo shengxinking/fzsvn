@@ -17,6 +17,7 @@
 #include <getopt.h>
 #include <sys/types.h>
 
+static char _g_optstr[] = ":h";
 
 /**
  *	Show help message	
@@ -26,6 +27,7 @@
 static void 
 _usage(void)
 {
+	printf("\t-h\tshow help message\n");
 }
 
 
@@ -38,10 +40,9 @@ static int
 _parse_cmd(int argc, char **argv)
 {
 	char opt;
-	char optstr[] = ":h";
 	
 	opterr = 0;
-	while ( (opt = getopt(argc, argv, optstr)) != -1) {
+	while ( (opt = getopt(argc, argv, _g_optstr)) != -1) {
 		
 		switch (opt) {
 			
