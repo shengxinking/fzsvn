@@ -57,6 +57,7 @@ x11-libs/vte		python
 x11-libs/fltk		cairo opengl threads xft
 x11-misc/lightdm	-introspection
 x11-misc/dmenu		xft
+x11-libs/wxGTK		X
 
 net-libs/gnutls		lzo
 net-im/pidgin		gnutls python perl dbus -gstreamer -xscreensaver -ncurses 
