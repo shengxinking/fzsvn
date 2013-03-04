@@ -200,8 +200,6 @@ eth_is_duplex(const char *ifname);
 extern int 
 eth_is_autoneg(const char *ifname);
 
-/**
- *	Read the eeprom content to buffer @buf, the eeprom address
 
 #endif /* end of __LIBINF_IOCTL_H__ */
 

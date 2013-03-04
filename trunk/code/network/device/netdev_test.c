@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <netinet/ether.h>
 
-#include "netdevice.h"
+#include "netdev.h"
 
 int main(int argc, char **argv)
 {

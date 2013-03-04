@@ -1,19 +1,48 @@
-# this is the Makefiel for gnu Make
+#
+#	Makefile for C languages
+#
 
-CC     = gcc
-CFLAGS = -ggdb -Wall -Wstrict-prototypes
+CC = gcc
+CFLAGS = -Wall -ggdb
+LDFLAGS = 
 
-TARGET  = netdevice
-OBJS    = netdevice.o netdevice_test.o
+ifneq (".deps", "$(wildcard .deps)")
+	DEPS = .deps
+endif
 
-.PHONY : all clean
+TARGET = netdev_test
 
-all: $(TARGET) $(TARGET1) $(TARGET2) $(TARGET3)
+TEST = 
 
-$(TARGET) : $(LIBS) $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
-	
+.PHONY : all test clean depclean
 
+# for all target
+all : $(TARGET)
+
+netdev_test : netdev.o ethtool.o netdev_test.o
+
+
+# for test target
+test : $(TEST)
+
+
+# for clean target
 clean :
-	rm -rf $(TARGET) $(OBJS) 
-	
+	rm -f *.o $(TARGET) $(TEST)
+
+
+# for depclean target
+depclean:
+	rm -rf *.o $(TARGET) $(TEST) .deps
+
+
+%.o : %.c $(DEPS)
+	$(CC) $(CFLAGS) -c -o $@ $< -MD -MF .deps/$(<:.c=.d)
+
+$(DEPS) :
+	@mkdir -p .deps
+
+
+-include .deps/*.d
+
+
