@@ -4,7 +4,7 @@
 
 CC = gcc
 CFLAGS = -Wall -ggdb
-LDFLAGS = 
+LDFLAGS = -static
 
 ifneq (".deps", "$(wildcard .deps)")
 	DEPS = .deps
@@ -19,7 +19,7 @@ TEST =
 # for all target
 all : $(TARGET)
 
-netdev_test : netdev.o ethtool.o netdev_test.o
+netdev_test : ioctl.o ethtool.o netdev_test.o
 
 
 # for test target

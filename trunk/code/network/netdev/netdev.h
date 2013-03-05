@@ -166,6 +166,13 @@ extern int
 eth_get_speed(const char *ifname);
 
 /**
+ *	Get eeprom size of ethernet @ifname.	
+ * 
+ */
+extern int 
+eth_get_eeprom_size(const char *ifname);
+
+/**
  *	Set link speed of ethernet interface @ifname.	
  * 
  *	Return 0 if success, -1 on error.
@@ -174,7 +181,7 @@ extern int
 eth_set_speed(const char *ifname);
 
 /**
- *	Get the link media of ethernet interface @ifname.	
+ *	Get the port media of ethernet interface @ifname.	
  * 
  *	Return:
  *	PORT_TP		(copper port, twist-pair)
@@ -183,7 +190,7 @@ eth_set_speed(const char *ifname);
  *	-1		(error)
  */
 extern int 
-eth_get_media(const char *ifname);
+eth_get_port(const char *ifname);
 
 /**
  *	Check the interface @ifname is duplex port or not.	
@@ -200,6 +207,15 @@ eth_is_duplex(const char *ifname);
 extern int 
 eth_is_autoneg(const char *ifname);
 
+/**
+ *	Read bytes from ethernet eeprom, the read offset is @off, length 
+ *	is @len, store read bytes into buffer @buf, @buf length no less than
+ *	@len.
+ *	
+ *	Return 0 if read success, -1 on error. 
+ */
+extern int 
+eth_read_eeprom(const char *ifname, char *buf, size_t off, size_t len);
 
 #endif /* end of __LIBINF_IOCTL_H__ */
 

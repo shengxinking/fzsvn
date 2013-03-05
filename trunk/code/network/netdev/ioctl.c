@@ -19,7 +19,7 @@
 #include <errno.h>
 #include <netinet/ether.h>
 
-#include "netdevice.h"
+#include "netdev.h"
 
 
 #define INF_ERR_LEN    1024
