@@ -37,4 +37,7 @@ c. vim中的ctags命令
    ]#			# 在#ifdef...#endif块中间按下, 跳到结束处
    			# (#else, #elif, #endif)
    
+3. vim编辑模式
+
+   :!xxd		# 进入16进制编辑模式.   
 

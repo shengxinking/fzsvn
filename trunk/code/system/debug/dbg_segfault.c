@@ -18,8 +18,7 @@
 #include <signal.h>
 #include <ucontext.h>
 
-#include "fdebug.h"
-#include "stdext.h"
+#include "debug.h"
 
 #define	DBG_MAX_FRAME	100
 #define	DBG_MAX_SO	100
@@ -237,8 +236,6 @@ _dbg_sighandler(int signo, siginfo_t *si, void *ucontext)
 	struct sigaction sa;
 	int i;
 
-	_dbg_handler(signo);
-
 	/* reset the signal */
 	sa.sa_handler = SIG_DFL;
 	sigemptyset(&sa.sa_mask);
@@ -264,6 +261,10 @@ _dbg_sighandler(int signo, siginfo_t *si, void *ucontext)
 	for (i = 1; i < n; i++) {
 		_dbg_dumpsym(frames[i]);
 	}
+
+	_dbg_handler(signo);
+
+	_exit(SIGSEGV);
 }
 
 

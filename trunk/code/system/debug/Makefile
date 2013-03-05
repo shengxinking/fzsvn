@@ -15,20 +15,16 @@ OBJS = dbg_file.o dbg_print.o dbg_segfault.o
 
 TARGET = debug_test
 
-.PHONY : all clean distclean
+.PHONY : all clean depclean
 
 # for all target
 all : $(TARGET)
 
+$(TARGET) : $(OBJS)
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 # for test target
 test : $(TEST)
-
-debug_test : debug.o debug_test.o
-	$(CC) -o $@ $^ $(LDFLAGS)
-
-dbg_file_test : dbg_file.o dbg_file_test.o
-	$(CC) -o $@ $^ $(LDFLAGS)
 
 
 # for clean target
@@ -36,8 +32,8 @@ clean :
 	rm -f *.o $(TARGET) $(TEST)
 
 
-# for distclean target
-distclean:
+# for depclean target
+depclean:
 	rm -rf *.o $(TARGET) $(TEST) .deps
 
 
