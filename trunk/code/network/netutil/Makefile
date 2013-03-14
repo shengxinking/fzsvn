@@ -13,7 +13,7 @@ endif
 TARGET = netutil_test
 
 
-.PHONY : all clean distclean
+.PHONY : all clean depclean
 
 all : $(TARGET)
 
@@ -26,7 +26,7 @@ clean :
 	rm -f *.o $(TARGET)
 
 
-distclean:
+depclean:
 	rm -rf *.o $(TARGET) .deps
 
 
