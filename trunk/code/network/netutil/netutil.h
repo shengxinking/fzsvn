@@ -14,6 +14,8 @@
 
 #include <netinet/in.h>
 
+#define	IP_STR_LEN		64	/* the ip_addr_t max string length */
+
 /* IP address for IPv4/IPv6 */
 typedef struct ip_addr {
 	int	family;			/* AF_INET, AF_INET6 */
@@ -135,8 +137,8 @@ ip_addr_compare(const ip_addr_t *ip1, const ip_addr_t *ip2);
 
 /**
  *	Convert a IPv4 address @v4 to IPv6 address @v6.
- *	The @v6 is IPv4 mapped address, it can use 
- *	communicate with IPv4 program.
+ *	The @v6 is IPv4 mapped address, it can use IPv4 program
+ *	communicate with IPv6 program.
  *
  *	Return 0 if success, -1 on error.
  */
@@ -226,6 +228,126 @@ ip_port_from_str(ip_port_t *ip, const char *str);
  */
 extern int 
 ip_port_compare(const ip_port_t *ip1, const ip_port_t *ip2);
+
+/********************************************************* 
+ *	Socket util functions.
+ ********************************************************/
+/**
+ * 	Common socket address.
+ */
+typedef struct sk_addr {
+	union {
+		struct sockaddr		sa;	/* common */
+		struct sockaddr_in	v4;	/* IPv4 */
+		struct sockaddr_in6	v6;	/* IPv6 */
+	} _addr;
+} sk_addr_t;
+
+#define	_addrsa		_addr.sa
+#define	_addrv4		_addr.v4
+#define _addrv6		_addr.v6
+
+
+/**
+ *	Create TCP server socket accoring IP port address @ip. 	
+ *
+ * 	Return socket fd is success, -1 on error.
+ */
+extern int
+sk_tcp_server(ip_port_t *ip);
+
+/**
+ * 	Create a TCP client socket and connect to IP port address
+ * 	@ip.
+ *
+ * 	Return socket fd is success, -1 on error.
+ */
+extern int 
+sk_tcp_client(ip_port_t *ip);
+
+/**
+ * 	Create a TCP client socket and connect to IP port address
+ * 	@ip, it use NONBLOCK socket before connect. If connection
+ *	is finished, set @wait = 0, or set @wait = 1 and need
+ *	check connection is finished later.
+ *
+ * 	Return socket fd is success, -1 on error.
+ */
+extern int 
+sk_tcp_client_nb(ip_port_t *ip, int *wait);
+
+/**
+ * 	Connect socket @fd to server IP port address @ip.
+ *	
+ *	Return 0 if success, 1 need check later, -1 on error.
+ */
+extern int 
+sk_tcp_connect(int fd, ip_addr_t *ip, u_int16_t port);
+
+/**
+ * 	Check Socket @fd connection is success or failed.
+ *
+ *	Return 0 if success, -1 if error.
+ */
+extern int 
+sk_is_connected(int fd);
+
+/**
+ *	Accept an client and save it's IP port address in @ip.
+ *
+ *	Return client socket fd if accept success, -1 on error.
+ */
+extern int 
+sk_accept(int fd, ip_port_t *ip);
+
+/**
+ * 	Set socket @fd to NONBLOCK mode if @nbio != 0, clear
+ * 	socket @fd to BLOCKED mode if @nbio is 0.
+ *
+ * 	Return 0 if success, -1 on error.
+ */
+extern int 
+sk_set_nonblock(int fd, int nbio);
+
+/**
+ * 	Set TCP socket @fd keepalive if @keepalive != 0, clear
+ * 	@fd keepalive if @keepalive is 0.
+ *
+ * 	Return 0 if success, -1 on error.
+ */
+extern int 
+sk_set_keepalive(int fd);
+
+/**
+ * 	Recv data from socket @fd, the data saved in @buf, it
+ * 	the @buf size is @len.
+ *
+ * 	If peer close connect, the @closed is set 1.
+ *
+ * 	Return recevied bytes number if success, -1 on error.
+ */
+extern int 
+sk_recv(int fd, void *buf, size_t len, int *closed);
+
+/**
+ * 	Send data in @buf to socket @fd, the @buf length is
+ * 	@len.
+ *
+ * 	Return send bytes number is success, -1 on error.
+ */
+extern int 
+sk_send(int fd, const void *buf, size_t len);
+
+/**
+ *	Resolve the domain name and save it into IP. 
+ *	If family is AF_INET, only return IPv4 address.
+ *	If family is AF_INET6, only return IPv6 address.
+ *	If family is 0, return a valid address if exist.
+ *
+ *	Return 0 if sucess, -1 on error.
+ */
+extern int 
+sk_gethostbyname(const char *domain, int family, ip_addr_t *ip);
 
 #endif /* end of FZ_IP_ADDR_H  */
 

@@ -13,6 +13,8 @@
 #include <netdb.h>
 #include <netinet/in.h>
 
+#include "netutil.h"
+
 /* likely()/unlikely() for performance */
 #ifndef unlikely
 #define unlikely(x)  __builtin_expect(!!(x), 0)
@@ -32,8 +34,6 @@
 #else
 #define _IP_ERR(fmt, args...)
 #endif
-
-#include "ip_addr.h"
 
 static u_int8_t _s_mask_partial[9] = {
 	0x00, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe, 0xff

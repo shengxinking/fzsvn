@@ -17,12 +17,13 @@
 #include <getopt.h>
 #include <sys/types.h>
 
-#include "ip_addr.h"
+#include "netutil.h"
 
 enum {
 	TEST_IP_ADDR,
 	TEST_IP_MASK,
 	TEST_IP_PORT,
+	TEST_SK_UTIL,
 };
 
 static int	_g_test = TEST_IP_ADDR;
@@ -36,10 +37,11 @@ static int	_g_test = TEST_IP_ADDR;
 static void 
 _usage(void)
 {
-	printf("ip_addr_test <options>\n");
+	printf("netutil_test <options>\n");
 	printf("\t-a\ttest ip_addr functions\n");
 	printf("\t-m\ttest ip_mask functions\n");
 	printf("\t-p\ttest ip_port functions\n");
+	printf("\t-s\ttest sk_util functions\n");
 	printf("\t-h\tshow help message\n");
 }
 
@@ -53,14 +55,14 @@ static int
 _parse_cmd(int argc, char **argv)
 {
 	char opt;
-	char optstr[] = ":amph";
+	char optstr[] = ":ampsh";
 	
 	opterr = 0;
 	while ( (opt = getopt(argc, argv, optstr)) != -1) {
 		
 		switch (opt) {
 			
-		case'a':
+		case 'a':
 			_g_test = TEST_IP_ADDR;
 			break;
 
@@ -70,6 +72,10 @@ _parse_cmd(int argc, char **argv)
 			
 		case 'p':
 			_g_test = TEST_IP_PORT;
+			break;
+
+		case 's':
+			_g_test = TEST_SK_UTIL;
 			break;
 
 		case 'h':
@@ -118,14 +124,37 @@ _release(void)
 static void 
 _test_ip_addr(void)
 {
+	char ip4_str[] = "10.200.4.12";
+	char ip6_str[] = "10:200::4:12";
+	char ipstr[IP_STR_LEN] = {0};
+	ip_addr_t ip4, ip6;
+	
+	if (ip_addr_from_str(&ip4, ip4_str)) {
+		printf("%s ip_addr_from_str failed\n", ip4_str);
+		return;
+	}
 
+	ip_addr_apply_mask(&ip4, 16);
+
+	printf("after apply mask, address is %s\n", 
+	       ip_addr_to_str(&ip4, ipstr, IP_STR_LEN));
+
+	if (ip_addr_from_str(&ip6, ip6_str)) {
+		printf("%s ip_addr_from_str failed\n", ip6_str);
+		return;
+	}
+
+	ip_addr_apply_mask(&ip6, 24);
+
+	printf("after apply mask, address is %s\n", 
+	       ip_addr_to_str(&ip6, ipstr, IP_STR_LEN));
 }
 
 
 static void 
 _test_ip_mask(void)
 {
-
+	
 }
 
 static void 
@@ -148,6 +177,45 @@ _test_ip_port(void)
 		printf("ip_port_from_str failed\n");
 	else
 		printf("%s\n", ip_port_to_str(&ip, buf, len));
+}
+
+static void 
+_test_sk_util(void)
+{
+	char domain_v4[] = "www.sina.com.cn";
+	char domain_v6[] = "www.google.com.hk";
+	ip_addr_t ip4, ip6;
+	char ipstr[IP_STR_LEN] = {0};
+
+	if (sk_gethostbyname(domain_v6, AF_INET6, &ip6)) {
+		printf("%s sk_gethostbyname failed\n", domain_v6);
+	}
+	else {
+		printf("%s address(6) is %s\n", domain_v6, 
+		       ip_addr_to_str(&ip6, ipstr, IP_STR_LEN));
+	}
+
+	if (sk_gethostbyname(domain_v4, AF_INET, &ip4)) {
+		printf("%s sk_gethostbyname(4) failed\n", domain_v4);
+	} else {
+		printf("%s address(4) is %s\n", domain_v4, 
+		       ip_addr_to_str(&ip4, ipstr, IP_STR_LEN));
+	}
+	
+	if (sk_gethostbyname(domain_v6, 0, &ip6)) {
+		printf("%s sk_gethostbyname(0) failed\n", domain_v6);
+	}
+	else {
+		printf("%s address(0) is %s\n", domain_v6, 
+		       ip_addr_to_str(&ip6, ipstr, IP_STR_LEN));
+	}
+
+	if (sk_gethostbyname(domain_v4, 0, &ip4)) {
+		printf("%s sk_gethostbyname(0) failed\n", domain_v4);
+	} else {
+		printf("%s address(0) is %s\n", domain_v4, 
+		       ip_addr_to_str(&ip4, ipstr, IP_STR_LEN));
+	}
 }
 
 /**
@@ -179,6 +247,10 @@ main(int argc, char **argv)
 
 	case TEST_IP_PORT:
 		_test_ip_port();
+		break;
+		
+	case TEST_SK_UTIL:
+		_test_sk_util();
 		break;
 		
 	default:

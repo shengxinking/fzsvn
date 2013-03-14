@@ -10,7 +10,7 @@ ifneq (".deps", "$(wildcard .deps)")
 	DEPS = .deps
 endif
 
-TARGET = sock_test
+TARGET = netutil_test
 
 
 .PHONY : all clean distclean
@@ -18,7 +18,7 @@ TARGET = sock_test
 all : $(TARGET)
 
 
-sock_test : sock.o sock_test.o
+netutil_test : ip_addr.o sock_util.o netutil_test.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 	
 

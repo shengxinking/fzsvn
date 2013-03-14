@@ -127,7 +127,7 @@ sk_send(int fd, const void *buf, size_t len);
  *	Return 0 if sucess, -1 on error.
  */
 extern int 
-sk_gethostbyname(const char *domain, ip_addr_t *ip);
+sk_gethostbyname(ip_addr_t *ip, const char *domain);
 
 #endif /* end of FZ_SOCK_UTIL_H  */
 

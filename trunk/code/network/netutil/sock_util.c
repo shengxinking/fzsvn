@@ -21,7 +21,7 @@
 #include <assert.h>
 #include <netdb.h>
 
-#include "sock_util.h"
+#include "netutil.h"
 
 /* likely()/unlikely() for performance */
 #ifndef unlikely
@@ -266,7 +266,6 @@ sk_set_nonblock(int fd, int nbio)
 	return 0;
 }
 
-
 int 
 sk_set_keepalive(int fd)
 {
@@ -310,30 +309,50 @@ sk_set_keepalive(int fd)
 }
 
 int 
-sk_gethostbyname(const char *domain, ip_addr_t *ip)
+sk_gethostbyname(const char *domain, int family, ip_addr_t *ip)
 {
-	struct hostent hi;
-	char buf[2048];
-	int err, ret;
+	struct addrinfo ai;
+	struct addrinfo *res = NULL, *pai = NULL;
+	struct sockaddr_in *in4;
+	struct sockaddr_in6 *in6;
+	int ret;
 
 	if (unlikely(!domain || !ip))
 		return -1;
 
-	ret = gethostbyname_r(domain, &hi, buf, sizeof(buf), NULL, &err);
+	/* set filter */
+	memset(&ai, 0, sizeof(ai));
+	ai.ai_flags = (AI_V4MAPPED | AI_ADDRCONFIG);
+	ai.ai_family = family;
+	ret = getaddrinfo(domain, NULL, &ai, &res);
 	if (ret) {
 		return -1;
 	}
 
-	if (hi.h_addrtype == AF_INET) {
-		ip->family = AF_INET;
-		memcpy(&ip->_addr4, hi.h_addr, 4);
-	}
-	else {
-		ip->family = AF_INET6;
-		memcpy(&ip->_addr6, hi.h_addr, 128);
+	pai = res;
+	while (pai) {
+		if (pai->ai_family == AF_INET) {
+			in4 = (struct sockaddr_in *)pai->ai_addr;
+			ip->family = AF_INET;
+			memcpy(&ip->_addr4, &in4->sin_addr, 4);
+			break;
+		}
+		else if (pai->ai_family == AF_INET6) {
+			in6 = (struct sockaddr_in6 *)pai->ai_addr;
+			ip->family = AF_INET6;			
+			memcpy(&ip->_addr6, &in6->sin6_addr, 16);
+			break;
+		}
+
+		pai = pai->ai_next;
 	}
 
-	return 0;
+	freeaddrinfo(res);
+
+	if (pai)
+		return 0;
+	else
+		return -1;
 }
 
 int 
@@ -366,7 +385,7 @@ sk_recv(int fd, void *buf, size_t len, int *closed)
 }
 
 int 
-sk_send(int fd, const void *buf, size_t len)
+sk_send_all(int fd, const void *buf, size_t len)
 {
 	struct pollfd pfd;
 	int n = 0, m = 0, ret;
@@ -409,6 +428,28 @@ sk_send(int fd, const void *buf, size_t len)
 	return m;
 }
 
+int 
+sk_send(int fd, const void *buf, size_t len)
+{
+	int n = 0;
+
+	if (unlikely(fd < 0 || !buf || len < 1)) {
+		_SK_ERR("invalid param\n");
+		return -1;
+	}
+
+	n = send(fd, buf, len, MSG_DONTWAIT);
+	if (n < 0) {
+		if (errno != EINTR || errno != EAGAIN) {
+			_SK_ERR("send error: %s\n", 
+				strerror(errno));
+			return -1;
+		}
+		n = 0;
+	}
+
+	return n;
+}
 
 
 
