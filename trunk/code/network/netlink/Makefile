@@ -1,42 +1,48 @@
 #
-#  make a route tools using netlink
-#
-#  write by Forrest.zhang
+#	Makefile for C languages
 #
 
 CC = gcc
-CFLAGS = -ggdb -Wall -Wstrict-prototypes
+CFLAGS = -Wall -ggdb
+LDFLAGS = 
 
-TARGET = route
-SRCS   = $(wildcard *.c)
-OBJS   = $(patsubst %.c,%.o,$(SRCS))
-
-ifneq (.deps, $(wildcard .deps))
-    DEPS = .deps
+ifneq (".deps", "$(wildcard .deps)")
+	DEPS = .deps
 endif
 
+TARGET = netlink_test
+
+TEST = 
+
+.PHONY : all test clean depclean
+
+# for all target
 all : $(TARGET)
 
-$(TARGET) : $(OBJS)
-	echo "link $@ ..."; \
-	$(CC) -o $@ $^ $(CFLAGS)
+netlink_test : libnetlink.o nl_neigh.o nl_ip.o nl_route.o netlink_test.o
 
-$(OBJS) : %.o : %.c $(DEPS)
-	@echo "compile $< ..."; \
-	$(CC) $(CFLAGS) -c -o $@ $< ; \
-	$(CC) -c $< -MM -MF $(patsubst %.o,%.d,$@); \
-	mv $(patsubst %.o,%.d,$@) .deps
+# for test target
+test : $(TEST)
+
+
+# for clean target
+clean :
+	rm -f *.o $(TARGET) $(TEST)
+
+
+# for depclean target
+depclean:
+	rm -rf *.o $(TARGET) $(TEST) .deps
+
+
+%.o : %.c $(DEPS)
+	$(CC) $(CFLAGS) -c -o $@ $< -MD -MF .deps/$(<:.c=.d)
 
 $(DEPS) :
-	@if [ ! -d .deps ]; then \
-            mkdir .deps; \
-        fi
+	@mkdir -p .deps
 
-.PHONY: clean
-
-clean:
-	@echo "clean ..." ; \
-	rm -rf .deps *.o $(TARGET)
 
 -include .deps/*.d
+
+
 
