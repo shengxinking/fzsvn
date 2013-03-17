@@ -16,24 +16,30 @@
 #include <sys/types.h>
 #include <libnetlink.h>
 
-/*
- *  open a netlink socket. and set local address and peer 
- *  address to kernel
- *
- *  return 0 if OK, -1 on error.
- */
+#define	RTNL_DEBUG
+
+/* define debug macro */
+#ifdef	RTNL_DEBUG
+#define	RTNL_DBG(f, a...)	printf("[rtnl-dbg]: "fmt, ##args)
+#else
+#define	RTNL_DBG(f, a...)
+#endif
+#define	RTNL_ERR(f, a...)	printf("[rtnl-err]: %s %d: "f, ##a)
+
+
 int 
-rtnl_open(struct rtnl_handle* rth)
+rtnl_open(struct rtnl_ctx* rth)
 {
 	int len;
+	struct sockaddr_nl nladdr;
 
 	if (!rth)
 		return -1;
 
-	memset(rth, 0, sizeof(struct rtnl_handle));
+	memset(rth, 0, sizeof(struct rtnl_ctx));
 
 	/* create netlink socket */
-	rth->fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+	rth->fd = socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
 	if (rth->fd < 0) {
 		perror("cannot open netlink socket\n");
 		return -1;
@@ -45,20 +51,19 @@ rtnl_open(struct rtnl_handle* rth)
 	rth->local.nl_groups = 0;
 
 	/* bind the netlink socket */
-	if (bind(rth->fd, (struct sockaddr*)&rth->local, sizeof(rth->local) ) ) {
-		perror("cannot bind netlink socket\n");
+	len = sizeof(rth->local);
+	if (bind(rth->fd, (struct sockaddr*)&rth->local, len) ) {
+		RTNL_ERR("cannot bind netlink socket\n");
 		return -1;
 	}
 
-	/* test bind success */
-	len = sizeof(rth->local);
-	if (getsockname(rth->fd, (struct sockaddr*)&rth->local, &addr_len)) {
-		perror("cannot get netlink socket local address\n");
+	if (getsockname(rth->fd, (struct sockaddr*)&nladdr, &len)) {
+		RTNL_ERR("can't get netlink socket address\n");
 		return -1;
 	}
 
 	if (len != sizeof(rth->local)) {
-		fprintf(stderr, "wrong address lenght %d\n", addr_len);
+		RTNL_ERR("wrong address length %d\n", len);
 		return -1;
 	}
     
@@ -71,29 +76,53 @@ rtnl_open(struct rtnl_handle* rth)
 	return 0;
 }
 
-
-/*
- *  send a message to kernel netlink
- *
- *  return 0 if OK, -1 on error
- */
 int 
-rtnl_send(struct rtnl_handle *rth, const struct nlmsghdr *nlmsg)
+rtnl_send(rtnl_ctx_t *rth, const struct nlmsghdr *nlmsg)
 {
-//    struct msghdr          msg;
-    
-    return 0;
+	int n;
+
+	if (!rth || !nlmsg)
+		return -1;
+
+	/* sendto peer */
+	n = sendto(rth->fd, (struct sockaddr *)&rth->peer, 
+		   nlmsg, nlmsg->nlmsg_len, 0);
+	if (n < 0)
+		return -1;
+	if (n != nlmsg->nlmsg_len)
+		return -1;
+
+	return 0;
 }
 
-/*
- *  receive a message from kernel netlink and store in buf
- *
- *  return the received size if OK, -1 on error
- */
 int 
-rtnl_recv(struct rtnl_handle *rth, struct nlmsghdr *nlmsg, size_t size)
+rtnl_recv(struct rtnl_ctx *rth, struct nlmsghdr *nlmsg, size_t size)
 {
-    return 0;
+	int n;
+	int total = 0;
+	char *buf;
+
+	if (!rth || !nlmsg || !size)
+		return -1;
+
+	buf = (char *)nlmsg;
+
+	do {
+		n = recv(rth->fd, buf, size, 0);
+		if (n < 0) {
+			if (errno == EAGAIN || errno == EINTR)
+				return 0;
+			return -1;
+		if (n == 0)
+			return 0;
+
+		total += n;
+		if (NLMSG_OK(nlmsg, total)) {
+			return 0;
+		}
+	}
+
+	return 0;
 }
 
 /*
@@ -102,9 +131,10 @@ rtnl_recv(struct rtnl_handle *rth, struct nlmsghdr *nlmsg, size_t size)
  *  return 0 if OK, -1 on error
  */
 int 
-add_rtattr(struct nlmsghdr *nl, size_t maxlen, int type, void *data, size_t datalen)
+rtnl_add_rtattr(struct nlmsghdr *nl, size_t maxlen, int type, 
+		void *data, size_t datalen)
 {
-	int           len = RTA_LENGTH(datalen);
+	int len = RTA_LENGTH(datalen);
 	struct rtattr *rta;
 
 	// no enough room to add rtarrt
@@ -126,14 +156,4 @@ add_rtattr(struct nlmsghdr *nl, size_t maxlen, int type, void *data, size_t data
 	return 0;
 }
 
-__u32 ip_u32 (const char* ip)
-{
-	__u32         addr;
 
-	assert(ip);
-
-	if(inet_pton(AF_INET, ip, &addr) < 0)
-		return 0;
-
-	return addr;
-}

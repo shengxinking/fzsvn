@@ -19,7 +19,7 @@ TEST =
 # for all target
 all : $(TARGET)
 
-netlink_test : libnetlink.o nl_neigh.o nl_ip.o nl_route.o netlink_test.o
+netlink_test : rtnetlink.o nl_link netlink_test.o
 
 # for test target
 test : $(TEST)

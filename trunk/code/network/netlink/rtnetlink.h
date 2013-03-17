@@ -11,6 +11,12 @@
 #ifndef FZ_RTNETLINK_H
 #define FZ_RTNETLINK_H
 
+typedef struct rtnl_ctx {
+	int		fd;	/* socket fd */
+	struct sockaddr_nl local;/* local netlink address */
+	struct sockaddr_nl peer;/* peer netlink address(kernel) */
+} rtnl_ctx;
+
 extern int 
 rtnl_open(void);
 
