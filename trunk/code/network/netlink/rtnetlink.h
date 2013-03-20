@@ -11,25 +11,41 @@
 #ifndef FZ_RTNETLINK_H
 #define FZ_RTNETLINK_H
 
+#include <linux/rtnetlink.h>
+
 typedef struct rtnl_ctx {
 	int		fd;	/* socket fd */
 	struct sockaddr_nl local;/* local netlink address */
 	struct sockaddr_nl peer;/* peer netlink address(kernel) */
-} rtnl_ctx;
+} rtnl_ctx_t;
+
+typedef	int (*rtnl_filter)(struct sockaddr_ll *nl, struct nlmsg *msg, void *arg);
+typedef void (*rtnl_print)(unsigned long *parg);
 
 extern int 
-rtnl_open(void);
+rtnl_open(rtnl_ctx_t *rtx);
 
 extern int 
-rtnl_send(int fd, struct nlmsghdr *msg);
+rtnl_send(rtnl_ctx_t *rtx, struct nlmsghdr *msg);
 
 extern struct nlmsghdr * 
-rtnl_recv(int fd);
+rtnl_recv(rtnl_ctx_t *rth);
 
 extern int 
-rtnl_error(int err);
+rtnl_wilddump();
 
+extern int 
+rtnl_dump_filter(rtnl_ctx_t *rth, int family, int cmd);
 
-#endif /* end of FZ_  */
+extern int 
+rtnl_add_rtattr(struct nlmsg *msg, int type, void *data, size_t len);
+
+extern int 
+rtnl_parse_rtattr(struct nlmsg *msg, struct rtattr *rtattrs, int nrtattr);
+
+extern int 
+rtnl_get_error(int err);
+
+#endif /* end of FZ_RTNETLINK_H  */
 
 
