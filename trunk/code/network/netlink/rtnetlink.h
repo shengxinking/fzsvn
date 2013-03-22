@@ -32,16 +32,16 @@ extern struct nlmsghdr *
 rtnl_recv(rtnl_ctx_t *rth);
 
 extern int 
-rtnl_wilddump();
+rtnl_dump_request(rtnl_ctx_t *rtx, int family, int type);
 
 extern int 
 rtnl_dump_filter(rtnl_ctx_t *rth, int family, int cmd);
 
 extern int 
-rtnl_add_rtattr(struct nlmsg *msg, int type, void *data, size_t len);
+rtnl_add_attr(struct nlmsg *msg, int type, void *data, size_t len);
 
 extern int 
-rtnl_parse_rtattr(struct nlmsg *msg, struct rtattr *rtattrs, int nrtattr);
+rtnl_parse_attr(struct nlmsg *msg, struct rtattr *rtattrs, int nrtattr);
 
 extern int 
 rtnl_get_error(int err);
