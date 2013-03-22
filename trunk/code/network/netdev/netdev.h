@@ -217,5 +217,22 @@ eth_is_autoneg(const char *ifname);
 extern int 
 eth_read_eeprom(const char *ifname, char *buf, size_t off, size_t len);
 
+/**
+ *	Get the device ID of give interface.
+ *
+ *	Return >0 if success, -1 on error.
+ */
+extern int 
+net_sys_get_device_id(const char *ifname);
+
+/**
+ *	Get the vendor ID of give interface.
+ *
+ *	Return > 0 if success, -1 on error.
+ */
+extern int 
+net_sys_get_vendor_id(const char *ifname);
+
+
 #endif /* end of __LIBINF_IOCTL_H__ */
 

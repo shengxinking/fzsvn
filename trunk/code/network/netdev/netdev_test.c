@@ -32,6 +32,7 @@ enum {
 	NETDEV_INET,
 	NETDEV_FLAG,
 	NETDEV_ETHTOOL,
+	NETDEV_ID,
 };
 
 
@@ -53,6 +54,7 @@ _usage(void)
 	printf("\t-i\tINET address\n");
 	printf("\t-f\tflags\n");
 	printf("\t-e\teeprom\n");
+	printf("\t-d\tdevice ID\n");
 	printf("\t-h\tshow help message\n");
 }
 
@@ -60,7 +62,7 @@ static int
 _parse_cmd(int argc, char **argv)
 {
 	char opt;
-	char optstr[] = ":n:gsamifpeh";
+	char optstr[] = ":n:gsamifpedh";
 
 	opterr = 0;
 	while ( (opt = getopt(argc, argv, optstr)) != -1) {
@@ -96,6 +98,10 @@ _parse_cmd(int argc, char **argv)
 
 		case 'e':
 			iftype = NETDEV_ETHTOOL;
+			break;
+
+		case 'd':
+			iftype = NETDEV_ID;
 			break;
 
 		case 'h':
@@ -252,19 +258,19 @@ _do_ioctl(void)
 int 
 _do_ethtool(void)
 {
-	char buf[32768] = {0};
+//	char buf[32768] = {0};
 
 	printf("link speed %d\n", eth_get_speed(ifname));
 	printf("port media %d\n", eth_get_port(ifname));
 	printf("autoneg %d\n", eth_is_autoneg(ifname));
 	printf("eeprom size %d\n", eth_get_eeprom_size(ifname));
 
+#if 0
 	if (eth_read_eeprom(ifname, buf, 0x2580 + 0x190, 16))
 		return -1;
 
 	printf("SN is %s\n", buf);
 
-#if 0
 	int fd;
 	fd = open("eeprom", O_RDWR|O_CREAT, 0644);
 	if (fd < 0)
@@ -279,6 +285,17 @@ _do_ethtool(void)
 
 
 int 
+_do_netsys(void)
+{
+	printf("%s vendor id %x, device id %x\n", 
+		ifname, 
+		net_sys_get_vendor_id(ifname),
+		net_sys_get_device_id(ifname));
+
+	return 0;
+}
+
+int 
 main(int argc, char **argv)
 {
 	if (_parse_cmd(argc, argv)) {
@@ -290,6 +307,9 @@ main(int argc, char **argv)
 
 	case NETDEV_ETHTOOL:
 		_do_ethtool();
+		break;
+	case NETDEV_ID:
+		_do_netsys();
 		break;
 	default:
 		_do_ioctl();

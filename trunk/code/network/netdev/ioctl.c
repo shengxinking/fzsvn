@@ -52,7 +52,7 @@ static int _inf_ioctl(struct ifreq *ifr, int request)
     return 0;
 }
 
-/*
+/**
  *  get interface flags, flags contains a bitmask of following values:
  *
  *  IFF_UP | IFF_BROADCAST | IFF_DEBUG | IFF_LOOPBACK | IFF_POINTOPOINT

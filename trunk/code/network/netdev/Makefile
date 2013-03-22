@@ -19,7 +19,7 @@ TEST =
 # for all target
 all : $(TARGET)
 
-netdev_test : ioctl.o ethtool.o netdev_test.o
+netdev_test : ioctl.o ethtool.o netsys.o netdev_test.o
 
 
 # for test target
