@@ -32,7 +32,6 @@ enum {
 	NETDEV_INET,
 	NETDEV_FLAG,
 	NETDEV_ETHTOOL,
-	NETDEV_ID,
 };
 
 
@@ -98,10 +97,6 @@ _parse_cmd(int argc, char **argv)
 
 		case 'e':
 			iftype = NETDEV_ETHTOOL;
-			break;
-
-		case 'd':
-			iftype = NETDEV_ID;
 			break;
 
 		case 'h':
@@ -285,17 +280,6 @@ _do_ethtool(void)
 
 
 int 
-_do_netsys(void)
-{
-	printf("%s vendor id %x, device id %x\n", 
-		ifname, 
-		net_sys_get_vendor_id(ifname),
-		net_sys_get_device_id(ifname));
-
-	return 0;
-}
-
-int 
 main(int argc, char **argv)
 {
 	if (_parse_cmd(argc, argv)) {
@@ -307,9 +291,6 @@ main(int argc, char **argv)
 
 	case NETDEV_ETHTOOL:
 		_do_ethtool();
-		break;
-	case NETDEV_ID:
-		_do_netsys();
 		break;
 	default:
 		_do_ioctl();
