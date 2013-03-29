@@ -22,7 +22,7 @@
 /**
  *	Read integer from file @ifname
  *
- *
+ *	Return >=0 if success, -1 on error.
  */
 static int 
 _nets_read_hex(const char *ifile)
