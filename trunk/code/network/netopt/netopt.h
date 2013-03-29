@@ -73,45 +73,87 @@ netp_get_tcp4_mem(int &low, int &media, int &high);
 extern int 
 netp_set_tcp4_tw_reuse(int val);
 
+/**
+ *	Get tcp4 timewait socket resue and return it.
+ *
+ * 	Return >=0 if success, -1 on error.
+ */
 extern int 
 netp_get_tcp4_tw_reuse(int val);
 
+/**
+ *	Set tcp4 timewait socket recyle as @val.
+ *
+ * 	Return 0 if success, -1 on error.
+ */
 extern int 
 netp_set_tcp4_tw_recycle(int family, int val);
 
+/**
+ *	Get tcp4 timewait recycle and return it.
+ *
+ *	Return >= 0 if success, -1 on error.
+ */
 extern int 
 netp_get_tcp4_tw_recycle(int family, int val);
 
+/**
+ *	Set tcp4 timewait max buckets as @val
+ *
+ * 	Return 0 if success, -1 on error.
+ */
 extern int 
 netp_set_tcp4_tw_max_buckets(int family, int val);
 
+/**
+ *	Get tcp4 timewait max buckets and return it.
+ *
+ *	Return >=0 if success, -1 on error.
+ */
 extern int 
 netp_get_tcp4_tw_max_buckets(int family, int val);
 
-
+/**
+ *	Set socket recv buffer size as @val.
+ *
+ * 	Return 0 if success, -1 on error.
+ */
 extern int 
 netp_set_rmem_default(int val);
 
+/**
+ *	Get socket recv buffer size and return it.
+ *
+ * 	Return >= 0 if success, -1 on error.
+ */
 extern int 
 netp_get_rmem_default(void);
 
-extern int 
-netp_set__rmem_max(int val);
-
-extern int
-netp_get_rmem_max(int val);
-
+/**
+ *	Set socket send buffer size as @val
+ *
+ *	Return 0 if success, -1 on error.
+ */
 extern int 
 netp_set_wmem_default(int val);
 
+/**
+ *	Get socket recv buffer size and return it.
+ *
+ *	Return >= 0 if success, -1 on error.
+ */
 extern int 
-netp_get_wmem_default(int val);
+netp_get_wmem_default();
 
+/**
+ *	Set IPv6 interface @ifname accept_dad value @val
+ *
+ *	Return 0 if success, -1 on error.
+ */
 extern int 
-netp_set_wmem_max(int val);
+netp_set_ip6_accept_dad(const char *ifname, int val);
 
-extern int 
-netp_get_wmem_max(int val);
+
 
 
 #endif /* end of FZ_NETOPT_H  */
