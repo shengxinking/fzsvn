@@ -1,8 +1,8 @@
 /**
  *	@file	netsys.c
  *
- *	@brief	Get network device information from "/sys/class/net/<ifname>/" 
- *		directory.
+ *	@brief	Get network device information from 
+ *		"/sys/class/net/<ifname>/" directory.
  *	
  *	@author	Forrest.zhang	
  *
@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
+
+#include "netopt.h"
 
 #define	NETS_PATH_LEN	1024
 #define	NETS_FMT	"/sys/class/net/%s/device/%s"
