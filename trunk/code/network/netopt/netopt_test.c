@@ -126,6 +126,12 @@ _netp_test(void)
 	int ret = 1;
 
 	printf("ip_forward: %d\n", netp_get_ip4_forward());
+	if (netp_set_ip4_forward(0)) {
+		printf("set ip_forward failed\n");
+		return -1;
+	}
+	printf("ip_forward: %d\n", netp_get_ip4_forward());
+
 	ret = netp_get_ip4_promote_secondaries(ifname); 
 	if (ret < 0){
 		printf("netp_get_ip4_promote_secondaries failed");
@@ -139,6 +145,11 @@ _netp_test(void)
 		return -1;
 	}
 	printf("local_port_range: %s\n", buf);
+
+	if (netp_set_ip4_local_port_range("32768	61000")) {
+		printf("write local port range failed\n");
+		return -1;
+	}
 
 	memset(buf, 0, sizeof(buf));
 	if (netp_get_tcp4_mem(buf, sizeof(buf))) {

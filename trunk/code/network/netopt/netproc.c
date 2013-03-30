@@ -64,8 +64,10 @@ _netp_write_int(const char *file, int val)
 	size_t len, n;
 
 	fp = fopen(file, "w");
-	if (!fp)
+	if (!fp) {
+		_NETP_ERR("open %s failed\n", file);
 		return -1;
+	}
 
 	snprintf(buf, sizeof(buf) - 1, "%d\n", val);
 
@@ -73,8 +75,10 @@ _netp_write_int(const char *file, int val)
 	n = fwrite(buf, len, 1, fp);
 	fclose(fp);
 
-	if (n != len)
+	if (n != 1) {
+		_NETP_ERR("write %s failed\n", file);
 		return -1;
+	}
 
 	return 0;
 }
@@ -127,10 +131,11 @@ _netp_write_str(const char *file, const char *buf)
 
 	len = strlen(buf);
 	n = fwrite(buf, len, 1, fp);
-	fputc('\n', fp);
+	if (buf[len - 1] != '\n')
+		fputc('\n', fp);
 	fclose(fp);
 
-	if (n != len)
+	if (n != 1)
 		return -1;
 
 	return 0;
