@@ -1,4 +1,4 @@
-www-plugins/adobe-flash	AdobeFlash-10.3
-app-emulation/virtualbox-bin PUEL
+www-plugins/adobe-flash		AdobeFlash-11.x
+app-emulation/virtualbox-bin	PUEL
 app-emulation/virtualbox-additions PUEL
 

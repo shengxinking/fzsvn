@@ -4,6 +4,7 @@ sys-apps/dbus		X
 sys-auth/pambase	consolekit
 sys-auth/consolekit	policykit
 sys-libs/zlib		minizip
+#sys-libs/glibc		debug
 
 dev-lang/python		xml ipv6 sqlite
 dev-util/cmake		vim-syntax
@@ -16,7 +17,7 @@ dev-games/cegui		opengl
 
 app-text/asciidoc	vim-syntax
 app-emacs/emacs-common-gentoo X
-app-editors/emacs	X gif jpeg png svg tiff xft alsa gzip-el dbus imagemagick libxml2 gtk gtk3 -gpm
+app-editors/emacs	X gif jpeg png svg tiff xft alsa gzip-el dbus imagemagick libxml2 gtk gtk3 gsettings gconf -gpm
 app-text/ghostscript-gpl   X dbus gtk -cups
 app-text/epdfview	-cups
 app-editors/vim		cscope vim-pager python -gpm
@@ -55,7 +56,7 @@ x11-libs/pango		X
 x11-terms/rxvt-unicode	256-color xft unicode3 pixbuf
 x11-libs/vte		python
 x11-libs/fltk		cairo opengl threads xft
-x11-misc/lightdm	-introspection
+x11-misc/lightdm	gtk -introspection
 x11-misc/dmenu		xft
 x11-libs/wxGTK		X
 
