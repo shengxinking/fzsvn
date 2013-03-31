@@ -32,6 +32,9 @@ extern struct nlmsghdr *
 rtnl_recv(rtnl_ctx_t *rth);
 
 extern int 
+rtnl_send_request(rtnl_ctx_t *rtx, int family, int type);
+
+extern int 
 rtnl_dump_request(rtnl_ctx_t *rtx, int family, int type);
 
 extern int 

@@ -16,65 +16,15 @@
 #include <sys/types.h>
 #include <libnetlink.h>
 
-#define	RTNL_DEBUG
+#define	_RTNL_DEBUG
 
 /* define debug macro */
-#ifdef	RTNL_DEBUG
-#define	RTNL_DBG(f, a...)	printf("[rtnl-dbg]: "fmt, ##args)
+#ifdef	_RTNL_DEBUG
+#define	_RTNL_DBG(f, a...)	printf("[rtnl-dbg]: "fmt, ##args)
 #else
-#define	RTNL_DBG(f, a...)
+#define	_RTNL_DBG(f, a...)
 #endif
-#define	RTNL_ERR(f, a...)	printf("[rtnl-err]: %s %d: "f, ##a)
-
-
-int 
-rtnl_open(struct rtnl_ctx* rth)
-{
-	int len;
-	struct sockaddr_nl nladdr;
-
-	if (!rth)
-		return -1;
-
-	memset(rth, 0, sizeof(struct rtnl_ctx));
-
-	/* create netlink socket */
-	rth->fd = socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
-	if (rth->fd < 0) {
-		perror("cannot open netlink socket\n");
-		return -1;
-	}
-
-	/* set local netlink address */
-	rth->local.nl_family = AF_NETLINK;
-	rth->local.nl_pid = getpid();
-	rth->local.nl_groups = 0;
-
-	/* bind the netlink socket */
-	len = sizeof(rth->local);
-	if (bind(rth->fd, (struct sockaddr*)&rth->local, len) ) {
-		RTNL_ERR("cannot bind netlink socket\n");
-		return -1;
-	}
-
-	if (getsockname(rth->fd, (struct sockaddr*)&nladdr, &len)) {
-		RTNL_ERR("can't get netlink socket address\n");
-		return -1;
-	}
-
-	if (len != sizeof(rth->local)) {
-		RTNL_ERR("wrong address length %d\n", len);
-		return -1;
-	}
-    
-	/* set peer netlink address(normally is kernel) */
-	rth->peer.nl_family = AF_NETLINK;
-	rth->peer.nl_pid = 0;
-	rth->peer.nl_groups = 0;
-	rth->seq = time(NULL);
-    
-	return 0;
-}
+#define	_RTNL_ERR(f, a...)	printf("[rtnl-err]: %s %d: "f, ##a)
 
 int 
 rtnl_send(rtnl_ctx_t *rth, const struct nlmsghdr *nlmsg)
@@ -126,18 +76,66 @@ rtnl_recv(struct rtnl_ctx *rth, struct nlmsghdr *nlmsg, size_t size)
 
 
 int 
-rtnl_request(struct rtnl_handle *rtx, struct nlmsghdr *nlmsg)
+rtnl_open(struct rtnl_ctx* rtx)
+{
+	int len;
+	struct sockaddr_nl nladdr;
+
+	if (!rtx)
+		return -1;
+
+	memset(rtx, 0, sizeof(rtnl_ctx_t));
+
+	/* create netlink socket */
+	rtx->fd = socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
+	if (rtx->fd < 0) {
+		_RTNL_ERR("create netlink socket error\n");
+		return -1;
+	}
+
+	/* set local netlink address */
+	rth->local.nl_family = AF_NETLINK;
+	rth->local.nl_pid = getpid();
+	rth->local.nl_groups = 0;
+
+	/* bind the netlink socket */
+	len = sizeof(rtx->local);
+	if (bind(rtx->fd, (struct sockaddr*)&rtx->local, len) ) {
+		_RTNL_ERR("cannot bind netlink socket\n");
+		return -1;
+	}
+
+	if (getsockname(rtx->fd, (struct sockaddr*)&nladdr, &len)) {
+		_RTNL_ERR("can't get netlink socket address\n");
+		return -1;
+	}
+
+	if (len != sizeof(rtx->local)) {
+		_RTNL_ERR("wrong address length %d\n", len);
+		return -1;
+	}
+    
+	/* set peer netlink address(normally is kernel) */
+	rth->peer.nl_family = AF_NETLINK;
+	rth->peer.nl_pid = 0;
+	rth->peer.nl_groups = 0;
+	rth->seq = time(NULL);
+    
+	return 0;
+}
+
+
+int 
+rtnl_send_request(struct rtnl_handle *rtx, int family, int type)
 {
 	struct sockaddr_nl nladdr;
 
-        memset(&nladdr, 0, sizeof(nladdr));
-        nladdr.nl_family = AF_NETLINK;
-
-        return sendto(rth->fd, buf, len, 0,
-                      (struct sockaddr*)&nladdr, sizeof(nladdr));
+        return sendto(rth->fd, buf, len, 0, 
+		      (struct sockaddr*)&rtx->peer, 
+		      sizeof(rtx->peer));
 }
 
-int
+int 
 rtnl_wilddump_request(struct rtnl_ctx *rth, int family, int type)
 {       
         struct {
@@ -188,6 +186,7 @@ rtnl_dump_request(rtnl_ctx_t *rtx, int type, void *req, int len)
 
 	return sendmsg(rth->fd, &msg, 0);
 }
+
 
 int 
 rtnl_dump_filter(rtnl_ctx_t *rtx, rtnl_filter *f1, void *arg1)
@@ -254,7 +253,7 @@ int
 rtnl_add_attr(struct nlmsghdr *nl, size_t maxlen, int type, 
 		void *data, size_t dlen)
 {
-	int len = RTA_LENGTH(datalen);
+	int len = RTA_LENGTH(dlen);
 	struct rtattr *rta;
 
 	/* check argument */
