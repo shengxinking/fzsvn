@@ -26,52 +26,54 @@
 #endif
 #define	_RTNL_ERR(f, a...)	printf("[rtnl-err]: %s %d: "f, ##a)
 
-int 
-rtnl_send(rtnl_ctx_t *rth, const struct nlmsghdr *nlmsg)
+/**
+ *	Send a nlmsghdr to kernel 
+ **/
+static int 
+_rtnl_send(rtnl_ctx_t *rtx, struct nlmsghdr *msg)
 {
 	int n;
 
-	if (!rth || !nlmsg)
+	if (!rtx || !nlmsg)
 		return -1;
 
-	/* sendto peer */
-	n = sendto(rth->fd, (struct sockaddr *)&rth->peer, 
-		   nlmsg, nlmsg->nlmsg_len, 0);
+	/* send blmmsghdr to peer */
+	n = sendto(rtx->fd, msg, msg->nlmsg_len, 
+		   (struct sockaddr *)&rtx->peer, sizeof(rtx->peer));
 	if (n < 0)
 		return -1;
-	if (n != nlmsg->nlmsg_len)
+	if (n != len)
 		return -1;
 
 	return 0;
 }
 
-rtnl_recv(struct rtnl_ctx *rth, struct nlmsghdr *nlmsg, size_t size)
+static int  
+rtnl_recv(struct rtnl_ctx *rtx, char *buf, size_t len)
 {
 	int n;
-	int total = 0;
-	char *buf;
+	struct nlmsghdr *nlh;
 
-	if (!rth || !nlmsg || !size)
+	if (!rtx || !nlmsg || !size)
 		return -1;
 
-	buf = (char *)nlmsg;
-
-	do {
-		n = recv(rth->fd, buf, size, 0);
-		if (n < 0) {
-			if (errno == EAGAIN || errno == EINTR)
-				return 0;
+	/* recv data */
+	n = recv(rtx->fd, buf, len, 0);
+	if (n <= 0) {
+		if (errno != EINTR) {
+			_RTNL_ERR("recv failed: %s\n", strerror(errno));
 			return -1;
-		if (n == 0)
-			return 0;
-
-		total += n;
-		if (NLMSG_OK(nlmsg, total)) {
-			return 0;
 		}
+		return 0;
 	}
 
-	return 0;
+	nlh = (struct nlmsghdr *)buf;
+	if (!NLMSG_OK(nlm, n)) {
+		_RTNL_ERR("recved message is trunked\n");
+		return 0;
+	}
+
+	return n;
 }
 
 
@@ -94,9 +96,9 @@ rtnl_open(struct rtnl_ctx* rtx)
 	}
 
 	/* set local netlink address */
-	rth->local.nl_family = AF_NETLINK;
-	rth->local.nl_pid = getpid();
-	rth->local.nl_groups = 0;
+	rtx->local.nl_family = AF_NETLINK;
+	rtx->local.nl_pid = getpid();
+	rtx->local.nl_groups = 0;
 
 	/* bind the netlink socket */
 	len = sizeof(rtx->local);
@@ -105,148 +107,123 @@ rtnl_open(struct rtnl_ctx* rtx)
 		return -1;
 	}
 
+	/* check bind success */
 	if (getsockname(rtx->fd, (struct sockaddr*)&nladdr, &len)) {
 		_RTNL_ERR("can't get netlink socket address\n");
 		return -1;
 	}
-
 	if (len != sizeof(rtx->local)) {
 		_RTNL_ERR("wrong address length %d\n", len);
 		return -1;
 	}
     
 	/* set peer netlink address(normally is kernel) */
-	rth->peer.nl_family = AF_NETLINK;
-	rth->peer.nl_pid = 0;
-	rth->peer.nl_groups = 0;
-	rth->seq = time(NULL);
+	rtx->peer.nl_family = AF_NETLINK;
+	rtx->seq = time(NULL);
     
 	return 0;
 }
 
 
 int 
-rtnl_send_request(struct rtnl_handle *rtx, int family, int type)
+rtnl_send_request(struct rtnl_handle *rtx, struct nlmsghdr *nlh)
 {
-	struct sockaddr_nl nladdr;
+	char buf[RTNL_REQ_LEN];
+	struct nlmsghdr *nlh;
+	int n;
 
-        return sendto(rth->fd, buf, len, 0, 
-		      (struct sockaddr*)&rtx->peer, 
-		      sizeof(rtx->peer));
+	if (!rtx || !nlh)
+		return -1;
+
+	/* send message */
+        if (rtnl_send(rtx, nlh)) {
+		return -1;
+	}
+
+	/* recved message */
+	n = rtnl_recv(rtx, buf, sizeof(buf))
+	if (n <= 0)
+		return -1;
+
+	/* check message */
+	nlh = (struct nlmsghdr *)buf;
+	if (nlh->nlmsg_type == NLMSG_ERROR)
+		return -1;
+	
+	return 0;
 }
 
 int 
-rtnl_wilddump_request(struct rtnl_ctx *rth, int family, int type)
+rtnl_dump_request(struct rtnl_ctx *rtx, int family, int type)
 {       
         struct {
                 struct nlmsghdr nlh;
                 struct rtgenmsg g;
         } req;
-        struct sockaddr_nl nladdr;
+	size_t len;
+	int n;
 
-        memset(&nladdr, 0, sizeof(nladdr));
-        nladdr.nl_family = AF_NETLINK;
+	len = sizeof(req);
+	memset(&req, 0, len);
 
+	/* set nlmsg */
         req.nlh.nlmsg_len = sizeof(req);
         req.nlh.nlmsg_type = type;
-        req.nlh.nlmsg_flags = NLM_F_ROOT|NLM_F_MATCH|NLM_F_REQUEST;
+        req.nlh.nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
         req.nlh.nlmsg_pid = 0;
-        req.nlh.nlmsg_seq = rth->dump = ++rth->seq;
+        req.nlh.nlmsg_seq = rtx->dump_seq = ++rtx->seq;
+
+	/* set rtgenmsg */
         req.g.rtgen_family = family;
 
-        return sendto(rth->fd, (void*)&req, sizeof(req), 0,
-                      (struct sockaddr*)&nladdr, sizeof(nladdr));
+	return rtnl_send(rtx, &req, len);
 }
-
-
-int 
-rtnl_dump_request(rtnl_ctx_t *rtx, int type, void *req, int len)
-{
-	struct nlmsghdr nlh;
-	struct sockaddr_nl nladdr;
-	struct iovec iov[2] = {{ &nlh, sizeof(nlh)}, {req, len}};
-	struct msghdr msg = {
-		(void*)&nladdr,
-		sizeof(nladdr),
-		iov,
-		2,
-		NULL,
-		0,
-		0
-	};
-
-	memset(&nladdr, 0, sizeof(nladdr));
-	nladdr.nl_family = AF_NETLINK;
-
-	nlh.nlmsg_len = NLMSG_LENGTH(len);
-	nlh.nlmsg_type = type;
-	nlh.nlmsg_flags = NLM_F_ROOT|NLM_F_MATCH|NLM_F_REQUEST;
-	nlh.nlmsg_pid = 0;
-	nlh.nlmsg_seq = rth->dump = ++rth->seq;
-
-	return sendmsg(rth->fd, &msg, 0);
-}
-
 
 int 
 rtnl_dump_filter(rtnl_ctx_t *rtx, rtnl_filter *f1, void *arg1)
 {
 	char buf[RTNL_DUMP_LEN];
-	struct sockaddr_nl nl;
-	struct iovec iov = {buf, sizeof(buf)};
-	struct nlmsghdr *h;
-	struct msghdr msg = {(void *)&nl, sizeof(nladdr), &iov, 1, NULL, 0, 0};
-	int status;
+	struct nlmsghdr *nlh;
+	int n;
 	int err;
 	struct nlmsgerr *errmsg;
 
 	while (1) {
-
-		status = recvmsg(rth->fd, &msg, 0);
-		if (status < 0) {
+		/* recv message */
+		n = rtnl_recv(rtx, buf, sizeof(buf));
+		if (n < 0) {
 			if (errno == EINTR)
 				continue;
-			continue;
+			break;
 		}
-		else if (status == 0) {
-			return -1;
-		}
-		if (msg.msg_namelen != sizeof(nladdr)) {
-			return -1;
-		}
-		
-		h = (struct nlmsghdr*)buf;
-		while (NLMSG_OK(h, status)) {
 
-			if (h->nlmsg_pid != rth->local.nl_pid ||
-					h->nlmsg_seq != rth->dump) {
-				goto skip_it;
-			}
+		/* check message */
+		nlh = (struct nlmsghdr *)buf;
+		while (NLMSG_OK(h, n)) {
 
-			if (h->nlmsg_type == NLMSG_DONE)
+			/* last message */
+			if (nlh->nlmsg_type == NLMSG_DONE)
 				return 0;
 
-			if (h->nlmsg_type == NLMSG_ERROR) {
-				*errmsg = (struct nlmsgerr*)NLMSG_DATA(h);
-				if (h->nlmsg_len >= NLMSG_LENGTH(sizeof(struct nlmsgerr))) {
+			/* error message */
+			if (nlh->nlmsg_type == NLMSG_ERROR) {
+				*errmsg = (struct nlmsgerr*)NLMSG_DATA(nlh);
+				if (nlh->nlmsg_len >= NLMSG_LENGTH(sizeof(struct nlmsgerr))) {
 					errno = -errmsg->error;
 				}
 				return -1;
 			}
-			err = filter(&nladdr, h, arg1);
+
+			/* call filter function */
+			err = filter(nlh, arg1);
 			if (err < 0)
 				return err;
 
-skip_it:
 			h = NLMSG_NEXT(h, status);
 		}
-		if (msg.msg_flags & MSG_TRUNC) {
-			continue;
-		}
-		if (status) {
-			return -1;
-		}
 	}
+
+	return 0;
 }
 
 int 
@@ -291,5 +268,36 @@ rtnl_parse_attr(struct rtattr *tb[], int max, struct rtattr *rta, int len)
 
 	return 0;
 }
+
+#if 0
+int 
+rtnl_dump_request(rtnl_ctx_t *rtx, int type, void *req, int len)
+{
+	struct nlmsghdr nlh;
+	struct sockaddr_nl nladdr;
+	struct iovec iov[2] = {{ &nlh, sizeof(nlh)}, {req, len}};
+	struct msghdr msg = {
+		(void*)&nladdr,
+		sizeof(nladdr),
+		iov,
+		2,
+		NULL,
+		0,
+		0
+	};
+
+	memset(&nladdr, 0, sizeof(nladdr));
+	nladdr.nl_family = AF_NETLINK;
+
+	nlh.nlmsg_len = NLMSG_LENGTH(len);
+	nlh.nlmsg_type = type;
+	nlh.nlmsg_flags = NLM_F_ROOT|NLM_F_MATCH|NLM_F_REQUEST;
+	nlh.nlmsg_pid = 0;
+	nlh.nlmsg_seq = rtx->dump = ++rtx->seq;
+
+	return sendmsg(rtx->fd, &msg, 0);
+}
+#endif
+
 
 
