@@ -10,51 +10,52 @@
 #include <assert.h>
 #include <stdio.h>
 #include <time.h>
-
+#include <errno.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <libnetlink.h>
+#include <linux/rtnetlink.h>
+
+#include "rtnetlink.h"
 
 #define	_RTNL_DEBUG
 
 /* define debug macro */
 #ifdef	_RTNL_DEBUG
-#define	_RTNL_DBG(f, a...)	printf("[rtnl-dbg]: "fmt, ##args)
+#define	_RTNL_DBG(fmt, args...)	\
+	printf("[rtnl-dbg]: "fmt, ##args)
 #else
-#define	_RTNL_DBG(f, a...)
+#define	_RTNL_DBG(fmt, args...)
 #endif
-#define	_RTNL_ERR(f, a...)	printf("[rtnl-err]: %s %d: "f, ##a)
+#define	_RTNL_ERR(fmt, args...)	\
+	printf("[rtnl-err]: %s %d: "fmt, __FILE__, __LINE__, ##args)
 
 /**
  *	Send a nlmsghdr to kernel 
  **/
-static int 
-_rtnl_send(rtnl_ctx_t *rtx, struct nlmsghdr *msg)
+int 
+rtnl_send(rtnl_ctx_t *rtx, struct nlmsghdr *nlh)
 {
 	int n;
 
-	if (!rtx || !nlmsg)
-		return -1;
-
 	/* send blmmsghdr to peer */
-	n = sendto(rtx->fd, msg, msg->nlmsg_len, 
+	n = sendto(rtx->fd, nlh, nlh->nlmsg_len, 0,
 		   (struct sockaddr *)&rtx->peer, sizeof(rtx->peer));
 	if (n < 0)
 		return -1;
-	if (n != len)
+	if (n != nlh->nlmsg_len)
 		return -1;
 
 	return 0;
 }
 
-static int  
+int  
 rtnl_recv(struct rtnl_ctx *rtx, char *buf, size_t len)
 {
 	int n;
 	struct nlmsghdr *nlh;
 
-	if (!rtx || !nlmsg || !size)
+	if (!rtx || !buf || len < 1)
 		return -1;
 
 	/* recv data */
@@ -68,7 +69,7 @@ rtnl_recv(struct rtnl_ctx *rtx, char *buf, size_t len)
 	}
 
 	nlh = (struct nlmsghdr *)buf;
-	if (!NLMSG_OK(nlm, n)) {
+	if (!NLMSG_OK(nlh, n)) {
 		_RTNL_ERR("recved message is trunked\n");
 		return 0;
 	}
@@ -81,7 +82,6 @@ int
 rtnl_open(struct rtnl_ctx* rtx)
 {
 	int len;
-	struct sockaddr_nl nladdr;
 
 	if (!rtx)
 		return -1;
@@ -107,16 +107,6 @@ rtnl_open(struct rtnl_ctx* rtx)
 		return -1;
 	}
 
-	/* check bind success */
-	if (getsockname(rtx->fd, (struct sockaddr*)&nladdr, &len)) {
-		_RTNL_ERR("can't get netlink socket address\n");
-		return -1;
-	}
-	if (len != sizeof(rtx->local)) {
-		_RTNL_ERR("wrong address length %d\n", len);
-		return -1;
-	}
-    
 	/* set peer netlink address(normally is kernel) */
 	rtx->peer.nl_family = AF_NETLINK;
 	rtx->seq = time(NULL);
@@ -126,10 +116,9 @@ rtnl_open(struct rtnl_ctx* rtx)
 
 
 int 
-rtnl_send_request(struct rtnl_handle *rtx, struct nlmsghdr *nlh)
+rtnl_send_request(rtnl_ctx_t *rtx, struct nlmsghdr *nlh)
 {
 	char buf[RTNL_REQ_LEN];
-	struct nlmsghdr *nlh;
 	int n;
 
 	if (!rtx || !nlh)
@@ -141,7 +130,7 @@ rtnl_send_request(struct rtnl_handle *rtx, struct nlmsghdr *nlh)
 	}
 
 	/* recved message */
-	n = rtnl_recv(rtx, buf, sizeof(buf))
+	n = rtnl_recv(rtx, buf, sizeof(buf));
 	if (n <= 0)
 		return -1;
 
@@ -161,7 +150,6 @@ rtnl_dump_request(struct rtnl_ctx *rtx, int family, int type)
                 struct rtgenmsg g;
         } req;
 	size_t len;
-	int n;
 
 	len = sizeof(req);
 	memset(&req, 0, len);
@@ -176,17 +164,17 @@ rtnl_dump_request(struct rtnl_ctx *rtx, int family, int type)
 	/* set rtgenmsg */
         req.g.rtgen_family = family;
 
-	return rtnl_send(rtx, &req, len);
+	return rtnl_send(rtx, &req.nlh);
 }
 
 int 
-rtnl_dump_filter(rtnl_ctx_t *rtx, rtnl_filter *f1, void *arg1)
+rtnl_dump_filter(rtnl_ctx_t *rtx, rtnl_filter filter, void *arg)
 {
 	char buf[RTNL_DUMP_LEN];
 	struct nlmsghdr *nlh;
 	int n;
 	int err;
-	struct nlmsgerr *errmsg;
+	struct nlmsgerr *emsg;
 
 	while (1) {
 		/* recv message */
@@ -199,7 +187,7 @@ rtnl_dump_filter(rtnl_ctx_t *rtx, rtnl_filter *f1, void *arg1)
 
 		/* check message */
 		nlh = (struct nlmsghdr *)buf;
-		while (NLMSG_OK(h, n)) {
+		while (NLMSG_OK(nlh, n)) {
 
 			/* last message */
 			if (nlh->nlmsg_type == NLMSG_DONE)
@@ -207,19 +195,18 @@ rtnl_dump_filter(rtnl_ctx_t *rtx, rtnl_filter *f1, void *arg1)
 
 			/* error message */
 			if (nlh->nlmsg_type == NLMSG_ERROR) {
-				*errmsg = (struct nlmsgerr*)NLMSG_DATA(nlh);
-				if (nlh->nlmsg_len >= NLMSG_LENGTH(sizeof(struct nlmsgerr))) {
-					errno = -errmsg->error;
-				}
+				emsg = (struct nlmsgerr*)NLMSG_DATA(nlh);
+				if (nlh->nlmsg_len >= NLMSG_LENGTH(sizeof(*emsg)))
+					errno = -emsg->error;
 				return -1;
 			}
 
 			/* call filter function */
-			err = filter(nlh, arg1);
+			err = filter(nlh, arg);
 			if (err < 0)
 				return err;
 
-			h = NLMSG_NEXT(h, status);
+			nlh = NLMSG_NEXT(nlh, n);
 		}
 	}
 
@@ -227,22 +214,22 @@ rtnl_dump_filter(rtnl_ctx_t *rtx, rtnl_filter *f1, void *arg1)
 }
 
 int 
-rtnl_add_attr(struct nlmsghdr *nl, size_t maxlen, int type, 
+rtnl_add_attr(struct nlmsghdr *nlh, size_t len, int type, 
 		void *data, size_t dlen)
 {
-	int len = RTA_LENGTH(dlen);
+	int alen = RTA_LENGTH(dlen);
 	struct rtattr *rta;
 
 	/* check argument */
-	if (!nl || !data)
+	if (!nlh || !data)
 		return -1;
 
 	/* no enough room to add rtattr */
-	if (NLMSG_ALIGN(nl->nlmsg_len) + dlen > maxlen)
+	if (NLMSG_ALIGN(nlh->nlmsg_len) + dlen > len)
 		return -1;
 
 	/* set rtattr value */
-	rta = (struct rtattr*)(((char*)nl) + NLMSG_ALIGN(nl->nlmsg_len));
+	rta = (struct rtattr*)(((char*)nlh) + NLMSG_ALIGN(nlh->nlmsg_len));
 	rta->rta_type = type;
 	rta->rta_len = dlen;
 
@@ -251,17 +238,17 @@ rtnl_add_attr(struct nlmsghdr *nl, size_t maxlen, int type,
 		memcpy(RTA_DATA(rta), data, dlen);
 
 	/* recalc nl's length */
-	nl->nlmsg_len = NLMSG_ALIGN(nl->nlmsg_len) + len;
+	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + alen;
 
 	return 0;
 }
 
 int 
-rtnl_parse_attr(struct rtattr *tb[], int max, struct rtattr *rta, int len)
+rtnl_parse_attr(struct rtattr *rtb[], int nrtb, struct rtattr *rta, size_t len)
 {
 	while (RTA_OK(rta, len)) {
-		if (rta->rta_type <= max) {
-			tb[rta->rta_type] = rta;
+		if (rta->rta_type <= nrtb) {
+			rtb[rta->rta_type] = rta;
 		}
 		rta = RTA_NEXT(rta, len);
 	}

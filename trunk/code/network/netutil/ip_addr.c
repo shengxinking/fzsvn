@@ -264,7 +264,7 @@ ip_addr_from_str(ip_addr_t *ip, const char *str)
 
 	if (unlikely(!ip || !str)) {
 		_IP_ERR("invalid argument\n");
-		return 0;
+		return -1;
 	}
 
 	/** 
@@ -273,7 +273,7 @@ ip_addr_from_str(ip_addr_t *ip, const char *str)
 	 */
 	for (i = 0; str[i]; i++)
 		if (isspace(str[i]))
-			return 0;
+			return -1;
 
 	/* IPv6 address: xx:xx:xx:xx:xx.... */
 	if (strchr(str, ':'))
@@ -566,24 +566,27 @@ ip_mask_from_str(ip_mask_t *mask, const char *str)
 	/* Find the slash first */
 	sep = strchr(str, '/');
 
+	printf("1\n");
+
 	/* find netmask */
 	if (sep && *(sep + 1)) {
 		mask->cidr = _ip_get_cidr(sep + 1);
 		len = sep - str;
 		if (len > INET6_ADDRSTRLEN) {
-			return 2;
+			return -1;
 		}
 
 		strncpy(ip, str, len);
-		if (ip_addr_from_str((ip_addr_t *)&mask, ip))
-			ret = 2;
+		if (ip_addr_from_str((ip_addr_t *)mask, ip))
+			ret = -1;
 		else {
+			printf("mask is %p\n", mask);
 			if (!IP_MASK_CIDR_IS_VALID(mask))
-				ret = 3;
+				ret = -1;
 		}
 	}
 	else {
-		ret = 3;
+		ret = -1;
 	}
 
 	return ret;

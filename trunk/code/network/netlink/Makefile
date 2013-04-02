@@ -19,7 +19,7 @@ TEST =
 # for all target
 all : $(TARGET)
 
-netlink_test : rtnetlink.o nl_link netlink_test.o
+netlink_test : rtnetlink.o ip_addr.o nl_addr.o netlink_test.o
 
 # for test target
 test : $(TEST)

@@ -12,8 +12,10 @@
 #define FZ_RTNETLINK_H
 
 #include <linux/rtnetlink.h>
+#include <sys/types.h>
 
 #define	RTNL_DUMP_LEN	8192
+#define	RTNL_REQ_LEN	1024
 
 typedef struct rtnl_ctx {
 	int		fd;		/* socket fd */
@@ -23,8 +25,8 @@ typedef struct rtnl_ctx {
 	u_int32_t	dump_seq;	/* dump sequence number */
 } rtnl_ctx_t;
 
-typedef	int	(*rtnl_filter)(struct nlmsg *msg, void *arg);
-typedef void	(*rtnl_print)(unsigned long *parg);
+typedef	int	(* rtnl_filter)(struct nlmsghdr *msg, void *arg);
+typedef void	(* rtnl_print)(unsigned long *parg);
 
 extern int 
 rtnl_open(rtnl_ctx_t *rtx);
@@ -32,23 +34,23 @@ rtnl_open(rtnl_ctx_t *rtx);
 extern int 
 rtnl_send(rtnl_ctx_t *rtx, struct nlmsghdr *msg);
 
-extern struct nlmsghdr * 
-rtnl_recv(rtnl_ctx_t *rtx);
+extern int 
+rtnl_recv(rtnl_ctx_t *rtx, char *buf, size_t len);
 
 extern int 
-rtnl_send_request(rtnl_ctx_t *rtx, int family, int type);
+rtnl_send_request(rtnl_ctx_t *rtx, struct nlmsghdr *nlh);
 
 extern int 
 rtnl_dump_request(rtnl_ctx_t *rtx, int family, int type);
 
 extern int 
-rtnl_dump_filter(rtnl_ctx_t *rtx, int family, int cmd);
+rtnl_dump_filter(rtnl_ctx_t *rtx, rtnl_filter filter, void *arg);
 
 extern int 
-rtnl_add_attr(struct nlmsg *msg, int type, void *data, size_t len);
+rtnl_add_attr(struct nlmsghdr *nlh, size_t len, int type, void *data, size_t dlen);
 
 extern int 
-rtnl_parse_attr(struct nlmsg *msg, struct rtattr *rtattrs, int nrtattr);
+rtnl_parse_attr(struct rtattr *rtb[], int nrtb, struct rtattr *rta, size_t len);
 
 extern int 
 rtnl_get_error(int err);

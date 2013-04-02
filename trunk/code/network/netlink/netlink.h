@@ -11,87 +11,65 @@
 #ifndef FZ_NETLINK_H
 #define FZ_NETLINK_H
 
+#include <linux/netlink.h>
+
+typedef	int	(* nl_filter)(struct nlmsghdr *nlh, void *arg);
+typedef int	(* nl_print)(unsigned long *parg);
+
 /*********************************************************
  *	Neight(ARP) functions.
  ********************************************************/
 extern int
-nl4_add_neight();
+nl_neigh_add();
 
 extern int 
-nl6_add_neight();
+nl_neigh_del();
 
 extern int 
-nl4_del_neight();
+nl_neight_flush();
 
 extern int 
-nl6_del_neight();
+nl_neight_find();
 
 extern int 
-nl4_flush_neight();
-
-extern int 
-nl6_flush_neight();
-
-extern int 
-nl4_find_neight();
-
-extern int 
-nl6_find_neight();
+nl_neigh_list();
 
 /*********************************************************
  *	IP address functions.
  ********************************************************/
 extern int 
-nl4_add_ip();
+nl_addr_add(int index, int family, void *addr, int cidr);
 
 extern int 
-nl6_add_ip();
+nl_addr_del(int index, int family, void *addr, int cidr);
 
 extern int 
-nl4_del_ip();
+nl_addr_flush(int index, int family);
 
 extern int 
-nl6_del_ip();
+nl_addr_find(int index, int family, void *addr);
 
 extern int 
-nl4_flush_ip();
+nl_addr_list(int index, int family, nl_print print, void *arg);
 
-extern int 
-nl6_flush_ip();
-
-extern int 
-nl4_find_ip();
-
-extern int 
-nl6_find_ip();
 
 /*********************************************************
  *	Route address functions.
  ********************************************************/
 extern int 
-nl4_add_route();
+nl_route_add();
 
 extern int 
-nl6_add_route();
+nl_route_del();
 
 extern int 
-nl4_del_route();
+nl_route_flush();
 
 extern int 
-nl6_del_route();
+nl_route_find();
 
 extern int 
-nl4_flush_route();
-
-extern int 
-nl6_flush_route();
-
-extern int 
-nl4_find_route();
-
-extern int 
-nl6_find_route();
-
+nl_route_list();
 
 #endif /* end of FZ_NETLINK_H  */
 

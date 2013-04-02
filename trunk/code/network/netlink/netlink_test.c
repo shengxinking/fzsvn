@@ -16,7 +16,23 @@
 #include <errno.h>
 #include <getopt.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 
+#include "netutil.h"
+#include "netlink.h"
+
+enum {
+	_NL_NEIGH,
+	_NL_ADDR,
+	_NL_ROUTE,
+};
+
+enum {
+	_NL_ADD,
+	_NL_DEL,
+	_NL_FLUSH,
+	_NL_LIST,
+};
 
 static char	_g_src[128];
 static char	_g_dst[128];
@@ -26,6 +42,11 @@ static char 	_g_gateway[128];
 static char	_g_addr[128];
 static char	_g_mac[12];
 static char	_g_optstr[] = ":t:adlfA:M:S:I:D:O:G:Ph";
+static int	_g_priority = 0;
+static int	_g_type;
+static int	_g_family = AF_INET;
+static int	_g_act = _NL_LIST;
+
 
 /**
  *	Show help message	
@@ -42,8 +63,8 @@ _usage(void)
 	printf("\t-t\tfamily type: AF_INET | AF_INET6\n");
 	printf("\t-a\tadd object\n");
 	printf("\t-d\tdelete object\n");
-	printf("\t-l\tlist all objects\n");
 	printf("\t-f\tflush all objects\n");
+	printf("\t-l\tlist all objects\n");
 	printf("\t-A\t(addr)address/cidr, (neigh)address\n");
 	printf("\t-M\t(neigh)MAC address\n");
 	printf("\t-S\t(route)source address/cidr\n");
@@ -69,26 +90,95 @@ _parse_cmd(int argc, char **argv)
 	if (argc < 2)
 		return -1;
 
-	if (stcmp(argv[1], "neigh")) {
+	if (strcmp(argv[1], "neigh") == 0) {
 		_g_type = _NL_NEIGH;
 	}
-	else if (strcmp(argv[1], "addr")) {
+	else if (strcmp(argv[1], "addr") == 0) {
 		_g_type = _NL_ADDR;
 	}
-	else if (strcmp(argv[1], "route")) {
+	else if (strcmp(argv[1], "route") == 0) {
 		_g_type = _NL_ROUTE;
 	}
-	else
+	else {
 		return -1;
+	}
 	
 	opterr = 0;
-	while ( (opt = getopt(argc, argv, _g_optstr)) != -1) {
+	while ( (opt = getopt((argc - 1), (argv + 1), _g_optstr)) != -1) {
 		
 		switch (opt) {
-
+		
 		case 't':
-			if (strcmp()
+			if (strcmp("AF_INET", optarg) == 0)
+				_g_family = AF_INET;
+			else if (strcmp("AF_INET6", optarg) == 0)
+				_g_family = AF_INET6;
+			else {
+				printf("unknow family %s\n", optarg);
+				return -1;
+			}
+			break;
+		
+		case 'a':
+			_g_act = _NL_ADD;
+			break;
+
+		case 'd':
+			_g_act = _NL_DEL;
+			break;
+
+		case 'f':
+			_g_act = _NL_FLUSH;
+			break;
+
+		case 'l':
+			_g_act = _NL_LIST;
+			break;
 			
+		case 'A':
+			strncpy(_g_addr, optarg, 127);
+			break;
+
+		case 'M':
+			strncpy(_g_mac, optarg, 127);
+			break;
+
+		case 'S':
+			strncpy(_g_src, optarg, 127);
+			break;
+
+		case 'D':
+			strncpy(_g_dst, optarg, 127);
+			break;
+
+		case 'I':
+			_g_iif = atoi(optarg);
+			if (_g_iif < 0) {
+				printf("invalid interface %s\n", optarg);
+				return -1;
+			}
+			break;
+
+		case 'O':
+			_g_oif = atoi(optarg);
+			if (_g_oif < 0) {
+				printf("invalid interface %s\n", optarg);
+				return -1;
+			}
+			break;
+
+		case 'G':
+			strncpy(_g_gateway, optarg, 127);
+			break;
+
+		case 'P':
+			_g_priority = atoi(optarg);
+			if (_g_priority <= 0) {
+				printf("invalid priority %s\n", optarg);
+				return -1;
+			}
+			break;
+
 		case 'h':
 			return -1;
 
@@ -102,12 +192,88 @@ _parse_cmd(int argc, char **argv)
 		}
 	}
 
-	if (argc != optind)
+	if ((argc - 1) != optind)
 		return -1;
 
 	return 0;
 }
 
+static int 
+_neigh_func(void)
+{
+	return 0;
+}
+
+static int 
+_addr_print(unsigned long *args)
+{
+	return 0;
+}
+
+static int 
+_addr_func(void)
+{
+	ip_mask_t ipmask;
+	int ret = -1;
+
+	switch (_g_act) {
+		
+	case _NL_ADD:
+		if (_g_iif < 1) {
+			printf("no interface\n");
+			return -1;
+		}
+
+		if (ip_mask_from_str(&ipmask, _g_addr)) {
+			printf("invalid address/cidr: %s\n", _g_addr);
+			return -1;
+		}
+		
+		if (ipmask.family != _g_family) {
+			printf("invalid address type\n");
+			return -1;
+		}
+		
+		ret = nl_addr_add(_g_iif, _g_family, &ipmask._addr, ipmask.cidr);
+
+		break;
+		
+	case _NL_DEL:
+		if (_g_iif < 1) {
+			printf("no interface\n");
+			return -1;
+		}
+
+		if (ip_mask_from_str(&ipmask, _g_addr)) {
+			printf("invalid address/cidr: %s\n", _g_addr);
+			return -1;
+		}
+		
+		if (ipmask.family != _g_family) {
+			printf("invalid address type\n");
+			return -1;
+		}
+
+		ret = nl_addr_del(_g_iif, _g_family, &ipmask._addr, ipmask.cidr);
+		break;
+
+	case _NL_FLUSH:
+		ret = nl_addr_flush(_g_iif, _g_family);
+		break;
+
+	case _NL_LIST:
+		ret = nl_addr_list(_g_iif, _g_family, _addr_print, NULL);
+		break;
+	}
+
+	return ret;
+}
+
+static int 
+_route_func(void)
+{
+	return 0;
+}
 
 /**
  *	Init some global resource used in program.	
@@ -140,6 +306,8 @@ _release(void)
 int 
 main(int argc, char **argv)
 {
+	int ret;
+
 	if (_parse_cmd(argc, argv)) {
 		_usage();
 		return -1;
@@ -149,9 +317,30 @@ main(int argc, char **argv)
 		return -1;
 	}
 
+	printf("_g_type %d\n", _g_type);
+
+	switch (_g_type) {
+
+	case _NL_NEIGH:
+		ret = _neigh_func();
+		break;
+
+	case _NL_ADDR:
+		ret = _addr_func();
+		break;
+
+	case _NL_ROUTE:
+		ret = _route_func();
+		break;
+
+	default:
+		printf("invalid type\n");
+		ret = -1;
+	}
+
 	_release();
 
-	return 0;
+	return ret;
 }
 
 
