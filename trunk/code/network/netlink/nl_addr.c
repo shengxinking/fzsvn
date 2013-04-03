@@ -17,6 +17,7 @@
 #include <linux/rtnetlink.h>
 #include <linux/if_addr.h>
 
+#include "netutil.h"
 #include "netlink.h"
 #include "rtnetlink.h"
 
@@ -45,6 +46,7 @@ nl_addr_add(int index, int family, void *addr, int cidr)
 	struct ifaddrmsg *req;
 	char buf[RTNL_REQ_LEN];
 	size_t alen = 4;
+	u_int32_t ip4, brd;
 
 	if (!addr)
 		return -1;
@@ -53,6 +55,8 @@ nl_addr_add(int index, int family, void *addr, int cidr)
 		_NL_ADDR_ERR("invalid family\n");
 		return -1;
 	}
+
+	if (family == AF_INET6) alen = 16;
 
 	if (rtnl_open(&rtx))
 		return -1;
@@ -76,12 +80,21 @@ nl_addr_add(int index, int family, void *addr, int cidr)
 	req->ifa_index = index;
 	
 	/* add addr */
-	if (family == AF_INET6) alen = 16;
 	if (rtnl_add_attr(nlh, sizeof (buf), IFA_LOCAL, addr, alen)) {
 		_NL_ADDR_ERR("add IFA_LOCAL failed\n");
 		return -1;
 	}
 	
+	/* add broad cast */
+	if (family == AF_INET) {
+		ip4 = *((u_int32_t *)addr);
+		brd = ip4 & ~(ip4_cidr_to_mask(cidr));
+		if (rtnl_add_attr(nlh, sizeof(buf), IFA_BROADCAST, &brd, 4)) {
+			_NL_ADDR_ERR("add IFA_BROADCAST failed\n");
+			return -1;
+		}
+	}
+		
 	/* send request */
 	return rtnl_send_request(&rtx, nlh);
 }

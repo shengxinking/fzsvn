@@ -79,7 +79,7 @@ rtnl_recv(struct rtnl_ctx *rtx, char *buf, size_t len)
 
 
 int 
-rtnl_open(struct rtnl_ctx* rtx)
+rtnl_open(struct rtnl_ctx* rtx, int group)
 {
 	int len;
 
@@ -98,7 +98,7 @@ rtnl_open(struct rtnl_ctx* rtx)
 	/* set local netlink address */
 	rtx->local.nl_family = AF_NETLINK;
 	rtx->local.nl_pid = getpid();
-	rtx->local.nl_groups = 0;
+	rtx->local.nl_groups = group;
 
 	/* bind the netlink socket */
 	len = sizeof(rtx->local);
