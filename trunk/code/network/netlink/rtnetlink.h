@@ -22,17 +22,20 @@ typedef struct rtnl_ctx {
 	struct sockaddr_nl local;	/* local netlink address */
 	struct sockaddr_nl peer;	/* peer netlink address(kernel) */
 	u_int32_t	seq;		/* sequence number */
-	u_int32_t	dump_seq;	/* dump sequence number */
+	u_int32_t	dump;		/* dump sequence number */
 } rtnl_ctx_t;
 
 typedef	int	(* rtnl_filter)(struct nlmsghdr *msg, void *arg);
-typedef void	(* rtnl_print)(unsigned long *parg);
+typedef int	(* rtnl_print)(unsigned long *parg);
 
 extern int 
 rtnl_open(rtnl_ctx_t *rtx);
 
 extern int 
-rtnl_send(rtnl_ctx_t *rtx, struct nlmsghdr *msg);
+rtnl_close(rtnl_ctx_t *rtx);
+
+extern int 
+rtnl_send(rtnl_ctx_t *rtx, struct nlmsghdr *msg, int check);
 
 extern int 
 rtnl_recv(rtnl_ctx_t *rtx, char *buf, size_t len);

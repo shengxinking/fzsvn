@@ -16,7 +16,7 @@
 #include <sys/types.h>
 #include <linux/rtnetlink.h>
 
-#include "rtnetlink.h"
+#include "libnetlink.h"
 
 #define	_RTNL_DEBUG
 
