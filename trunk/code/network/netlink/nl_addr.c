@@ -19,7 +19,7 @@
 
 #include "netutil.h"
 #include "netlink.h"
-#include "rtnetlink.h"
+#include "libnetlink.h"
 
 #define	_NL_ADDR_ERR(fmt, args...)	\
 	printf("%s:%d: "fmt, __FILE__, __LINE__, ##args)
@@ -58,7 +58,7 @@ nl_addr_add(int index, int family, void *addr, int cidr)
 
 	if (family == AF_INET6) alen = 16;
 
-	if (rtnl_open(&rtx))
+	if (rtnl_open(&rtx, 0))
 		return -1;
 	
 	memset(buf, 0, sizeof(buf));
@@ -67,7 +67,7 @@ nl_addr_add(int index, int family, void *addr, int cidr)
 	nlh = (struct nlmsghdr *)buf;
 	nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*req));
 	nlh->nlmsg_type = RTM_NEWADDR;
-	nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK | NLM_F_CREATE | NLM_F_APPEND;
+	nlh->nlmsg_flags = NLM_F_REQUEST|NLM_F_CREATE|NLM_F_EXCL|NLM_F_ACK;
 	nlh->nlmsg_seq = rtx.seq;
 	nlh->nlmsg_pid = rtx.local.nl_pid;
 
@@ -85,7 +85,7 @@ nl_addr_add(int index, int family, void *addr, int cidr)
 		return -1;
 	}
 	
-	/* add broad cast */
+	/* add broad cast only for IPv4 */
 	if (family == AF_INET) {
 		ip4 = *((u_int32_t *)addr);
 		brd = ip4 & ~(ip4_cidr_to_mask(cidr));
@@ -95,8 +95,8 @@ nl_addr_add(int index, int family, void *addr, int cidr)
 		}
 	}
 		
-	/* send request */
-	return rtnl_send_request(&rtx, nlh);
+	/* send request and check reply */
+	return rtnl_talk(&rtx, nlh);
 }
 
 int 

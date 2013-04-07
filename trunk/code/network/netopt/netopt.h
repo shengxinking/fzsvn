@@ -326,6 +326,14 @@ netp_set_ip6_accept_dad(const char *ifname, int val);
 extern int 
 netp_get_ip6_accept_dad(const char *ifname);
 
+/**
+ *	Get interface irqs and stored in @irqs, the nirq 
+ *	is @irqs object number
+ *
+ *	Return > 0 irq count if success, -1 on error.
+ */
+extern int 
+netp_get_irqs(const char *ifname, int *irqs, size_t nirq);
 
 #endif /* end of FZ_NETOPT_H  */
 

@@ -254,7 +254,7 @@ _addr_func(void)
 			return -1;
 		}
 
-		ret = nl_addr_del(_g_iif, _g_family, &ipmask._addr, ipmask.cidr);
+		//ret = nl_addr_delete(_g_iif, _g_family, &ipmask._addr, ipmask.cidr);
 		break;
 
 	case _NL_FLUSH:

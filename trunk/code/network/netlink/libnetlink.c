@@ -116,13 +116,16 @@ rtnl_open(struct rtnl_ctx* rtx, int group)
 
 
 int 
-rtnl_send_request(rtnl_ctx_t *rtx, struct nlmsghdr *nlh)
+rtnl_talk(rtnl_ctx_t *rtx, struct nlmsghdr *nlh)
 {
 	char buf[RTNL_REQ_LEN];
 	int n;
 
 	if (!rtx || !nlh)
 		return -1;
+
+	/* need ack data */
+	nlh->nlmsg_flags |= NLM_F_ACK;
 
 	/* send message */
         if (rtnl_send(rtx, nlh)) {
@@ -159,7 +162,7 @@ rtnl_dump_request(struct rtnl_ctx *rtx, int family, int type)
         req.nlh.nlmsg_type = type;
         req.nlh.nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
         req.nlh.nlmsg_pid = 0;
-        req.nlh.nlmsg_seq = rtx->dump_seq = ++rtx->seq;
+        req.nlh.nlmsg_seq = rtx->dump = ++rtx->seq;
 
 	/* set rtgenmsg */
         req.g.rtgen_family = family;

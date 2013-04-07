@@ -1,15 +1,15 @@
 /**
- *	@file	rtnetlink.h
+ *	@file	libnetlink.h
  *
- *	@brief	The NETLINK_ROUTE netlink APIs.
+ *	@brief	The netlink basic APIs.
  *	
  *	@author	Forrest.zhang
  *
  *	@date
  */
 
-#ifndef FZ_RTNETLINK_H
-#define FZ_RTNETLINK_H
+#ifndef FZ_LIBNETLINK_H
+#define FZ_LIBNETLINK_H
 
 #include <linux/rtnetlink.h>
 #include <sys/types.h>
@@ -29,16 +29,19 @@ typedef	int	(* rtnl_filter)(struct nlmsghdr *msg, void *arg);
 typedef int	(* rtnl_print)(unsigned long *parg);
 
 extern int 
-rtnl_open(rtnl_ctx_t *rtx);
+rtnl_open(rtnl_ctx_t *rtx, int group);
 
 extern int 
 rtnl_close(rtnl_ctx_t *rtx);
 
 extern int 
-rtnl_send(rtnl_ctx_t *rtx, struct nlmsghdr *msg, int check);
+rtnl_send(rtnl_ctx_t *rtx, struct nlmsghdr *msg);
 
 extern int 
 rtnl_recv(rtnl_ctx_t *rtx, char *buf, size_t len);
+
+extern int 
+rtnl_talk(rtnl_ctx_t *rtx, struct nlmsghdr *msg);
 
 extern int 
 rtnl_send_request(rtnl_ctx_t *rtx, struct nlmsghdr *nlh);
@@ -58,6 +61,6 @@ rtnl_parse_attr(struct rtattr *rtb[], int nrtb, struct rtattr *rta, size_t len);
 extern int 
 rtnl_get_error(int err);
 
-#endif /* end of FZ_RTNETLINK_H  */
+#endif /* end of FZ_LIBNETLINK_H  */
 
 

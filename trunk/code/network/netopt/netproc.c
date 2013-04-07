@@ -21,6 +21,16 @@
 #define	_NETP_ERR(fmt, args...)	\
 	printf("%s:%d: "fmt, __FILE__, __LINE__, ##args)
 
+static int
+_netp_cpu_number()
+{
+        int ncpu;
+
+        ncpu = sysconf(_SC_NPROCESSORS_CONF);
+
+        return ncpu;
+}
+
 /**
  *	Read integer from proc file @file and return it.
  *
@@ -614,4 +624,86 @@ netp_get_ip6_accept_dad(const char *ifname)
 	return _netp_read_int(file);
 }
 
+int 
+netp_get_irqs(const char *ifname, int *irqs, size_t nirq)
+{
+	int irq_num = 0;
+	const char *pfile = "/proc/interrupt"
+	char buf[1024];
+	size_t blen;
+	FILE *fp;
+	char *ptr;
+	int line_num = 0;
+	int start = 0, end = 0;	
 
+	fp = fopen(pfile, "r");
+	if (!fp) {
+		_NETP_ERR("open %s failed: %s\n", pfile, strerror(errno));
+		return -1;
+	}
+
+	/* check interrupt number */
+	do {
+		blen = sizeof(buf);
+		memset(buf, 0, blen);
+		ptr = fgets(buf, blen - 1, fp);
+		if (!ptr) break;
+		line_num++;
+		if (line_num == 1)
+			continue;
+		
+		/* find interface name */
+		ptr = strstr(buf, ifname);
+		if (!ptr) {
+			if (start) {
+				break;
+			}
+			else {
+				start = end = 0;
+				continue;
+			}
+		}
+		/* find */
+		start = 1;
+		irq_num++;		
+	} while (1);
+
+	if (irq_num > 1)
+		irq_num--;
+
+	if (!irqs)
+		return irq_num;
+       
+	if (nirq < irq_num) {
+		_NETP_ERR("irqs is too small for %s inqs(%d)\n", 
+			  nirq, ifname, irq_num);
+		return -1;
+	}
+
+	/* save irq */
+	fseek(fp, 0L, SEEK_SET);
+	do {
+		blen = sizeof(buf);
+		memset(buf, 0, blen);
+		ptr = fgets(buf, blen - 1, fp);
+		if (!ptr) break;
+		line_num++;
+		if (line_num == 1)
+			continue;
+		
+		/* find interface name */
+		ptr = strstr(buf, ifname);
+		if (!ptr) {
+			if (start) {
+				break;
+			}
+			else {
+				start = end = 0;
+				continue;
+			}
+		}
+		/* find */
+		start = 1;
+		irq_num++;
+	} while (1);
+}
