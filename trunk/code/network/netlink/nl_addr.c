@@ -94,7 +94,7 @@ nl_addr_add(int index, int family, void *addr, int cidr)
 			return -1;
 		}
 	}
-		
+	
 	/* send request and check reply */
 	return rtnl_talk(&rtx, nlh);
 }

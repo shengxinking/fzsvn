@@ -30,9 +30,42 @@
 #define	_RTNL_ERR(fmt, args...)	\
 	printf("[rtnl-err]: %s %d: "fmt, __FILE__, __LINE__, ##args)
 
-/**
- *	Send a nlmsghdr to kernel 
- **/
+int 
+rtnl_open(struct rtnl_ctx* rtx, int group)
+{
+	int len;
+
+	if (!rtx)
+		return -1;
+
+	memset(rtx, 0, sizeof(rtnl_ctx_t));
+
+	/* create netlink socket */
+	rtx->fd = socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
+	if (rtx->fd < 0) {
+		_RTNL_ERR("create netlink socket error\n");
+		return -1;
+	}
+
+	/* set local netlink address */
+	rtx->local.nl_family = AF_NETLINK;
+	rtx->local.nl_pid = getpid();
+	rtx->local.nl_groups = group;
+
+	/* bind the netlink socket */
+	len = sizeof(rtx->local);
+	if (bind(rtx->fd, (struct sockaddr*)&rtx->local, len) ) {
+		_RTNL_ERR("cannot bind netlink socket\n");
+		return -1;
+	}
+
+	/* set peer netlink address(normally is kernel) */
+	rtx->peer.nl_family = AF_NETLINK;
+	rtx->seq = time(NULL);
+    
+	return 0;
+}
+
 int 
 rtnl_send(rtnl_ctx_t *rtx, struct nlmsghdr *nlh)
 {
@@ -77,42 +110,6 @@ rtnl_recv(struct rtnl_ctx *rtx, char *buf, size_t len)
 	return n;
 }
 
-
-int 
-rtnl_open(struct rtnl_ctx* rtx, int group)
-{
-	int len;
-
-	if (!rtx)
-		return -1;
-
-	memset(rtx, 0, sizeof(rtnl_ctx_t));
-
-	/* create netlink socket */
-	rtx->fd = socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
-	if (rtx->fd < 0) {
-		_RTNL_ERR("create netlink socket error\n");
-		return -1;
-	}
-
-	/* set local netlink address */
-	rtx->local.nl_family = AF_NETLINK;
-	rtx->local.nl_pid = getpid();
-	rtx->local.nl_groups = group;
-
-	/* bind the netlink socket */
-	len = sizeof(rtx->local);
-	if (bind(rtx->fd, (struct sockaddr*)&rtx->local, len) ) {
-		_RTNL_ERR("cannot bind netlink socket\n");
-		return -1;
-	}
-
-	/* set peer netlink address(normally is kernel) */
-	rtx->peer.nl_family = AF_NETLINK;
-	rtx->seq = time(NULL);
-    
-	return 0;
-}
 
 
 int 
