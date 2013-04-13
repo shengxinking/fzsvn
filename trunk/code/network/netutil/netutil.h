@@ -48,6 +48,12 @@ typedef struct ip_port {
 #define _addr4		_addr.v4
 #define _addr6		_addr.v6
 
+#define	IP4_QUAD(ip)	\
+	((unsigned char *)&ip)[0], \
+        ((unsigned char *)&ip)[1], \
+        ((unsigned char *)&ip)[2], \
+        ((unsigned char *)&ip)[3]
+
 #define	IP_ADDR_SET_V4(ip, val) 			\
 	{(ip)->family=AF_INET;(ip)->_addr4.s_addr=val;}
 
@@ -86,7 +92,7 @@ ip4_cidr_to_mask(int cidr);
  *
  *	Return 1 if in range, 0 if not.
  */
-int
+extern int
 ip4_in_range(u_int32_t ip, u_int32_t begin, u_int32_t end);
 
 /**
@@ -102,8 +108,33 @@ ip4_in_range(u_int32_t ip, u_int32_t begin, u_int32_t end);
  *     
  *	Return 1 if matched, 0 if not matched or error.
  */
-int 
+extern int 
 ip4_match_range(u_int32_t ip, const char *ip_or_range);
+
+/**
+ *	Convert IPv4 address @ip to string stored in @buf.
+ *	the @buf length is @len. If success, the buf is zero 
+ *	end. 
+ * 
+ *	Return pointer to buf if success, NULL on error.
+ */
+extern const char * 
+ip4_to_str(u_int32_t ip, char *buf, size_t len); 
+
+/**
+ *	Convert string @str to IPv4 address and store in
+ *	@ip.
+ * 
+ * 	Return 0 if success, -1 on error.
+ */
+extern int  
+ip4_from_str(u_int32_t *ip, const char *str);
+
+extern int 
+ip6_to_str(void *ip6, char *buf, size_t len);
+
+extern int 
+ip6_from_str(void *ip6, const char *str);
 
 /**
  *	Convert ip_addr_t object @ip to string format. 

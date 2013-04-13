@@ -18,22 +18,22 @@
 
 #include "libnetlink.h"
 
-#define	_RTNL_DEBUG
+#define	_LIBNL_DEBUG
 
 /* define debug macro */
-#ifdef	_RTNL_DEBUG
-#define	_RTNL_DBG(fmt, args...)	\
-	printf("[rtnl-dbg]: "fmt, ##args)
+#ifdef	_LIBNL_DEBUG
+#define	_LIBNL_DBG(fmt, args...)	\
+	printf("[RTNLDBG]: "fmt, ##args)
 #else
-#define	_RTNL_DBG(fmt, args...)
+#define	_LIBNL_DBG(fmt, args...)
 #endif
-#define	_RTNL_ERR(fmt, args...)	\
-	printf("[rtnl-err]: %s %d: "fmt, __FILE__, __LINE__, ##args)
+#define	_LIBNL_ERR(fmt, args...)	\
+	printf("[RTNLERR]: %s %d: "fmt, __FILE__, __LINE__, ##args)
 
 int 
-rtnl_open(struct rtnl_ctx* rtx, int group)
+rtnl_open(rtnl_ctx_t *rtx, int group)
 {
-	int len;
+	socklen_t len;
 
 	if (!rtx)
 		return -1;
@@ -41,9 +41,9 @@ rtnl_open(struct rtnl_ctx* rtx, int group)
 	memset(rtx, 0, sizeof(rtnl_ctx_t));
 
 	/* create netlink socket */
-	rtx->fd = socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
+	rtx->fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
 	if (rtx->fd < 0) {
-		_RTNL_ERR("create netlink socket error\n");
+		_LIBNL_ERR("create netlink socket error\n");
 		return -1;
 	}
 
@@ -55,10 +55,26 @@ rtnl_open(struct rtnl_ctx* rtx, int group)
 	/* bind the netlink socket */
 	len = sizeof(rtx->local);
 	if (bind(rtx->fd, (struct sockaddr*)&rtx->local, len) ) {
-		_RTNL_ERR("cannot bind netlink socket\n");
+		_LIBNL_ERR("cannot bind netlink socket\n");
+		close(rtx->fd);
+		rtx->fd = -1;
 		return -1;
 	}
-
+	/* get sockname to check bind */
+	len = sizeof(rtx->local);
+        if (getsockname(rtx->fd, (struct sockaddr*)&rtx->local, &len) < 0) {
+                _LIBNL_ERR("cannot getsockname");
+		close(rtx->fd);
+		rtx->fd = -1;
+                return -1;
+        }
+	/* check bind status */
+	if (len != sizeof(rtx->local)) {
+		_LIBNL_ERR("bind check failed\n");
+		close(rtx->fd);
+		rtx->fd = -1;
+		return -1;
+	}
 	/* set peer netlink address(normally is kernel) */
 	rtx->peer.nl_family = AF_NETLINK;
 	rtx->seq = time(NULL);
@@ -67,9 +83,26 @@ rtnl_open(struct rtnl_ctx* rtx, int group)
 }
 
 int 
+rtnl_close(rtnl_ctx_t *rtx)
+{
+	if (!rtx)
+		return -1;
+
+	if (rtx->fd > 0)
+		close(rtx->fd);
+	
+	rtx->fd = -1;
+
+	return 0;
+}
+
+int 
 rtnl_send(rtnl_ctx_t *rtx, struct nlmsghdr *nlh)
 {
 	int n;
+
+	if (!rtx || !nlh)
+		return -1;
 
 	/* send blmmsghdr to peer */
 	n = sendto(rtx->fd, nlh, nlh->nlmsg_len, 0,
@@ -95,27 +128,28 @@ rtnl_recv(struct rtnl_ctx *rtx, char *buf, size_t len)
 	n = recv(rtx->fd, buf, len, 0);
 	if (n <= 0) {
 		if (errno != EINTR) {
-			_RTNL_ERR("recv failed: %s\n", strerror(errno));
+			_LIBNL_ERR("recv failed: %s\n", strerror(errno));
 			return -1;
 		}
 		return 0;
 	}
 
+	printf("recv %d bytes\n", n);
+
 	nlh = (struct nlmsghdr *)buf;
 	if (!NLMSG_OK(nlh, n)) {
-		_RTNL_ERR("recved message is trunked\n");
+		_LIBNL_ERR("recved message is trunked\n");
 		return 0;
 	}
 
 	return n;
 }
 
-
-
 int 
 rtnl_talk(rtnl_ctx_t *rtx, struct nlmsghdr *nlh)
 {
-	char buf[RTNL_REQ_LEN];
+	char buf[RTNL_BUF_LEN];
+	struct nlmsgerr *errmsg;
 	int n;
 
 	if (!rtx || !nlh)
@@ -125,9 +159,8 @@ rtnl_talk(rtnl_ctx_t *rtx, struct nlmsghdr *nlh)
 	nlh->nlmsg_flags |= NLM_F_ACK;
 
 	/* send message */
-        if (rtnl_send(rtx, nlh)) {
+        if (rtnl_send(rtx, nlh))
 		return -1;
-	}
 
 	/* recved message */
 	n = rtnl_recv(rtx, buf, sizeof(buf));
@@ -136,8 +169,12 @@ rtnl_talk(rtnl_ctx_t *rtx, struct nlmsghdr *nlh)
 
 	/* check message */
 	nlh = (struct nlmsghdr *)buf;
-	if (nlh->nlmsg_type == NLMSG_ERROR)
+	if (nlh->nlmsg_type == NLMSG_ERROR) {
+		errmsg = NLMSG_DATA(nlh);
+		_LIBNL_ERR("the request is error(%d), %s\n", 
+			   errmsg->error, strerror(-errmsg->error));
 		return -1;
+	}
 	
 	return 0;
 }

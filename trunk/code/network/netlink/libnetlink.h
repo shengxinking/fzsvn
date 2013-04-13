@@ -15,7 +15,7 @@
 #include <sys/types.h>
 
 #define	RTNL_DUMP_LEN	8192
-#define	RTNL_REQ_LEN	1024
+#define	RTNL_BUF_LEN	1024
 
 typedef struct rtnl_ctx {
 	int		fd;		/* socket fd */
@@ -42,9 +42,6 @@ rtnl_recv(rtnl_ctx_t *rtx, char *buf, size_t len);
 
 extern int 
 rtnl_talk(rtnl_ctx_t *rtx, struct nlmsghdr *msg);
-
-extern int 
-rtnl_send_request(rtnl_ctx_t *rtx, struct nlmsghdr *nlh);
 
 extern int 
 rtnl_dump_request(rtnl_ctx_t *rtx, int family, int type);

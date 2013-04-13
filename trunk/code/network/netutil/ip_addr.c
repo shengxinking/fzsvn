@@ -60,26 +60,25 @@ ip4_mask_to_cidr(u_int32_t mask)
 	return (32 - i);
 }
 
-u_int32_t 
-ip4_from_str(const char *str)
+int  
+ip4_from_str(u_int32_t *ip, const char *str)
 {
-	u_int32_t  ip;
-	if (inet_pton(AF_INET, str, &ip) ==  1) {
-		return ip;
-	} else {
+	if (unlikely(!ip || !str))
+		return -1;
+
+	if (inet_pton(AF_INET, str, ip) == 1) 
 		return 0;
-	}
+	else
+		return -1;
 }
 
-char *
+const char *
 ip4_to_str(u_int32_t ip, char *buf, size_t len)
 {
 	if (unlikely(!buf || len < INET_ADDRSTRLEN)) 
 		return NULL;
 
-	inet_ntop(AF_INET, &ip, buf, len);
-
-	return buf;
+	return inet_ntop(AF_INET, &ip, buf, len);
 }
 
 int
@@ -97,6 +96,7 @@ ip4_match_range(u_int32_t ip, const char* ip_or_range)
 	u_int32_t value = 0;
 	u_int32_t begin = 0;
 	u_int32_t end = 0;
+	u_int32_t mask = 0;
 	char * ptr;
 	int res = 0;
 	char range_copy[1024];
@@ -113,7 +113,9 @@ ip4_match_range(u_int32_t ip, const char* ip_or_range)
 			/**
 			 * Format (1): Single host only.
 			 */
-			if (ip4_from_str(range_copy) == ip) {
+			if (ip4_from_str(&value, range_copy) == 0 && 
+			    value == ip) 
+			{
 				res = 1;
 			}
 
@@ -126,7 +128,7 @@ ip4_match_range(u_int32_t ip, const char* ip_or_range)
 		 */
 		cidr = atoi(ptr + 1);
 		*ptr = '\0';
-		value = ip4_from_str(range_copy);
+		ip4_from_str(&value, range_copy);
 		*ptr = '/';
 
 		if (strchr(ptr + 1, '.')) {
@@ -136,7 +138,8 @@ ip4_match_range(u_int32_t ip, const char* ip_or_range)
 			 * Convert to <IP>/cidr format to 
 			 * be consistent with (3.2)
 			 */
-			cidr=ip4_mask_to_cidr(ip4_from_str(ptr+1));
+			ip4_from_str(&mask, ptr + 1);
+			cidr = ip4_mask_to_cidr(mask);
 		}
 
 		/**
@@ -194,14 +197,14 @@ ip4_match_range(u_int32_t ip, const char* ip_or_range)
 			/* if no start ip, start ip is 0.0.0.0 */
 			begin = 0;
 		} else {
-			begin = ip4_from_str(range_copy);
+			ip4_from_str(&begin, range_copy);
 		}
 
 		if (*(ptr + 1) == '\0') {
 			/* no end ip, end ip is 255.255.255.255 */
 			end = 0xffffffff;
 		} else {
-			end = ip4_from_str(ptr + 1);
+			ip4_from_str(&end, ptr + 1);
 		}
 		*ptr = '-';
 
