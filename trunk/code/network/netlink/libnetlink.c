@@ -100,13 +100,19 @@ int
 rtnl_send(rtnl_ctx_t *rtx, struct nlmsghdr *nlh)
 {
 	int n;
+	struct sockaddr_nl nl;
 
-	if (!rtx || !nlh)
+	if (!rtx || !nlh) {
+		_LIBNL_ERR("invalid argument!\n");
 		return -1;
+	}
+
+	memset(&nl, 0, sizeof(nl));
+	nl.nl_family = AF_NETLINK;
 
 	/* send blmmsghdr to peer */
 	n = sendto(rtx->fd, nlh, nlh->nlmsg_len, 0,
-		   (struct sockaddr *)&rtx->peer, sizeof(rtx->peer));
+		   (struct sockaddr *)&nl, sizeof(nl));
 	if (n < 0)
 		return -1;
 	if (n != nlh->nlmsg_len)

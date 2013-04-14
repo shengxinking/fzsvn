@@ -234,10 +234,6 @@ _addr_func(void)
 			return -1;
 		}
 		
-		printf("ip4 addr is %p(%u.%u.%u.%u), %p\n", 
-		       &ipmask._addr, IP4_QUAD(ipmask._addr.v4.s_addr), 
-		       &ipmask._addr.v4.s_addr);
-
 		ret = nl_addr_add(_g_iif, _g_family, &(ipmask._addr), ipmask.cidr);
 
 		break;
@@ -348,16 +344,6 @@ main(int argc, char **argv)
 }
 
 
-
-/**
- *	@file	
- *
- *	@brief
- *	
- *	@author	Forrest.zhang	
- *
- *	@date
- */
 
 
 
