@@ -14,6 +14,8 @@ dev-vcs/git		bash-completion
 dev-libs/libxml2	icu python
 dev-util/cscope		emacs
 dev-games/cegui		opengl
+dev-libs/nss		utils
+dev-java/icedtea-bin	nsplugin -cups
 
 app-text/asciidoc	vim-syntax
 app-emacs/emacs-common-gentoo X
@@ -28,6 +30,7 @@ app-text/poppler	cairo cjk jpeg png
 app-emulation/libvirt	qemu virt-network python
 app-emulation/qemu	alsa ssl jpeg png qemu-ifup threads vde sdl spice
 app-office/dia		cairo python
+app-emulation/libvirt-glib	python
 
 media-fonts/liberation-fonts X
 media-libs/freetype	X
@@ -47,6 +50,8 @@ media-libs/libsdl	X
 media-plugins/audacious-plugins alsa mp3 wavpack flac vorbis
 media-sound/mpg123	alsa 
 media-libs/gd		fontconfig jpeg png truetype xpm
+media-libs/mesa		gles2
+media-video/ffmpeg	opus
 
 x11-libs/cairo		opengl drm X xcb
 x11-wm/awesome		dbus
@@ -56,7 +61,8 @@ x11-libs/pango		X
 x11-terms/rxvt-unicode	256-color xft unicode3 pixbuf
 x11-libs/vte		python
 x11-libs/fltk		cairo opengl threads xft
-x11-misc/lightdm	gtk -introspection
+x11-misc/lightdm	gtk branding test -introspection
+x11-misc/lightdm-gtk-greeter branding
 x11-misc/dmenu		xft
 x11-libs/wxGTK		X
 
@@ -75,7 +81,7 @@ net-misc/spice-gtk	python gtk3
 net-misc/iperf		threads
 
 gnome-base/librsvg	gtk3
-
+gnome-base/gconf	gtk policykit
 
 www-client/firefox	linguas_zh_CN
 www-client/chromium	linguas_zh_CN -cups
