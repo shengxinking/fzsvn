@@ -17,9 +17,9 @@
 #include "cblist.h"
 #include "objpool.h"
 
-typedef void (shash_cmp_func *)(const void *d1, const void *d2);
-typedef void (shash_free_func *)(void *data);
-typedef void (shash_print_func *)(const void *data);
+typedef int  (* shash_cmp_func)(const void *d1, const void *d2);
+typedef void (*shash_free_func)(void *data);
+typedef void (*shash_print_func)(const void *data);
 
 typedef struct shash_item {
 	cblist_t	list;
@@ -48,32 +48,32 @@ shash_alloc(u_int32_t bucket, shash_cmp_func cfunc, shash_free_func ffunc)
 	shash_t *h;
 	shash_bucket_t *b;
 
-	if (unlikely(max < 1))
+	if (unlikely(bucket < 1))
 		ERR_RET(NULL, "invalid argument\n");
 
 	h = malloc(sizeof(shash_t));
 	if (unlikely(!h))
 		ERR_RET(NULL, "malloc shash failed: %s\n", ERRSTR);
 
-	h->buckets = malloc(sizeof(shash_bucket_t) * max);
+	h->buckets = malloc(sizeof(shash_bucket_t) * bucket);
 	if (unlikely(!h->buckets)) {
 		free(h);
 		ERR_RET(NULL, "malloc buckets failed: %s\n", ERRSTR);
 	}
 
-	for (i = 0; i < max; i++) {
-		b = &h->buckest[i];
-		CBLIST_INIT(b);
+	for (i = 0; i < bucket; i++) {
+		b = &h->buckets[i];
+		CBLIST_INIT(&b->list);
 		b->size = 0;
 	}
 
-	h->itempool = objpool_alloc(1024, 0);
+	h->itempool = objpool_alloc(sizeof(shash_item_t), 1024, 0);
 	if (!h->itempool) {
 		free(h->buckets);
 		free(h);
 		ERR_RET(NULL, "objpool_alloc failed\n");
 	}
-	h->nbucket = max;
+	h->nbucket = bucket;
 	h->size = 0;
 	h->cmp_func = cfunc;
 	h->free_func = ffunc;
@@ -88,13 +88,15 @@ shash_free(shash_t *h)
 	shash_item_t *item, *bak;
 	shash_bucket_t *b;
 
-	if (unlikely(!h))
-		ERR_RET(-1, "invalid argument\n");
+	if (unlikely(!h)) {
+		ERR("invalid argument\n");
+		return;
+	}
 
 	/* free buckets items */
 	if (h->buckets) {
-		for (i = 0; i < h->max; i++) {
-			b = &h->buckest[i];
+		for (i = 0; i < h->nbucket; i++) {
+			b = &h->buckets[i];
 			CBLIST_FOR_EACH_SAFE(&b->list, item, bak, list) {
 				CBLIST_DEL(item);
 				if (h->free_func)
@@ -153,7 +155,7 @@ static inline void *
 shash_del(shash_t *h, void *d, u_int32_t hval)
 {
 	void *data;
-	shash_item_t *item;
+	shash_item_t *item, *bak;
 	shash_bucket_t *b;
 
 	if (unlikely(!h || !d))
@@ -162,7 +164,7 @@ shash_del(shash_t *h, void *d, u_int32_t hval)
 	hval %= h->nbucket;
 	b = h->buckets[hval];
 	
-	CBLIST_FOR_EACH_SAFE(&b->list, item, list) {
+	CBLIST_FOR_EACH_SAFE(&b->list, item, bak, list) {
 		if (h->cmp_func(item->data, d) == 0) {
 			CBLIST_DEL(&item->list);
 			data = item->data;
@@ -177,21 +179,21 @@ shash_del(shash_t *h, void *d, u_int32_t hval)
 static inline void *
 shash_find(shash_t *h, void *d, u_int32_t hval)
 {
-	void *data;
 	shash_item_t *item;
 	shash_bucket_t *b;
 
-	if (unlikely(!h || !d))
-		ERR_RET(-1, "invalid argument\n");
-
+	if (unlikely(!h || !d)) {
+		ERR(-1, "invalid argument\n");
+		return;
+	}
+	
 	hval %= h->nbucket;
-	b = h->buckets[hval];
+	b = &h->buckets[hval];
 	
 	CBLIST_FOR_EACH_SAFE(&b->list, item, list) {
 		if (h->cmp_func(item->data, d) == 0) {
 			CBLIST_DEL(&item->list);
-			data = item->data;
-			return data;
+			return item->data;
 		}
 	}
 
@@ -215,7 +217,7 @@ shash_print(const shash_t *h, shash_print_func pfunc)
 
 	for (i = 0; i < h->nbucket; i++) {
 		b = &h->buckets[i];
-		printf("\tbucket(%d): size %u\n", b->size);
+		printf("\tbucket(%d): size %u\n", i, b->size);
 		if (pfunc) {
 			printf("\t\t");
 			CBLIST_FOR_EACH(&b->list, item, list) {
