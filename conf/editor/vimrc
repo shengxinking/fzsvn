@@ -71,12 +71,12 @@ if has("autocmd")
 endif
 
 " Add C language templator when create a new *.c file or *.h file
-autocmd BufNewFile main.c 0r ~/fzgit/code/templator/main.c
-autocmd BufNewFile m.c,[^m]*.c,ma.c,m[^a]*.c,mai.c,ma[^i]*.c,mai[^n]*.c,main?*.c 0r ~/fzgit/code/templator/templator.c
-autocmd BufNewFile *.h 0r ~/fzgit/code/templator/templator.h
-autocmd BufNewFile *_test.c 0r ~/fzgit/code/templator/main.c
-autocmd BufNewFile Makefile 0r ~/fzgit/code/templator/Makefile
-autocmd BufNewFile makefile 0r ~/fzgit/code/templator/makefile
+autocmd BufNewFile main.c 0r ~/fzsvn/code/templator/main.c
+autocmd BufNewFile m.c,[^m]*.c,ma.c,m[^a]*.c,mai.c,ma[^i]*.c,mai[^n]*.c,main?*.c 0r ~/fzsvn/code/templator/templator.c
+autocmd BufNewFile *.h 0r ~/fzsvn/code/templator/templator.h
+autocmd BufNewFile *_test.c 0r ~/fzsvn/code/templator/main.c
+autocmd BufNewFile Makefile 0r ~/fzsvn/code/templator/Makefile
+autocmd BufNewFile makefile 0r ~/fzsvn/code/templator/makefile
 
 " expand "//" to "/* */" in C language and expand "/**" to "/**<cr>*<cr>*/" mode
 "au BufNewFile,BufRead *.[ch] iabbrev // /*!cursor! */<esc>:call search('!cursor!', 'b')<cr>cf!

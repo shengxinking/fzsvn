@@ -45,6 +45,39 @@
 #endif
 #endif	/* end of align_num */
 
+#ifndef	rol64
+#define	rol64(w, n)	(((w) << n) | ((w) >> (64 - n)))
+#endif
+
+#ifndef ror64
+#define	ror64(w, n)	((w) >> n) | ((w) << (64 - n))
+#endif
+
+#ifndef rol32
+#define rol32(w, n)	(((w) << n) | ((w) >> (32 - n)))
+#endif
+
+#ifndef ror32
+#define ror32(w, n)	((w) >> n) | ((w) << (32 - n))
+#endif
+
+#ifndef rol16
+#define rol16(w, n)	(((w) << n) | ((w) >> (16 - n)))
+#endif
+
+#ifndef ror16
+#define ror16(w, n)	((w) >> n) | ((w) << (16 - n))
+#endif
+
+#ifndef rol8
+#define rol8(w, n)	(((w) << n) | ((w) >> (8 - n)))
+#endif
+
+#ifndef ror8
+#define ror8(w, n)	((w) >> n) | ((w) << (8 - n))
+#endif
+
+
 
 #endif /* end of FZ_GCC_COMMON_H  */
 

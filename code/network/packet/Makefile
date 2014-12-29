@@ -2,9 +2,12 @@
 #	Makefile for C languages
 #
 
+SSL_PATH = /home/data/source/network/openssl-1.0.1j
+SSL_LIBS = $(SSL_PATH)/libssl.a $(SSL_PATH)/libcrypto.a
+
 CC = gcc
-CFLAGS = -Wall -ggdb
-LDFLAGS = -lpcap -lpthread
+CFLAGS = -Wall -ggdb -I $(SSL_PATH)/include
+LDFLAGS = -lpcap -lpthread -ldl -lz
 
 ifneq (".deps", "$(wildcard .deps)")
 	DEPS = .deps
@@ -37,7 +40,8 @@ ssldump : ssldump.o \
 	  ip_addr.o \
 	  objpool.o \
 	  tcp_stream.o \
-	  dssl_util.o
+	  dssl_util.o \
+	  $(SSL_LIBS)
 
 # for test target
 test : $(TEST)

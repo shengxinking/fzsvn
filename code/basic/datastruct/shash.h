@@ -17,13 +17,13 @@
 #include "cblist.h"
 #include "objpool.h"
 
-typedef int  (* shash_cmp_func)(const void *d1, const void *d2);
-typedef void (*shash_free_func)(void *data);
+typedef int  (*shash_cmp_func)  (const void *d1, const void *d2);
+typedef void (*shash_free_func) (void *data);
 typedef void (*shash_print_func)(const void *data);
 
 typedef struct shash_item {
 	cblist_t	list;
-	void		*item;
+	void		*data;
 } shash_item_t;
 
 typedef struct shash_bucket {
@@ -98,7 +98,7 @@ shash_free(shash_t *h)
 		for (i = 0; i < h->nbucket; i++) {
 			b = &h->buckets[i];
 			CBLIST_FOR_EACH_SAFE(&b->list, item, bak, list) {
-				CBLIST_DEL(item);
+				CBLIST_DEL(&item->list);
 				if (h->free_func)
 					h->free_func(item->data);
 
@@ -127,7 +127,7 @@ shash_add(shash_t *h, void *d, u_int32_t hval, int check)
 		ERR_RET(-1, "invalid argument\n");
 
 	hval %= h->nbucket;
-	b = h->buckets[hval];
+	b = &h->buckets[hval];
 	
 	if (check) {
 		CBLIST_FOR_EACH(&b->list, item, list) {
@@ -159,10 +159,10 @@ shash_del(shash_t *h, void *d, u_int32_t hval)
 	shash_bucket_t *b;
 
 	if (unlikely(!h || !d))
-		ERR_RET(-1, "invalid argument\n");
+		ERR_RET(NULL, "invalid argument\n");
 
 	hval %= h->nbucket;
-	b = h->buckets[hval];
+	b = &h->buckets[hval];
 	
 	CBLIST_FOR_EACH_SAFE(&b->list, item, bak, list) {
 		if (h->cmp_func(item->data, d) == 0) {
@@ -179,18 +179,16 @@ shash_del(shash_t *h, void *d, u_int32_t hval)
 static inline void *
 shash_find(shash_t *h, void *d, u_int32_t hval)
 {
-	shash_item_t *item;
+	shash_item_t *item, *bak;
 	shash_bucket_t *b;
 
-	if (unlikely(!h || !d)) {
-		ERR(-1, "invalid argument\n");
-		return;
-	}
+	if (unlikely(!h || !d))
+		ERR_RET(NULL, "invalid argument\n");
 	
 	hval %= h->nbucket;
 	b = &h->buckets[hval];
 	
-	CBLIST_FOR_EACH_SAFE(&b->list, item, list) {
+	CBLIST_FOR_EACH_SAFE(&b->list, item, bak, list) {
 		if (h->cmp_func(item->data, d) == 0) {
 			CBLIST_DEL(&item->list);
 			return item->data;

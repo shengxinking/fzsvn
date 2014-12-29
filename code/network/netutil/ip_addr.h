@@ -317,6 +317,7 @@ ip_port_from_str(ip_port_t *ip, const char *str);
 extern int 
 ip_port_compare(const ip_port_t *ip1, const ip_port_t *ip2);
 
+
 #endif /* end of FZ_IP_ADDR_H  */
 
 
