@@ -1,0 +1,54 @@
+[proxy]
+worker		20
+use_splice	yes|no
+user_nb_splice	yes|no
+maxconn		1000000
+bind_cpu	yes|no
+bind_cpu_algo	rr|odd|even
+bind_cpu_ht	low|high|full
+debug		<0-7>
+
+[certset]
+name		cert1
+domain		www.sina.com.cn
+certificate	a.crt
+privatekey	a.rsa
+pkcs12		a.p12
+intca		d.crt
+intca		d.crt
+ca		b.crt
+ca		c.crt
+crl		e.crl
+
+[listener]
+name		vserver1
+address		172.22.14.61:80
+
+[listener]
+name		vserver2
+address		172.22.14.61:443
+ssl		yes|no
+certset		cert1
+
+[svrpool]
+name		pool2
+algo		wrr
+# server format: server	<weight> <http|https> <address:port> [certset]
+server		1 http 10.200.2.1:80
+server		1 http 10.200.4.203:443
+server		1 https 10.200.4.203:8443 cert1
+
+[policy]
+name		policy1
+mode		reverse/transparent
+listener	vserver1
+svrpool		pool1
+
+[policy]
+name		policy2
+listener	vserver2
+svrpool		pool2
+
+
+
+

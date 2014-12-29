@@ -1,0 +1,111 @@
+sys-devel/gcc		-fortran -gtk
+sys-libs/ncurses	-gpm
+sys-apps/dbus		X
+sys-auth/pambase	consolekit
+sys-auth/consolekit	policykit
+sys-apps/portage	python2 python3
+sys-auth/polkit		gtk
+sys-devel/bc		libedit
+sys-fs/udev		hwdb
+sys-libs/zlib		minizip
+sys-libs/talloc		python
+
+
+dev-lang/python		xml ipv6 sqlite
+dev-lang/lua		readline emacs -deprecated
+dev-util/cmake		vim-syntax emacs
+dev-libs/libxslt	python
+dev-vcs/subversion	bash-completion emacs python vim-syntax
+dev-vcs/git		bash-completion emacs
+dev-libs/libxml2	icu python
+dev-util/cscope		emacs
+dev-games/cegui		opengl
+dev-libs/nss		utils
+dev-java/icedtea-bin	nsplugin
+dev-libs/apr-util	sqlite
+
+app-text/asciidoc	vim-syntax
+app-emacs/emacs-common-gentoo X
+app-editors/emacs	X gtk3 gif jpeg png svg tiff xft gsettings imagemagick libxml2 gtk gconf dbus gzip-el -gpm
+app-text/ghostscript-gpl   X dbus gtk -cups
+app-editors/vim		cscope vim-pager python -gpm
+app-editors/gvim	cscope gtk python -gpm
+app-i18n/fcitx		cairo gtk gtk3 pango 
+app-editors/leafpad	emacs
+app-text/poppler	cairo cjk jpeg png
+app-emulation/libvirt	qemu virt-network python
+app-emulation/qemu	alsa ssl jpeg png qemu-ifup threads vde sdl spice opengl
+app-emulation/virt-manager spice
+app-office/dia		cairo python
+app-text/asciidoc	graphviz
+app-i18n/fcitx-configtool gtk gtk3
+app-crypt/pinentry	gtk
+app-office/libreoffice	-cups -webdav -vba
+app-office/libreoffice-l10n linguas_zh_CN
+app-editors/bluefish	python
+app-text/mupdf		X
+app-emulation/libvirt-glib python
+
+media-fonts/liberation-fonts X
+media-libs/freetype	X
+media-libs/libpng	apng
+media-gfx/imagemagick	png fontconfig X jpeg tiff truetype xml graphviz pango
+media-libs/tiff		jpeg
+media-libs/lcms		jpeg python
+media-libs/freetype	auto-hinter utils
+media-libs/imlib2	X gif jpeg mmx mp3 tiff png
+media-fonts/dejavu	X 
+media-fonts/wqy-microhei X
+media-fonts/wqy-zenhei	X
+media-fonts/ttf-bitstream-vera	X
+media-gfx/geeqie	exif xmp
+media-libs/libsdl	X
+media-plugins/audacious-plugins alsa mp3 wavpack vorbis
+media-sound/mpg123	alsa 
+media-gfx/fbida		X gif imagemagick png tiff
+media-gfx/exiv2		xmp
+media-libs/gd		truetype jpeg png fontconfig
+media-libs/libsdl	alsa opengl
+media-libs/libvpx	sse3 sse4_1
+media-libs/mesa		gles2
+media-video/ffmpeg	opus
+
+x11-libs/cairo		opengl drm X xcb
+x11-wm/awesome		dbus
+x11-libs/gdk-pixbuf	jpeg tiff
+x11-libs/gtk+		vim-syntax X -cups
+x11-libs/pango		X
+x11-terms/rxvt-unicode	truetype 256-color unicode3 xft pixmap
+x11-libs/vte		python
+x11-libs/fltk		cairo opengl threads xft
+x11-misc/dmenu		xft
+x11-misc/lightdm-gtk-greeter branding
+
+net-libs/gnutls		lzo
+net-im/pidgin		gnutls python perl dbus -gstreamer -xscreensaver -ncurses 
+net-libs/gtk-vnc	python
+net-libs/neon		gnutls linguas_zh_CN
+net-dns/dnsmasq		dbus
+net-misc/wget		ntlm
+net-misc/openssh	X509
+net-analyzer/wireshark	python gcrypt gtk threads
+net-misc/rdesktop	alsa
+net-ftp/lftp		linguas_zh_CN
+net-misc/spice-gtk	python
+net-misc/iperf		threads
+net-misc/spice-gtk	-pulseaudio gtk3
+
+gnome-base/librsvg	gtk3
+
+www-client/firefox	linguas_zh_CN dbus
+www-client/chromium	linguas_zh_CN -cups
+www-client/w3m		imlib gtk X -gpm
+
+
+mail-client/thunderbird	linguas_zh_CN
+mail-client/mutt	gnutls gpg imap mbox pop sidebar smime smtp
+mail-filter/procmail	mbox
+mail-mta/msmtp		gnutls vim-syntax
+sys-boot/plymouth	-openrc
+
+rox-base/rox		-svg -video

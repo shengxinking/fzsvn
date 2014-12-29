@@ -1,0 +1,34 @@
+/*
+ * Security Scanner Scanned the Site
+ */
+
+[1a 1b]:
+	REQUEST_HEADERS:User-Agent
+	
+	(?:\b(?:m(?:ozilla\/4\.0\(compatible\)|etis)|webtrends security analyzer|pmafind)\b|n(?:-stealth|sauditor|essus|ikto)|b(?:lack ?widow|rutus|ilbo)|(?:jaascoi|paro)s|webinspect|\.nasl)
+
+[2a]
+	REQUEST_HEADERS_NAMES
+
+	\bacunetix-product\b
+
+[3a]
+	REQUEST_FILENAME
+
+	^/nessustest
+
+[4a 4b]
+	REQUEST_HEADERS:User-Agent
+
+	(?:e(?:mail(?:(?:collec|harves|magne)t|(?:extracto|reape)r|siphon|wolf)|(?:collecto|irgrabbe)r|xtractorpro|o browse)|m(?:ozilla\/4\.0 \(compatible; advanced email extractor|ailto:craftbot\@yahoo\.com)|a(?:t(?:tache|hens)|utoemailspider|dsarobot)|w(?:eb(?:emailextrac| by mail)|3mir)|f(?:astlwspider|loodgate)|p(?:cbrowser|ackrat|surf)|(?:digout4uagen|takeou)t|\bdatacha0s\b|hhjhj@yahoo|chinaclaw|rsync|shai|zeus)
+
+[5a 5b]
+	REQUEST_HEADERS:User-Agent
+
+	(?:\b(?:(?:indy librar|snoop)y|microsoft urlcontrol|lynx)\b|mozilla\/2\.0 \(compatible; newt activex; win32\)|w(?:3mirror|get)|download demon|l(?:ibwww|wp)|p(?:avuk|erl)|bigbrother|autohttp|netants|eCatch|curl)
+
+[6a 6b]
+	REQUEST_HEADERS:User-Agent
+
+	!^apache.*perl
+

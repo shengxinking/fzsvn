@@ -1,0 +1,4 @@
+using "crontab -e" command
+add:
+0 10 * * * /usr/sbin/ntpdate cn.pool.ntp.org > /dev/null 2>&1
+

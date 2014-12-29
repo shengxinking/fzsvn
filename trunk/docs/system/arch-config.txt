@@ -1,0 +1,32 @@
+1. 配置网络和无线网络:
+
+/etc/rc.conf
+
+a. DHCP
+eth0="dhcp"
+INTERFACES=(eth0 [NNNN])
+gateway=(default gw NNN.NNN.NNN.NNN)
+ROUTES(gateway)
+
+b. 静态IP
+eth0="eth0 192.168.0.2 netmask 255.255.255.0 broadcast 192.168.0.255"
+INTERFACES=(eth0 [NNNN])
+gateway=(default gw NNN.NNN.NNN.NNN)
+ROUTES(gateway)
+
+c. 无线网络
+#wlan0="dhcp"
+wlan0="wlan0 192.168.0.2 netmask 255.255.255.0 broadcast 192.168.0.255"
+wlan_wlan0="wlan0 essid Forrest key 0C255056DF channel 1"
+gateway="default gw 192.168.2.1"
+ROUTES=(gateway)
+INTERFACES=(wlan0)
+
+d. 桥接网络
+eth0="eth0 up"
+#br0="dhcp"
+br0="br0 192.168.2.10 netmask 255.255.255.0 up"
+INTERFACES=(eth0 br0)
+
+
+

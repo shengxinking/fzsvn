@@ -1,0 +1,115 @@
+/*
+ * SQL injection
+ */
+
+[1a 1b]
+	REQUEST_FILENAME|ARGS|REQUEST_HEADERS|!REQUEST_HEADERS:Referer
+
+	s(?:ys\.(?:user_(?:(?:t(?:ab(?:_column|le)|rigger)|object|view)s|c(?:onstraints|atalog))|all_tables|tab)|elect)|m(?:sys(?:(?:queri|ac)e|relationship|column|object)s|ysql\.user)|c(?:onstraint_type|harindex)|\@\@spid| instr|locate|attnotnull|waitfor
+
+	t:none,t:urlDecodeUni,t:htmlEntityDecode,t:lowercase,t:replaceComments,t:compressWhiteSpace
+
+[2a 2b]
+	REQUEST_FILENAME|ARGS
+
+	(?:\b(?:(?:s(?:ys\.(?:user_(?:(?:t(?:ab(?:_column|le)|rigger)|object|view)s|c(?:onstraints|atalog))|all_tables|tab)|elect\b.{0,40}\b(?:substring|ascii|user))|m(?:sys(?:(?:queri|ac)e|relationship|column|object)s|ysql\.user)|c(?:onstraint_type|harindex)|waitfor\b\W*?\bdelay|attnotnull)\b|(?:locate|instr)\W+\()|\@\@spid\b)
+
+	t:none,t:htmlEntityDecode,t:lowercase,t:replaceComments,t:compressWhiteSpace
+
+[3a 3b]
+	REQUEST_HEADERS|!REQUEST_HEADERS:Referer
+
+	(?:\b(?:(?:s(?:ys\.(?:user_(?:(?:t(?:ab(?:_column|le)|rigger)|object|view)s|c(?:onstraints|atalog))|all_tables|tab)|elect\b.{0,40}\b(?:substring|ascii|user))|m(?:sys(?:(?:queri|ac)e|relationship|column|object)s|ysql\.user)|c(?:onstraint_type|harindex)|waitfor\b\W*?\bdelay|attnotnull)\b|(?:locate|instr)\W+\()|\@\@spid\b)
+
+	t:urlDecodeUni,t:htmlEntityDecode,t:lowercase,t:replaceComments,t:compressWhiteSpace
+
+[4a 4b]
+	REQUEST_FILENAME|ARGS|REQUEST_HEADERS|!REQUEST_HEADERS:Referer
+
+	s(?:ys(?:(?:(?:process|tabl)e|filegroup|object)s|c(?:o(?:nstraint|lumn)s|at)|dba|ibm)|ubstr(?:ing)?)|user_(?:(?:(?:constrain|objec)t|tab(?:_column|le)|ind_column|user)s|password|group)|a(?:tt(?:rel|typ)id|ll_objects)|object_(?:(?:nam|typ)e|id)|pg_(?:attribute|class)|column_(?:name|id)|(?:dba|mb)_users|xtype|rownum|t(?:able_name|extpos)
+
+	t:urlDecodeUni,t:htmlEntityDecode,t:replaceComments,t:compressWhiteSpace,t:lowercase
+
+[5a 5b]
+	REQUEST_FILENAME|ARGS
+
+	\b(?:(?:s(?:ys(?:(?:(?:process|tabl)e|filegroup|object)s|c(?:o(?:nstraint|lumn)s|at)|dba|ibm)|ubstr(?:ing)?)|user_(?:(?:(?:constrain|objec)t|tab(?:_column|le)|ind_column|user)s|password|group)|a(?:tt(?:rel|typ)id|ll_objects)|object_(?:(?:nam|typ)e|id)|pg_(?:attribute|class)|column_(?:name|id)|(?:dba|mb)_users|xtype\W+\bchar|rownum)\b|t(?:able_name\b|extpos\W+\())
+
+	t:htmlEntityDecode,t:replaceComments,t:compressWhiteSpace,t:lowercase
+
+[6a 6b]
+	REQUEST_HEADERS|!REQUEST_HEADERS:Referer
+	
+	\b(?:(?:s(?:ys(?:(?:(?:process|tabl)e|filegroup|object)s|c(?:o(?:nstraint|lumn)s|at)|dba|ibm)|ubstr(?:ing)?)|user_(?:(?:(?:constrain|objec)t|tab(?:_column|le)|ind_column|user)s|password|group)|a(?:tt(?:rel|typ)id|ll_objects)|object_(?:(?:nam|typ)e|id)|pg_(?:attribute|class)|column_(?:name|id)|(?:dba|mb)_users|xtype\W+\bchar|rownum)\b|t(?:able_name\b|extpos\W+\())
+
+	t:urlDecodeUni,t:htmlEntityDecode,t:replaceComments,t:compressWhiteSpace,t:lowercase
+
+[7a 7b]
+	REQUEST_FILENAME|ARGS|REQUEST_HEADERS|!REQUEST_HEADERS:Referer
+
+	a(?:nd|utonomous_transaction)|benchmark|cast|d(?:(?:elet|ata_typ|umpfil)e|bms_java|rop)|having|i(?:n(?:sert|file|ner)|(?:f|s)null)|nvarchar|o(?:pen(?:query|rowset)|utfile|r)|print|s(?:p_(?:addextendedproc|execute(?:sql)?|makewebtask|oacreate|prepare|sqlexec)|ql_(?:longvarchar|variant)|hutdown|elect)|tbcreator|utl_(?:file|http)|varchar|xp_(?:availablemedia|cmdshell|dirtree|enumdsn|execresultset|filelist|loginconfig|makecab|ntsec|reg(?:addmultistring|(?:enum|delete)(?:key|value)s?|r(?:ead|emovemultistring)|write)|terminate)|\@\@version|'(?:s(?:a|qloledb)|dbo|msdasql)'
+
+	t:urlDecodeUni,t:htmlEntityDecode,t:replaceComments,t:compressWhiteSpace,t:lowercase
+
+[8a 8b]
+	REQUEST_FILENAME|ARGS|ARGS_NAMES
+
+	(?:\b(?:(?:s(?:elect\b(?:.{1,100}?\b(?:(?:length|count|top)\b.{1,100}?\bfrom|from\b.{1,100}?\bwhere)|.*?\b(?:d(?:ump\b.*\bfrom|ata_type)|(?:to_(?:numbe|cha)|inst)r))|p_(?:(?:addextendedpro|sqlexe)c|(?:oacreat|prepar)e|execute(?:sql)?|makewebtask)|ql_(?:longvarchar|variant))|xp_(?:reg(?:re(?:movemultistring|ad)|delete(?:value|key)|enum(?:value|key)s|addmultistring|write)|e(?:xecresultset|numdsn)|(?:terminat|dirtre)e|availablemedia|loginconfig|cmdshell|filelist|makecab|ntsec)|u(?:nion\b.{1,100}?\bselect|tl_(?:file|http))|group\b.*\bby\b.{1,100}?\bhaving|d(?:elete\b\W*?\bfrom|bms_java)|load\b\W*?\bdata\b.*\binfile|(?:n?varcha|tbcreato)r)\b|i(?:n(?:to\b\W*?\b(?:dump|out)file|sert\b\W*?\binto|ner\b\W*?\bjoin)\b|(?:f(?:\b\W*?\(\W*?\bbenchmark|null\b)|snull\b)\W*?\()|a(?:nd\b ?(?:\d{1,10}|[\'\"][^=]{1,10}[\'\"]) ?[=<>]+|utonomous_transaction\b)|o(?:r\b ?(?:\d{1,10}|[\'\"][^=]{1,10}[\'\"]) ?[=<>]+|pen(?:rowset|query)\b)|having\b ?(?:\d{1,10}|[\'\"][^=]{1,10}[\'\"]) ?[=<>]+|print\b\W*?\@\@|cast\b\W*?\()|(?:;\W*?\b(?:shutdown|drop)|\@\@version)\b|'(?:s(?:qloledb|a)|msdasql|dbo)')
+
+	t:htmlEntityDecode,t:replaceComments,t:compressWhiteSpace,t:lowercase
+
+[9a 9b]
+	REQUEST_HEADERS|!REQUEST_HEADERS:Referer
+
+	(?:\b(?:(?:s(?:elect\b(?:.{1,100}?\b(?:(?:length|count|top)\b.{1,100}?\bfrom|from\b.{1,100}?\bwhere)|.*?\b(?:d(?:ump\b.*\bfrom|ata_type)|(?:to_(?:numbe|cha)|inst)r))|p_(?:(?:addextendedpro|sqlexe)c|(?:oacreat|prepar)e|execute(?:sql)?|makewebtask)|ql_(?:longvarchar|variant))|xp_(?:reg(?:re(?:movemultistring|ad)|delete(?:value|key)|enum(?:value|key)s|addmultistring|write)|e(?:xecresultset|numdsn)|(?:terminat|dirtre)e|availablemedia|loginconfig|cmdshell|filelist|makecab|ntsec)|u(?:nion\b.{1,100}?\bselect|tl_(?:file|http))|group\b.*\bby\b.{1,100}?\bhaving|d(?:elete\b\W*?\bfrom|bms_java)|load\b\W*?\bdata\b.*\binfile|(?:n?varcha|tbcreato)r)\b|i(?:n(?:to\b\W*?\b(?:dump|out)file|sert\b\W*?\binto|ner\b\W*?\bjoin)\b|(?:f(?:\b\W*?\(\W*?\bbenchmark|null\b)|snull\b)\W*?\()|a(?:nd\b ?(?:\d{1,10}|[\'\"][^=]{1,10}[\'\"]) ?[=<>]+|utonomous_transaction\b)|o(?:r\b ?(?:\d{1,10}|[\'\"][^=]{1,10}[\'\"]) ?[=<>]+|pen(?:rowset|query)\b)|having\b ?(?:\d{1,10}|[\'\"][^=]{1,10}[\'\"]) ?[=<>]+|print\b\W*?\@\@|cast\b\W*?\()|(?:;\W*?\b(?:shutdown|drop)|\@\@version)\b|'(?:s(?:qloledb|a)|msdasql|dbo)')
+
+	t:urlDecodeUni,t:htmlEntityDecode,t:replaceComments,t:compressWhiteSpace,t:lowercase
+
+[10a 10b]
+	REQUEST_FILENAME|ARGS
+
+	\b(\d+) ?= ?\1\b|[\'\"](\w+)[\'\"] ?= ?[\'\"]\2\b
+
+	t:htmlEntityDecode,t:replaceComments,t:compressWhiteSpace,t:lowercase
+
+[11a 11b]
+	REQUEST_HEADERS|!REQUEST_HEADERS:Referer
+
+	\b(\d+) ?= ?\1\b|[\'\"](\w+)[\'\"] ?= ?[\'\"]\2\b
+
+	t:urlDecodeUni,t:htmlEntityDecode,t:replaceComments,t:compressWhiteSpace,t:lowercase
+
+[12a 12b]
+	REQUEST_FILENAME|ARGS|REQUEST_HEADERS|!REQUEST_HEADERS:Referer
+
+	(?:user_(?:(?:object|table|user)s|password|group)|a(?:tt(?:rel|typ)id|ll_objects)|object_(?:(?:nam|typ)e|id)|pg_(?:attribute|class)|column_(?:name|id)|substr(?:ing)?|table_name|mb_users|rownum)
+
+	t:urlDecodeUni,t:htmlEntityDecode,t:replaceComments,t:compressWhiteSpace,t:lowercase
+
+[13a 13b]
+	REQUEST_FILENAME|ARGS
+
+	\b(?:user_(?:(?:object|table|user)s|password|group)|a(?:tt(?:rel|typ)id|ll_objects)|object_(?:(?:nam|typ)e|id)|pg_(?:attribute|class)|column_(?:name|id)|substr(?:ing)?|table_name|mb_users|rownum)\b
+
+	t:htmlEntityDecode,t:replaceComments,t:compressWhiteSpace,t:lowercase
+
+[14a 14b]
+	REQUEST_HEADERS|!REQUEST_HEADERS:Referer
+
+	\b(?:user_(?:(?:object|table|user)s|password|group)|a(?:tt(?:rel|typ)id|ll_objects)|object_(?:(?:nam|typ)e|id)|pg_(?:attribute|class)|column_(?:name|id)|substr(?:ing)?|table_name|mb_users|rownum)\b
+
+	t:urlDecodeUni,t:htmlEntityDecode,t:replaceComments,t:compressWhiteSpace,t:lowercase
+
+[15a 15b]
+	REQUEST_FILENAME|ARGS|!REQUEST_HEADERS:via
+
+	\b(?:coalesce\b|root\@)
+
+	t:htmlEntityDecode,t:replaceComments,t:compressWhiteSpace,t:lowercase
+
+[16a 16b]
+	REQUEST_HEADERS|!REQUEST_HEADERS:Referer|!REQUEST_HEADERS:via
+
+	\b(?:coalesce\b|root\@)
+
+	t:urlDecodeUni,t:htmlEntityDecode,t:replaceComments,t:compressWhiteSpace,t:lowercase

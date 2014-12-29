@@ -1,0 +1,21 @@
+[startup]{fcitx}
+[startup]{idesk}
+[startup]{xscreensaver -nosplash}
+[startup]{conky}
+[startup]{fbsetbg -l}
+[app] (name=xxx) (class=Firefox-bin)
+  [Dimensions]	{732 566}
+  [Position]	(UPPERLEFT)	{354 180}
+  [Close]	{no}
+[end]
+[app] (name=player) (class=Audacious) (role=player)
+  [Workspace]	{0}
+  [Dimensions]	{275 116}
+  [Sticky]	{yes}
+[end]
+[app] (name=stardict) (class=Stardict)
+[end]
+[app] (name=acroread) (class=Acroread)
+  [Dimensions]	{1024 745}
+  [Position]	(UPPERLEFT)	{0 0}
+[end]

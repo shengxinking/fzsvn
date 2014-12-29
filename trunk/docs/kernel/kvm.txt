@@ -1,0 +1,25 @@
+1 KVM介绍
+  KVM是Linux下最快速的虚拟机， 它需要Intel和AMD的硬件虚拟化支持。
+
+2. 安装：
+  在Kernel里打开
+  Virtualization-->kernel-based virtual machine (KVM) support y | m
+              -->KVM for Intel processors support            y | m | n
+              -->KVM for AMD processor support             y | m | n
+
+  Device Drivers-->Network device support-->802.1d Ethernet bridging y
+                                            -->802.1Q VLAN support   y
+                                            -->Universal TUN/TAP device driver support  y
+  安转qemu-kvm bridge-utils usermode-utilities iptables
+
+3. 配置KVM网络
+  iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+  brctl addbr br0 
+  ifconfig br0 192.168.100.254 netmask 255.255.255.0 up
+  tunctl -b -u forrest -t qtap0
+  brctl addif br0 qtap0
+  ifconfig qtap0 up 0.0.0.0 promisc
+  
+4. 启动KVM
+  kvm -hda ./hda.img -cdrom /home/work/soft/iso/debian-504-i386-CD-1.iso -boot d -net nic,macaddr=52:54:00:12:34:56 -net tap,ifname=qtap0,script=no,downscript=no
+  kvm -net nic,macaddr=52:54:00:12:34:56 -net tap,ifname=qtap0,script=no,downscript=no hda.img

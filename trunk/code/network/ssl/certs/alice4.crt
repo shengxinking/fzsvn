@@ -1,0 +1,63 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 4 (0x4)
+    Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=CN, ST=Beijing, O=alice3, OU=alice3, CN=www.alice3.org
+        Validity
+            Not Before: Oct 19 14:09:37 2014 GMT
+            Not After : Oct 16 14:09:37 2024 GMT
+        Subject: C=CN, ST=Beijing, O=alice4, OU=alice4, CN=www.alice4.org
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (1024 bit)
+                Modulus:
+                    00:da:7f:ff:fa:bf:6d:40:c7:4d:48:f4:b9:8a:fe:
+                    44:d2:98:64:84:8f:45:ba:42:a5:f4:81:f1:2c:65:
+                    19:f9:21:a2:b2:c5:60:84:b5:83:22:5e:30:a7:1c:
+                    3f:ac:77:40:8b:e3:63:91:5d:9f:fe:b8:e1:98:78:
+                    0b:de:95:11:d7:36:dc:a1:93:bc:39:32:1b:b6:e9:
+                    b3:4b:c6:20:f4:45:83:93:94:f6:bd:36:e2:69:6d:
+                    19:54:90:c3:28:45:b4:61:45:d3:5b:07:49:e9:76:
+                    d8:70:2a:b7:55:63:d5:cf:29:ec:5a:4a:55:9c:1e:
+                    37:57:5f:79:15:7c:f6:6d:f1
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Subject Alternative Name: 
+                DNS:www.alice4.com
+    Signature Algorithm: sha1WithRSAEncryption
+         24:0b:6d:17:70:70:cc:36:52:47:46:bf:ea:49:80:76:14:db:
+         cb:0a:15:59:27:62:58:83:83:51:6a:1f:d1:4b:16:0a:61:8a:
+         28:05:9b:ff:0b:8e:5d:8f:b0:3c:97:8b:8a:06:9f:f5:e1:e7:
+         fa:1d:89:9a:7a:f0:ec:a7:86:b4:db:73:76:61:38:8a:c2:8d:
+         a0:85:8f:f6:72:a9:7e:75:92:02:a1:13:6e:69:60:a2:f8:9b:
+         93:0f:7a:fd:fa:80:7d:02:ba:ef:9a:e7:ee:36:1c:c4:8d:62:
+         32:f9:57:72:6d:84:f6:3e:cd:b6:af:bf:80:67:83:b4:7b:42:
+         71:3b:30:b1:d2:ab:06:4c:02:9e:86:7c:9f:2a:43:17:ee:df:
+         23:7a:a4:0f:db:e2:f4:43:c0:4a:b6:5c:f9:94:c1:d1:41:6d:
+         d6:78:1f:f5:3e:89:40:e6:88:cc:69:b0:3e:58:e5:e5:35:14:
+         38:b3:dc:bf:3a:64:3e:06:b1:73:80:09:bf:29:ef:e1:f8:04:
+         fb:14:aa:29:b1:79:ed:5b:f6:57:7b:2b:fd:52:a3:fd:a9:3a:
+         5d:a7:9c:0a:b4:d0:48:a3:ce:de:09:8b:63:53:a8:3c:bd:2f:
+         98:56:82:fe:2f:2c:b9:17:b4:56:d3:fe:d7:a1:0a:ed:04:19:
+         02:04:d4:11
+-----BEGIN CERTIFICATE-----
+MIIC0zCCAbugAwIBAgIBBDANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJDTjEQ
+MA4GA1UECAwHQmVpamluZzEPMA0GA1UECgwGYWxpY2UzMQ8wDQYDVQQLDAZhbGlj
+ZTMxFzAVBgNVBAMMDnd3dy5hbGljZTMub3JnMB4XDTE0MTAxOTE0MDkzN1oXDTI0
+MTAxNjE0MDkzN1owWjELMAkGA1UEBhMCQ04xEDAOBgNVBAgMB0JlaWppbmcxDzAN
+BgNVBAoMBmFsaWNlNDEPMA0GA1UECwwGYWxpY2U0MRcwFQYDVQQDDA53d3cuYWxp
+Y2U0Lm9yZzCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA2n//+r9tQMdNSPS5
+iv5E0phkhI9FukKl9IHxLGUZ+SGissVghLWDIl4wpxw/rHdAi+NjkV2f/rjhmHgL
+3pUR1zbcoZO8OTIbtumzS8Yg9EWDk5T2vTbiaW0ZVJDDKEW0YUXTWwdJ6XbYcCq3
+VWPVzynsWkpVnB43V195FXz2bfECAwEAAaMoMCYwCQYDVR0TBAIwADAZBgNVHREE
+EjAQgg53d3cuYWxpY2U0LmNvbTANBgkqhkiG9w0BAQUFAAOCAQEAJAttF3BwzDZS
+R0a/6kmAdhTbywoVWSdiWIODUWof0UsWCmGKKAWb/wuOXY+wPJeLigaf9eHn+h2J
+mnrw7KeGtNtzdmE4isKNoIWP9nKpfnWSAqETbmlgovibkw96/fqAfQK675rn7jYc
+xI1iMvlXcm2E9j7Ntq+/gGeDtHtCcTswsdKrBkwCnoZ8nypDF+7fI3qkD9vi9EPA
+SrZc+ZTB0UFt1ngf9T6JQOaIzGmwPljl5TUUOLPcvzpkPgaxc4AJvynv4fgE+xSq
+KbF57Vv2V3sr/VKj/ak6XaecCrTQSKPO3gmLY1OoPL0vmFaC/i8suRe0VtP+16EK
+7QQZAgTUEQ==
+-----END CERTIFICATE-----

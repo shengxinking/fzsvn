@@ -1,0 +1,43 @@
+1. vim使用ctags.
+
+a. 生成ctag文件
+   ctags -R dir1 ...
+
+b. 运行vim并使用ctags 
+   在ctag文件所在的目录运行vim或者运行命令
+   :set tags=<tag dir>
+
+c. vim中的ctags命令
+   :tag	<符号名字>	# 查找到符号并跳转到标签处, 如果不带参数,
+   			# 就跳转到最后的标签处.
+   Ctrl-]		# 跳转到当前光标的符号的定义处
+   Ctrl-t		# 跳回到上一个标签的位置.
+   :tags		# 显示当前的标签的位置
+   :stag <符号>		# 分割窗口并跳到符号定义处.
+   Ctrl-w]		# 分割窗口并跳到符号定义处.
+   :tselect		# 选择跳到标签的哪一个匹配处.
+   :tfirst		# 跳到第一个匹配.
+   :[count]tprevious	# 向前[count]个匹配.
+   :[count]tnext	# 向后[count]个匹配.
+   :tlast		# 最后一个匹配.
+   :ptag <符号>		# 打开一个预览窗口显示标签.
+   :pclose		# 关闭预览窗口.
+   :pedit <文件名字>	# 打开预览窗口编辑指定的文件. 例如编辑头文件.
+   :psearch <符号>	# 查找当前文件和当前文件包含的所有文件中的
+   			# 单词并且在预览窗口中显示.
+   
+
+2. vim常用命令
+
+   :split <文件名>	# 打开另外窗口显示文件, 窗口水平排列
+   :vsplit <文件名>	# 打开另外的窗口编辑文件, 窗口垂直排列
+   %			# 在#ifdef按下, 跳到#endif处, 再按跳回来.
+   [#			# 在#ifdef...#endif块中间按下,
+   			# 跳到开始处(#ifdef或者#elif.
+   ]#			# 在#ifdef...#endif块中间按下, 跳到结束处
+   			# (#else, #elif, #endif)
+   
+3. vim编辑模式
+
+   :%!xxd		# 进入16进制编辑模式.   
+

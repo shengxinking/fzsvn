@@ -1,0 +1,7 @@
+1. copy ipw2200-firmware to /lib/firmware
+
+2. using iwconfig to configure network
+
+3. config kernel ipw2200 as module.
+
+

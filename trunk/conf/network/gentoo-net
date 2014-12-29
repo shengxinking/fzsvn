@@ -1,0 +1,31 @@
+## begin of /etc/conf.d/net
+
+# the wired config tools
+modules=("iproute2")
+
+# dhcpd config.
+dns_domain_lo="org"
+config_eth0=("dhcpcd")
+
+# manual IPv4 config.
+config_enp3s0="172.22.14.61/24"
+routes_enp3s0="default via 172.22.14.1"
+
+# manual IPv6 config
+config_enp3s0="2001:470:19:ad7:14::61/80"
+routes_enp3s0="default via 2001:470:19:ad7:14::1"
+
+# manual IPv4+IPv6
+config_enp3s0="172.22.14.61/24 2001:470:19:ad7:14::61/80"
+routes_enp3s0="default via 172.22.14.1 
+default via 2001:470:19:ad7:14::1"
+
+# wireless config tools
+modules=("iwconfig")
+
+# wireless config.
+key_Forrest="[1] 0c255056df key [1] enc open"
+config_Forrest=("dhcpcd")
+preferred_aps=("Forrest")
+
+

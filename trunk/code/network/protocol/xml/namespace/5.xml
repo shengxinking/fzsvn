@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" ?>
+<!-- http://www.w3.org is bound to n1 and is the default -->
+<x xmlns:n1="http://www.w3.org" 
+   xmlns:n2="http://www.w3.org" >
+	<bad n1:a="1"  n2:a="2" />
+</x>
+

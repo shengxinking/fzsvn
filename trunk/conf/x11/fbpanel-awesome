@@ -1,0 +1,234 @@
+##  Begin of ~/.config/fbpanel/default
+
+# the fbpanel 6.0 config file
+
+# the global config
+Global {
+	edge = top
+	allign = center
+	margin = 0
+	widthtype = percent
+	width = 100
+	height = 24
+	transparent = true
+	tintcolor = #ffffff
+	alpha = 80
+	setdocktype = true
+	setpartialstrut = true
+	autohide = false
+	heightWhenHidden = 2
+	roundcorners = true
+	roundcornersradius = 8
+	layer = none
+}
+
+
+# the 2 pixel space
+Plugin {
+	type = space
+	config {
+		size = 2
+	}
+}
+
+
+# the menu
+Plugin {
+	type = menu
+	config {
+		# menu icon
+		#icon = start-here
+		icon = logo
+
+		# the top menu item
+		item {
+			name = Terminal
+			icon = terminal
+			action = urxvt
+		}
+		item {
+			name = Emacs
+			icon = emacs
+			action = emacs
+		}
+		item {
+			name = Chromium
+			icon = chromium-browser
+			action = chromium
+		}
+
+		separator {
+		}
+
+		# system menu, it's XDG memu in /usr/share/applications/
+		systemmenu {
+		}
+
+		separator {
+		}
+
+		# Restart/Logout menu
+		item {
+			name = Lock Screen
+			icon = gnome-lockscreen
+			action = slock
+		}
+	}
+}
+
+
+# the 16 pixel space
+Plugin {
+	type = space
+	config {
+		size = 16
+	}
+}
+
+
+# the launchbar.
+Plugin {
+	type = launchbar
+	config {
+		button {
+			icon = ROX-Filer
+			tooltip = File manager
+			action = rox
+		}
+		button {
+			icon = terminal
+			tooltip = Terminal
+			action = urxvt
+		}
+		button {
+			icon = emacs
+			tooltip = Emacs
+			action = emacs
+		}
+		button {
+			icon = gvim
+			tooltip = gvim
+			action = gvim
+		}
+		button {
+			icon = firefox
+			tooltip = Mozilla Firefox
+			action = firefox
+		}
+		button {
+			icon = chromium-browser
+			tooltip = Google Chrome
+			action = chromium
+		}
+	}
+}
+
+
+# the space
+Plugin {
+	type = space
+	config {
+		size = 4
+	}
+}
+
+
+# the show-desk icon
+Plugin {
+	type = wincmd
+	config {
+		icon = gnome-fs-desktop
+		tooltip = Left click to iconify all windows. Middle click to shade them.
+	}
+}
+
+
+# the space
+Plugin {
+	type = space
+	config {
+		size = 8
+	}
+}
+
+# the pager
+Plugin {
+	type = pager
+	config {
+		showwallpaper = false
+	}
+}
+
+# the space
+Plugin {
+	type = space
+	config {
+		size = 4
+	}
+}
+
+# the task bar
+Plugin {
+	type = taskbar
+	expand = true
+	config {
+		ShowIconified = true
+		ShowMapped    = true
+		ShowAllDesks  = false
+		tooltips = true
+		IconsOnly = false
+		MaxTaskWidth = 120
+	}
+}
+
+# the space
+Plugin {
+	type = space
+	config {
+		size = 12
+	}
+}
+
+
+# the system tray
+Plugin {
+	type = tray
+}
+
+plugin {
+	type = volume
+}
+
+# the space
+Plugin {
+	type = space
+	config {
+		size = 4
+	}
+}
+
+# Digital Clock
+#Plugin {
+#	type = dclock
+#	config {
+#		ShowSeconds = true
+#		HoursView = 24
+#		TooltipFmt = %A %x
+#       	#Action = xmessage Please define some command &
+#	}
+#}
+
+# Text Clock
+Plugin {
+	type = tclock
+	config {
+		ClockFmt = <b>%k:%M:%S %Y-%m-%d</b>
+		ShowCalendar = true
+		ShowTooltip = true
+		TooltipFmt = %A %x
+        #Action = xmessage Please define some command &
+	}
+}
+
+
+

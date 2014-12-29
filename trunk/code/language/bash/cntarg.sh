@@ -1,0 +1,4 @@
+function countargs
+{
+	echo "$# args"
+}

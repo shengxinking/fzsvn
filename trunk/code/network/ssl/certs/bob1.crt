@@ -1,0 +1,113 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1 (0x1)
+    Signature Algorithm: dsaWithSHA1
+        Issuer: C=CN, ST=Beijing, L=Haidian, O=bob, OU=bob, CN=www.bob.org/emailAddress=admin@bob.org
+        Validity
+            Not Before: Oct 19 14:31:21 2014 GMT
+            Not After : Oct 16 14:31:21 2024 GMT
+        Subject: C=CN, ST=Beijing, O=bob1, OU=bob1, CN=www.bob1.org
+        Subject Public Key Info:
+            Public Key Algorithm: dsaEncryption
+                pub: 
+                    2d:85:68:d3:c2:ef:49:6b:96:f6:a3:d1:d1:bf:f1:
+                    4b:c5:08:e0:a7:9c:75:83:30:b9:5d:6b:17:5f:96:
+                    12:4b:d5:85:81:8d:6c:df:87:3f:be:4f:97:ee:ce:
+                    7d:5f:0f:09:83:40:73:7b:1f:11:20:1d:0a:7c:16:
+                    db:f3:66:9c:7a:77:37:a8:3c:89:f2:4c:99:3e:a8:
+                    88:f5:f8:88:30:98:26:ca:36:43:ea:33:2e:d4:23:
+                    10:d5:0a:a5:60:48:6a:57:61:ea:ce:5d:27:6f:e8:
+                    15:18:a4:a9:a7:cf:9e:2f:03:19:2a:69:2b:0a:fc:
+                    94:e4:68:c6:69:83:cb:e5:63:e8:0a:8b:85:e5:bf:
+                    03:44:a6:90:15:4a:f9:99:93:37:a4:5e:bd:27:fa:
+                    3c:a7:23:e0:4c:6e:ca:b5:fd:25:2e:de:95:4f:a3:
+                    55:48:67:2e:cd:6d:16:3d:1a:d9:1e:77:db:66:51:
+                    1f:c8:0f:85:1f:c8:55:36:bb:49:47:47:c4:c5:34:
+                    57:48:c8:a9:03:41:fd:9f:fa:64:81:6c:ea:b8:3d:
+                    44:04:a1:f6:b2:cf:73:4e:3b:c0:77:a7:f2:bf:d9:
+                    ea:2d:dd:dc:77:d2:9e:69:21:17:c6:84:53:31:56:
+                    63:17:1a:42:e6:f8:08:7e:69:67:8b:ee:5d:7d:98:
+                    73
+                P:   
+                    00:e2:9e:0b:f0:69:0c:3c:91:e9:0a:6f:1d:90:74:
+                    9e:c2:00:51:a5:52:34:94:cf:aa:74:42:49:47:2b:
+                    3c:e8:cd:8a:01:56:3c:3a:fb:62:16:8f:9e:d2:6d:
+                    15:f5:cb:b5:5a:11:69:f9:39:35:ba:ee:ba:ef:d0:
+                    6c:92:37:a2:c8:78:11:c1:ed:01:56:6d:a8:7c:d8:
+                    99:6b:b7:b6:ef:38:83:c4:08:1b:f7:82:72:97:58:
+                    da:e4:24:66:c5:be:80:7d:fd:e5:b6:b9:9b:11:be:
+                    a4:d1:13:c8:ea:16:77:73:f9:97:99:68:93:94:a7:
+                    e5:f8:10:7a:68:68:4a:b7:54:1c:3e:af:ad:30:f7:
+                    d1:88:93:87:01:7e:bb:a2:c9:19:ab:2c:f2:f4:00:
+                    91:63:4d:6d:78:b1:15:73:f0:22:98:0d:f2:7b:a8:
+                    6a:2e:c9:1b:0d:ac:c2:c3:e7:f2:d5:6f:0c:ec:b5:
+                    53:9f:59:a4:6d:5d:30:45:6f:b4:ef:35:94:1a:c2:
+                    40:29:75:aa:24:ea:f8:8a:17:c1:db:ae:5c:c1:d6:
+                    40:4f:66:e5:e4:98:ef:aa:4b:49:25:78:d2:03:c9:
+                    a7:35:88:fd:13:8d:13:74:97:c8:57:ad:d2:bc:47:
+                    97:94:43:75:5f:04:9c:3f:eb:ab:96:80:6f:82:47:
+                    96:93
+                Q:   
+                    00:dc:e8:3d:94:ec:6a:61:45:27:d0:d4:4c:57:bb:
+                    b0:ba:a2:69:e7:73:16:04:4d:fc:43:6d:bb:9d:a4:
+                    aa:85:ed
+                G:   
+                    00:d6:c3:7e:b6:e0:0f:dd:21:7a:da:7e:6b:1c:69:
+                    53:f5:8c:42:16:62:53:80:15:42:45:52:9a:27:09:
+                    68:d2:2f:36:03:94:b1:50:f5:12:a7:b5:da:f9:69:
+                    f4:b9:86:e4:3b:6f:7f:04:8b:50:9b:da:3b:b3:f2:
+                    b3:90:a8:33:14:36:38:a3:25:1d:7e:02:64:6e:ad:
+                    17:ce:47:49:4b:07:ff:12:92:df:e9:64:2d:37:6b:
+                    c2:49:05:44:f0:ce:8b:87:94:69:76:f0:00:6d:aa:
+                    5a:6a:60:4f:4b:87:55:f1:0d:9a:87:f8:b8:11:7f:
+                    1d:bf:8e:14:74:5b:8f:f3:9c:ce:99:13:31:4c:67:
+                    23:08:eb:7c:42:e6:8d:fd:7e:56:4a:08:b8:87:93:
+                    d5:f1:48:ca:4f:d4:0f:1b:73:7f:da:db:09:7a:bd:
+                    e1:a1:ee:a3:a1:80:58:1b:4a:54:3c:ba:b7:e0:db:
+                    bd:e1:e0:5d:c4:b8:85:fa:43:81:3e:75:05:4c:e2:
+                    16:4f:b9:de:cd:a4:30:1e:07:4e:c5:1a:25:a9:b5:
+                    03:f5:a8:48:33:52:61:4a:6f:3f:33:23:f9:05:85:
+                    41:86:9f:11:ea:e6:b0:4c:e3:4e:a7:f1:c0:41:7d:
+                    2a:be:f6:a2:83:f8:5f:28:d0:70:20:f5:ab:76:b8:
+                    68:1a
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Subject Alternative Name: 
+                DNS:www.bob1.com
+    Signature Algorithm: dsaWithSHA1
+         r:   
+             25:18:0e:ae:7c:8a:70:42:1b:77:1e:4f:cf:c9:d4:
+             5d:18:e2:3b:da
+         s:   
+             13:e5:9a:58:01:2c:45:10:39:00:78:16:3a:17:89:
+             4a:6f:ca:95:aa
+-----BEGIN CERTIFICATE-----
+MIIEwDCCBICgAwIBAgIBATAJBgcqhkjOOAQDMIGBMQswCQYDVQQGEwJDTjEQMA4G
+A1UECAwHQmVpamluZzEQMA4GA1UEBwwHSGFpZGlhbjEMMAoGA1UECgwDYm9iMQww
+CgYDVQQLDANib2IxFDASBgNVBAMMC3d3dy5ib2Iub3JnMRwwGgYJKoZIhvcNAQkB
+Fg1hZG1pbkBib2Iub3JnMB4XDTE0MTAxOTE0MzEyMVoXDTI0MTAxNjE0MzEyMVow
+VDELMAkGA1UEBhMCQ04xEDAOBgNVBAgMB0JlaWppbmcxDTALBgNVBAoMBGJvYjEx
+DTALBgNVBAsMBGJvYjExFTATBgNVBAMMDHd3dy5ib2IxLm9yZzCCA0cwggI6Bgcq
+hkjOOAQBMIICLQKCAQEA4p4L8GkMPJHpCm8dkHSewgBRpVI0lM+qdEJJRys86M2K
+AVY8OvtiFo+e0m0V9cu1WhFp+Tk1uu6679BskjeiyHgRwe0BVm2ofNiZa7e27ziD
+xAgb94Jyl1ja5CRmxb6Aff3ltrmbEb6k0RPI6hZ3c/mXmWiTlKfl+BB6aGhKt1Qc
+Pq+tMPfRiJOHAX67oskZqyzy9ACRY01teLEVc/AimA3ye6hqLskbDazCw+fy1W8M
+7LVTn1mkbV0wRW+07zWUGsJAKXWqJOr4ihfB265cwdZAT2bl5JjvqktJJXjSA8mn
+NYj9E40TdJfIV63SvEeXlEN1XwScP+urloBvgkeWkwIhANzoPZTsamFFJ9DUTFe7
+sLqiaedzFgRN/ENtu52kqoXtAoIBAQDWw3624A/dIXrafmscaVP1jEIWYlOAFUJF
+UponCWjSLzYDlLFQ9RKntdr5afS5huQ7b38Ei1Cb2juz8rOQqDMUNjijJR1+AmRu
+rRfOR0lLB/8Skt/pZC03a8JJBUTwzouHlGl28ABtqlpqYE9Lh1XxDZqH+LgRfx2/
+jhR0W4/znM6ZEzFMZyMI63xC5o39flZKCLiHk9XxSMpP1A8bc3/a2wl6veGh7qOh
+gFgbSlQ8urfg273h4F3EuIX6Q4E+dQVM4hZPud7NpDAeB07FGiWptQP1qEgzUmFK
+bz8zI/kFhUGGnxHq5rBM406n8cBBfSq+9qKD+F8o0HAg9at2uGgaA4IBBQACggEA
+LYVo08LvSWuW9qPR0b/xS8UI4KecdYMwuV1rF1+WEkvVhYGNbN+HP75Pl+7OfV8P
+CYNAc3sfESAdCnwW2/NmnHp3N6g8ifJMmT6oiPX4iDCYJso2Q+ozLtQjENUKpWBI
+aldh6s5dJ2/oFRikqafPni8DGSppKwr8lORoxmmDy+Vj6AqLheW/A0SmkBVK+ZmT
+N6RevSf6PKcj4ExuyrX9JS7elU+jVUhnLs1tFj0a2R5322ZRH8gPhR/IVTa7SUdH
+xMU0V0jIqQNB/Z/6ZIFs6rg9RASh9rLPc047wHen8r/Z6i3d3HfSnmkhF8aEUzFW
+YxcaQub4CH5pZ4vuXX2Yc6MmMCQwCQYDVR0TBAIwADAXBgNVHREEEDAOggx3d3cu
+Ym9iMS5jb20wCQYHKoZIzjgEAwMvADAsAhQlGA6ufIpwQht3Hk/PydRdGOI72gIU
+E+WaWAEsRRA5AHgWOheJSm/Klao=
+-----END CERTIFICATE-----

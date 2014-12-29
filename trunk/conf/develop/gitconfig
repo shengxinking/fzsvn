@@ -1,0 +1,10 @@
+[user]
+	email = thangguo@gmail.com
+	name = Forrest.Zhang
+[http]
+	proxy = 127.0.0.1:8087
+	sslVerify = false
+[push]
+	default = simple
+[core]
+	excludesfile = /home/data/source/fzgit/conf/develop/gitignore

@@ -1,0 +1,14 @@
+netdevice介绍:
+
+
+
+netdevice函数:
+netif_rx();
+net_tx_action();
+dev_queue_xmit();
+
+
+softirq函数:
+net_rx_action(struct softirq_action *h);
+net_tx_action(struct softirq_action *h);
+

@@ -1,0 +1,41 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 2 (0x2)
+    Signature Algorithm: ecdsa-with-SHA1
+        Issuer: C=CN, ST=Beijing, O=carl1, OU=carl1, CN=www.carl1.org
+        Validity
+            Not Before: Oct 19 15:02:51 2014 GMT
+            Not After : Oct 16 15:02:51 2024 GMT
+        Subject: C=CN, ST=Beijing, O=carl2, OU=carl2, CN=www.carl2.org
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (192 bit)
+                pub: 
+                    04:1c:df:75:53:b0:be:ee:a4:21:ee:a5:b3:88:61:
+                    2f:04:c3:d7:27:f3:a2:bf:be:bf:29:32:82:1d:4b:
+                    50:6f:58:07:6c:64:c5:87:03:60:ec:38:7b:b2:33:
+                    5c:71:65:cc
+                ASN1 OID: prime192v1
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:TRUE
+            X509v3 Subject Alternative Name: 
+                DNS:www.carl2.com
+    Signature Algorithm: ecdsa-with-SHA1
+         30:40:02:1e:72:55:1a:43:bb:6b:52:7d:d3:c5:2e:d8:94:00:
+         77:bc:f6:c3:e8:c2:77:61:d1:89:b4:80:d9:8d:5d:60:02:1e:
+         4e:97:5b:a7:b9:34:f4:b2:a0:6e:ce:6d:23:10:93:22:b4:4f:
+         ea:6d:de:5a:0a:ca:60:10:4d:ba:dc:cd
+-----BEGIN CERTIFICATE-----
+MIIBsDCCAVygAwIBAgIBAjAJBgcqhkjOPQQBMFcxCzAJBgNVBAYTAkNOMRAwDgYD
+VQQIDAdCZWlqaW5nMQ4wDAYDVQQKDAVjYXJsMTEOMAwGA1UECwwFY2FybDExFjAU
+BgNVBAMMDXd3dy5jYXJsMS5vcmcwHhcNMTQxMDE5MTUwMjUxWhcNMjQxMDE2MTUw
+MjUxWjBXMQswCQYDVQQGEwJDTjEQMA4GA1UECAwHQmVpamluZzEOMAwGA1UECgwF
+Y2FybDIxDjAMBgNVBAsMBWNhcmwyMRYwFAYDVQQDDA13d3cuY2FybDIub3JnMEkw
+EwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAEHN91U7C+7qQh7qWziGEvBMPXJ/Oiv76/
+KTKCHUtQb1gHbGTFhwNg7Dh7sjNccWXMoyowKDAMBgNVHRMEBTADAQH/MBgGA1Ud
+EQQRMA+CDXd3dy5jYXJsMi5jb20wCQYHKoZIzj0EAQNDADBAAh5yVRpDu2tSfdPF
+LtiUAHe89sPowndh0Ym0gNmNXWACHk6XW6e5NPSyoG7ObSMQkyK0T+pt3loKymAQ
+TbrczQ==
+-----END CERTIFICATE-----

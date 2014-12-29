@@ -1,0 +1,39 @@
+1. tar xf rxvt-unicode-8.4.tar.gz
+#tar xf rxvt-unicode-8.4.tar.gz
+#cd rxvt-unicode-8.4
+
+2. configure
+
+#./configure --prefix=/usr --enable-everything --enable-xim --x-includes=/usr/X11R7/include/ --x-libraries=/usr/X11R7/lib/ --enable-xft --with-x --enable-transparency --enable-fading --enable-rxvt-scroll --enable-plain-scroll --enable-mousewheel --enable-smart-resize
+
+3. make and make install
+# make && make install
+
+4. set .Xdefaults, add following contents
+!! Begin of URxvt
+URxvt.font:xft:Bitstream Vera Sans Mono:pixelsize=16,xft:WenQuanYi Bitmap Song:pixsize=12
+URxvt.depth:24
+
+!! Here is URxvt colors
+URxvt.background:black
+URxvt.foreground:white
+URxvt.colorBD:yellow
+URxvt.colorUL:green
+
+
+!! Scroll bar
+URxvt.scrollBar_right:True
+URxvt.saveLines:10000
+URxvt.internalBorder:2
+URxvt.externalBorder:2
+URxvt.linespace:4
+
+!! Input Method
+URxvt.preeditType: Root
+URxvt.inputMethod:fcitx
+URxvt.imLocale:zh_CN.UTF-8
+URxvt.imFont:xft:WenQuanYi Bitmap Song:pixsize=12
+
+
+!! End of URxvt
+

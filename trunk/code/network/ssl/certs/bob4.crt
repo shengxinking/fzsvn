@@ -1,0 +1,78 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 4 (0x4)
+    Signature Algorithm: dsaWithSHA1
+        Issuer: C=CN, ST=Beijing, O=bob3, OU=bob3, CN=www.bob3.org
+        Validity
+            Not Before: Oct 19 14:40:30 2014 GMT
+            Not After : Oct 16 14:40:30 2024 GMT
+        Subject: C=CN, ST=Beijing, O=bob4, OU=bob4, CN=www.bob4.org
+        Subject Public Key Info:
+            Public Key Algorithm: dsaEncryption
+                pub: 
+                    23:a6:a9:c5:0f:6e:a4:82:35:2e:5f:35:a7:3d:96:
+                    0c:96:f1:5a:cf:26:82:8b:4b:25:3c:79:f7:0b:62:
+                    7a:9c:cd:37:d0:6b:4f:33:fb:af:05:0f:a7:54:2b:
+                    2b:34:51:5e:8b:f6:f6:b0:b8:3e:40:a8:f4:f3:54:
+                    af:c7:61:ab:98:06:f8:de:26:6b:96:4f:9e:8a:2e:
+                    5c:52:c6:86:74:10:d4:31:4d:38:64:68:ba:e1:ba:
+                    15:b0:a2:f0:98:40:e0:7b:2c:63:bb:1e:79:74:fa:
+                    64:5b:44:df:79:b8:5f:2a:2c:68:5a:b5:4d:ac:de:
+                    d0:81:ba:12:08:80:52:95
+                P:   
+                    00:ac:eb:7d:3c:bd:1c:fd:ae:cf:c8:1d:e5:9d:b7:
+                    c8:88:a3:4e:42:c3:e7:b0:81:ac:a2:48:e7:18:07:
+                    0b:42:cc:4f:59:a6:bd:4c:bb:ee:01:e5:f4:89:5e:
+                    04:b8:20:22:06:ca:12:f9:a6:cb:a7:b0:14:15:5c:
+                    60:2c:85:6d:8f:b6:f5:67:db:73:4e:ac:c5:d7:45:
+                    f5:ee:67:6c:9d:87:a0:1d:c1:44:3e:75:41:de:1b:
+                    3d:0f:ab:88:1d:e3:71:47:48:ba:35:7a:61:19:f8:
+                    28:f5:e9:19:7b:ca:97:0f:88:07:48:34:0d:66:46:
+                    25:7c:7a:8e:a2:8d:be:b4:c1
+                Q:   
+                    00:87:3c:c2:57:61:45:f0:24:47:4c:ba:53:08:79:
+                    18:9d:57:ad:5e:a9
+                G:   
+                    78:30:f8:68:b7:ce:af:b2:c9:d5:84:e0:74:62:6d:
+                    86:ff:ba:42:6f:4f:48:3d:7e:c5:cc:ff:d0:27:7d:
+                    16:50:9c:8a:3c:e8:06:94:1c:6b:61:f3:b3:22:f2:
+                    13:1f:55:02:da:dd:4d:35:34:cd:27:72:e1:b5:7a:
+                    67:18:18:76:59:23:ec:2d:05:7c:60:e1:98:a2:bf:
+                    26:91:a1:47:89:36:38:3e:3d:c9:da:70:87:b6:bb:
+                    32:1c:97:5a:46:9f:b5:36:45:14:14:08:29:67:db:
+                    15:75:97:ee:38:e8:60:34:bb:e2:3f:f1:71:fa:da:
+                    d6:93:24:82:b3:ba:be:ef
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Subject Alternative Name: 
+                DNS:www.bob4.com
+    Signature Algorithm: dsaWithSHA1
+         r:   
+             02:35:e3:cd:33:cb:1f:a6:d7:a1:eb:3f:4b:68:f6:
+             f5:73:c0:65:35:59:0b:8d:c1:b8:85:fa:f6:73:ec:
+             a2:18
+         s:   
+             0b:22:26:7d:5e:94:73:30:f6:d4:5c:70:93:a2:d5:
+             2e:1b:7f:23:c7:f5:50:b8:de:c2:64:99:00:e9:4e:
+             7d:9e
+-----BEGIN CERTIFICATE-----
+MIIDGTCCAsGgAwIBAgIBBDAJBgcqhkjOOAQDMFQxCzAJBgNVBAYTAkNOMRAwDgYD
+VQQIDAdCZWlqaW5nMQ0wCwYDVQQKDARib2IzMQ0wCwYDVQQLDARib2IzMRUwEwYD
+VQQDDAx3d3cuYm9iMy5vcmcwHhcNMTQxMDE5MTQ0MDMwWhcNMjQxMDE2MTQ0MDMw
+WjBUMQswCQYDVQQGEwJDTjEQMA4GA1UECAwHQmVpamluZzENMAsGA1UECgwEYm9i
+NDENMAsGA1UECwwEYm9iNDEVMBMGA1UEAwwMd3d3LmJvYjQub3JnMIIBtjCCASsG
+ByqGSM44BAEwggEeAoGBAKzrfTy9HP2uz8gd5Z23yIijTkLD57CBrKJI5xgHC0LM
+T1mmvUy77gHl9IleBLggIgbKEvmmy6ewFBVcYCyFbY+29Wfbc06sxddF9e5nbJ2H
+oB3BRD51Qd4bPQ+riB3jcUdIujV6YRn4KPXpGXvKlw+IB0g0DWZGJXx6jqKNvrTB
+AhUAhzzCV2FF8CRHTLpTCHkYnVetXqkCgYB4MPhot86vssnVhOB0Ym2G/7pCb09I
+PX7FzP/QJ30WUJyKPOgGlBxrYfOzIvITH1UC2t1NNTTNJ3LhtXpnGBh2WSPsLQV8
+YOGYor8mkaFHiTY4Pj3J2nCHtrsyHJdaRp+1NkUUFAgpZ9sVdZfuOOhgNLviP/Fx
++trWkySCs7q+7wOBhAACgYAjpqnFD26kgjUuXzWnPZYMlvFazyaCi0slPHn3C2J6
+nM030GtPM/uvBQ+nVCsrNFFei/b2sLg+QKj081Svx2GrmAb43iZrlk+eii5cUsaG
+dBDUMU04ZGi64boVsKLwmEDgeyxjux55dPpkW0TfebhfKixoWrVNrN7QgboSCIBS
+laMmMCQwCQYDVR0TBAIwADAXBgNVHREEEDAOggx3d3cuYm9iNC5jb20wCQYHKoZI
+zjgEAwNHADBEAiACNePNM8sfpteh6z9LaPb1c8BlNVkLjcG4hfr2c+yiGAIgCyIm
+fV6UczD21Fxwk6LVLht/I8f1ULjewmSZAOlOfZ4=
+-----END CERTIFICATE-----

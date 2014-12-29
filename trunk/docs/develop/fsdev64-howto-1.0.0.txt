@@ -1,0 +1,1201 @@
+fsdev64 compile tool chain howto.
+
+A. Prepare:
+echo $LFS
+export LFS=/mnt/lfs
+mkdir -v $LFS
+mkdir -v $LFS/tools
+mkdir -v $LFS/sources
+ln -sv $LFS/tools /
+groupadd lfs
+useradd -s /bin/bash -g lfs -m -k /dev/null lfs
+chown -v lfs $LFS/tools
+chown -v lfs $LFS/sources
+su - lfs
+
+cat > ~/.bash_profile << "EOF"
+exec env -i HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' /bin/bash
+EOF
+
+cat > ~/.bashrc << "EOF"
+set +h
+umask 022
+LFS=/mnt/lfs
+LC_ALL=POSIX
+LFS_TGT=$(uname -m)-lfs-linux-gnu
+PATH=/tools/bin:/bin:/usr/bin
+export LFS LC_ALL LFS_TGT PATH
+EOF
+
+B. Install temp compile tools into /tools
+
+1. Binutils-2.23.2 - Pass 1
+tar xf binutils-2.23.2.tar.bz2
+cd binutils-2.23.2
+sed -i -e 's/@colophon/@@colophon/' \
+       -e 's/doc@cygnus.com/doc@@cygnus.com/' bfd/doc/bfd.texinfo
+mkdir -v ../binutils-build
+cd ../binutils-build
+../binutils-2.23.2/configure   \
+    --prefix=/tools            \
+    --with-sysroot=$LFS        \
+    --with-lib-path=/tools/lib \
+    --target=$LFS_TGT          \
+    --disable-nls              \
+    --disable-werror
+make
+case $(uname -m) in
+  x86_64) mkdir -v /tools/lib && ln -sv lib /tools/lib64 ;;
+esac
+make install
+cd ..
+rm -rf binutils-build binutils-2.23.2
+
+2. GCC-4.8.1 - Pass 1
+tar xf gcc-4.8.1.tar.bz2
+cd gcc-4.8.1
+tar -Jxf ../mpfr-3.1.2.tar.xz
+mv -v mpfr-3.1.2 mpfr
+tar -Jxf ../gmp-5.1.2.tar.xz
+mv -v gmp-5.1.2 gmp
+tar -zxf ../mpc-1.0.1.tar.gz
+mv -v mpc-1.0.1 mpc
+
+for file in \
+ $(find gcc/config -name linux64.h -o -name linux.h -o -name sysv4.h)
+do
+  cp -uv $file{,.orig}
+  sed -e 's@/lib\(64\)\?\(32\)\?/ld@/tools&@g' \
+      -e 's@/usr@/tools@g' $file.orig > $file
+  echo '
+#undef STANDARD_STARTFILE_PREFIX_1
+#undef STANDARD_STARTFILE_PREFIX_2
+#define STANDARD_STARTFILE_PREFIX_1 "/tools/lib/"
+#define STANDARD_STARTFILE_PREFIX_2 ""' >> $file
+  touch $file.orig
+done
+
+sed -i '/k prot/agcc_cv_libc_provides_ssp=yes' gcc/configure
+
+mkdir -v ../gcc-build
+cd ../gcc-build
+
+../gcc-4.8.1/configure                               \
+    --target=$LFS_TGT                                \
+    --prefix=/tools                                  \
+    --with-sysroot=$LFS                              \
+    --with-newlib                                    \
+    --without-headers                                \
+    --with-local-prefix=/tools                       \
+    --with-native-system-header-dir=/tools/include   \
+    --disable-nls                                    \
+    --disable-shared                                 \
+    --disable-multilib                               \
+    --disable-decimal-float                          \
+    --disable-threads                                \
+    --disable-libatomic                              \
+    --disable-libgomp                                \
+    --disable-libitm                                 \
+    --disable-libmudflap                             \
+    --disable-libquadmath                            \
+    --disable-libsanitizer                           \
+    --disable-libssp                                 \
+    --disable-libstdc++-v3                           \
+    --enable-languages=c,c++                         \
+    --with-mpfr-include=$(pwd)/../gcc-4.8.1/mpfr/src \
+    --with-mpfr-lib=$(pwd)/mpfr/src/.libs
+make
+make install
+ln -sv libgcc.a `$LFS_TGT-gcc -print-libgcc-file-name | sed 's/libgcc/&_eh/'`
+cd ..
+rm -rf gcc-build gcc-4.8.1
+
+3. Linux-3.10.10 API Headers 
+tar xf linux-3.10.10.tar.xz
+cd linux-3.10.10
+make mrproper
+make headers_check
+make INSTALL_HDR_PATH=dest headers_install
+cp -rv dest/include/* /tools/include
+cd ..
+rm -rf linux-3.10.10
+
+4. Glibc-2.18 
+tar xf glibc-2.18.tar.xz
+cd glibc-2.18
+if [ ! -r /usr/include/rpc/types.h ]; then
+  su -c 'mkdir -p /usr/include/rpc'
+  su -c 'cp -v sunrpc/rpc/*.h /usr/include/rpc'
+fi
+sed -i -e 's/static __m128i/inline &/' sysdeps/x86_64/multiarch/strstr.c
+
+mkdir -v ../glibc-build
+cd ../glibc-build
+
+../glibc-2.18/configure                             \
+      --prefix=/tools                               \
+      --host=$LFS_TGT                               \
+      --build=$(../glibc-2.18/scripts/config.guess) \
+      --disable-profile                             \
+      --enable-kernel=2.6.32                        \
+      --with-headers=/tools/include                 \
+      libc_cv_forced_unwind=yes                     \
+      libc_cv_ctors_header=yes                      \
+      libc_cv_c_cleanup=yes
+
+make
+make install
+
+echo 'main(){}' > dummy.c
+$LFS_TGT-gcc dummy.c
+readelf -l a.out | grep ': /tools'
+	[Requesting program interpreter: /tools/lib/ld-linux.so.2]
+rm -v dummy.c a.out
+cd ..
+rm -rf glibc-build glibc-2.18
+
+5. Libstdc++-4.8.1
+tar xf gcc-4.8.1.tar.bz2
+cd gcc-4.8.1
+mkdir -pv ../gcc-build
+cd ../gcc-build
+../gcc-4.8.1/libstdc++-v3/configure \
+    --host=$LFS_TGT                      \
+    --prefix=/tools                      \
+    --disable-multilib                   \
+    --disable-shared                     \
+    --disable-nls                        \
+    --disable-libstdcxx-threads          \
+    --disable-libstdcxx-pch              \
+    --with-gxx-include-dir=/tools/$LFS_TGT/include/c++/4.8.1
+make
+make install
+cd ..
+rm -rf gcc-build gcc-4.8.1
+
+6. Binutils-2.23.2 - Pass 2 
+tar xf binutils-2.23.2.tar.bz2
+cd binutils-2.23.2
+sed -i -e 's/@colophon/@@colophon/' \
+       -e 's/doc@cygnus.com/doc@@cygnus.com/' bfd/doc/bfd.texinfo
+mkdir -v ../binutils-build
+cd ../binutils-build
+CC=$LFS_TGT-gcc                \
+AR=$LFS_TGT-ar                 \
+RANLIB=$LFS_TGT-ranlib         \
+../binutils-2.23.2/configure   \
+    --prefix=/tools            \
+    --disable-nls              \
+    --with-lib-path=/tools/lib \
+    --with-sysroot
+make
+make install
+
+make -C ld clean
+make -C ld LIB_PATH=/fsdev64/lib
+cp -v ld/ld-new /tools/bin
+
+cd ..
+rm -rf binutils-build binutils-2.23.2
+
+7. GCC-4.8.1 - Pass 2 
+tar xf gcc-4.8.1.tar.bz2
+cd gcc-4.8.1
+cat gcc/limitx.h gcc/glimits.h gcc/limity.h > \
+  `dirname $($LFS_TGT-gcc -print-libgcc-file-name)`/include-fixed/limits.h
+cp -v gcc/Makefile.in{,.tmp}
+sed 's/^T_CFLAGS =$/& -fomit-frame-pointer/' gcc/Makefile.in.tmp \
+  > gcc/Makefile.in
+
+for file in \
+ $(find gcc/config -name linux64.h -o -name linux.h -o -name sysv4.h)
+do
+  cp -uv $file{,.orig}
+  sed -e 's@/lib\(64\)\?\(32\)\?/ld@/tools&@g' \
+  -e 's@/usr@/tools@g' $file.orig > $file
+  echo '
+#undef STANDARD_STARTFILE_PREFIX_1
+#undef STANDARD_STARTFILE_PREFIX_2
+#define STANDARD_STARTFILE_PREFIX_1 "/tools/lib/"
+#define STANDARD_STARTFILE_PREFIX_2 ""' >> $file
+  touch $file.orig
+done
+
+tar -Jxf ../mpfr-3.1.2.tar.xz
+mv -v mpfr-3.1.2 mpfr
+tar -Jxf ../gmp-5.1.2.tar.xz
+mv -v gmp-5.1.2 gmp
+tar -zxf ../mpc-1.0.1.tar.gz
+mv -v mpc-1.0.1 mpc
+
+mkdir -v ../gcc-build
+cd ../gcc-build
+
+CC=$LFS_TGT-gcc                                      \
+CXX=$LFS_TGT-g++                                     \
+AR=$LFS_TGT-ar                                       \
+RANLIB=$LFS_TGT-ranlib                               \
+../gcc-4.8.1/configure                               \
+    --prefix=/tools                                  \
+    --with-local-prefix=/tools                       \
+    --with-native-system-header-dir=/tools/include   \
+    --enable-clocale=gnu                             \
+    --enable-shared                                  \
+    --enable-threads=posix                           \
+    --enable-__cxa_atexit                            \
+    --enable-languages=c,c++                         \
+    --disable-libstdcxx-pch                          \
+    --disable-multilib                               \
+    --disable-bootstrap                              \
+    --disable-libgomp                                \
+    --with-mpfr-include=$(pwd)/../gcc-4.8.1/mpfr/src \
+    --with-mpfr-lib=$(pwd)/mpfr/src/.libs
+
+make
+make install
+ln -sv gcc /tools/bin/cc
+
+echo 'main(){}' > dummy.c
+cc dummy.c
+readelf -l a.out | grep ': /tools'
+	[Requesting program interpreter: /tools/lib/ld-linux.so.2]
+rm -v dummy.c a.out
+
+cd ..
+rm -rf gcc-build gcc-4.8.1
+
+8. Tcl-8.6.0 
+tar xf tcl8.6.0-src.tar.gz
+cd tcl8.6.0
+sed -i s/500/5000/ generic/regc_nfa.c
+cd unix
+./configure --prefix=/tools
+make
+TZ=UTC make test
+make install
+chmod -v u+w /tools/lib/libtcl8.6.so
+make install-private-headers
+ln -sv tclsh8.6 /tools/bin/tclsh
+cd ../../
+rm -rf tcl8.6.0
+
+9. Expect-5.45 
+tar xf expect5.45.tar.gz
+cd expect5.45
+cp -v configure{,.orig}
+sed 's:/usr/local/bin:/bin:' configure.orig > configure
+./configure --prefix=/tools --with-tcl=/tools/lib \
+  --with-tclinclude=/tools/include
+make
+make test
+make SCRIPTS="" install
+cd ..
+rm -rf expect5.45
+
+10. DejaGNU-1.5.1
+tar xf dejagnu-1.5.1.tar.gz
+cd dejagnu-1.5.1
+./configure --prefix=/tools
+make install
+make check
+cd ..
+rm -rf dejagnu-1.5.1
+
+11. Check-0.9.10 
+tar xf check-0.9.10.tar.gz
+cd check-0.9.10
+./configure --prefix=/tools
+make
+make check
+make install
+cd ..
+rm -rf check-0.9.10
+
+12. Ncurses-5.9
+tar xf ncurses-5.9.tar.gz
+cd ncurses-5.9
+./configure --prefix=/tools --with-shared \
+    --without-debug --without-ada --enable-overwrite
+make
+make install
+cd ..
+rm -rf ncurses-5.9
+
+13. Bash-4.2 
+tar xf bash-4.2.tar.gz
+cd bash-4.2
+patch -Np1 -i ../bash-4.2-fixes-12.patch
+./configure --prefix=/tools --without-bash-malloc
+make
+make tests
+make install
+ln -sv bash /tools/bin/sh
+cd ..
+rm -rf bash-4.2
+
+14. Bzip2-1.0.6 
+tar xf bzip2-1.0.6.tar.gz
+cd bzip2-1.0.6
+make 
+make PREFIX=/tools install
+cd ..
+rm -rf bzip2-1.0.6
+
+15. Coreutils-8.21
+tar xf coreutils-8.21.tar.xz
+cd coreutils-8.21
+./configure --prefix=/tools --enable-install-program=hostname
+make
+make RUN_EXPENSIVE_TESTS=yes check
+make install
+cd .. 
+rm -rf coreutils-8.21
+
+16. Diffutils-3.3
+tar xf diffutils-3.3.tar.xz
+cd diffutils-3.3
+./configure --prefix=/tools
+make
+make check
+make install
+cd ..
+rm -rf diffutils-3.3
+
+17. File-5.14 
+tar xf file-5.14.tar.gz
+cd file-5.14
+./configure --prefix=/tools
+make
+make check
+make install
+cd ..
+rm -rf file-5.14
+
+18. Findutils-4.4.2 
+tar xf findutils-4.4.2.tar.gz
+cd findutils-4.4.2
+./configure --prefix=/tools
+make
+make check
+make install
+cd ..
+rm -rf findutils-4.4.2
+
+19. Gawk-4.1.0 
+tar xf gawk-4.1.0.tar.xz
+cd gawk-4.1.0
+./configure --prefix=/tools
+make
+make check
+make install
+cd ..
+rm -rf gawk-4.1.0
+
+20. Gettext-0.18.3 
+tar xf gettext-0.18.3.tar.gz
+cd gettext-0.18.3
+cd gettext-tools
+EMACS="no" ./configure --prefix=/tools --disable-shared
+make -C gnulib-lib
+make -C src msgfmt
+cp -v src/msgfmt /tools/bin
+cd ../../
+rm -rf gettext-0.18.3
+
+21. Grep-2.14 
+tar xf grep-2.14.tar.xz
+cd grep-2.14
+./configure --prefix=/tools
+make
+make check
+make install
+cd ..
+rm -rf grep-2.14
+
+22. Gzip-1.6
+tar xf gzip-1.6.tar.xz
+cd gzip-1.6
+./configure --prefix=/tools
+make
+make check
+make install
+cd ..
+rm -rf gzip-1.6
+
+23. M4-1.4.16
+tar xf m4-1.4.16.tar.bz2
+cd m4-1.4.16
+sed -i -e '/gets is a/d' lib/stdio.in.h
+./configure --prefix=/tools
+make
+make check
+make install
+cd ..
+rm -rf m4-1.4.16
+
+24. Make-3.82 
+tar xf make-3.82.tar.bz2
+cd make-3.82
+./configure --prefix=/tools
+make
+make check
+make install
+cd ..
+rm -rf make-3.82
+
+25. Patch-2.7.1 
+tar xf patch-2.7.1.tar.xz
+cd patch-2.7.1
+./configure --prefix=/tools
+make
+make check
+make install
+cd ..
+rm -rf patch-2.7.1
+
+26. Perl-5.18.1 
+tar xf perl-5.18.1.tar.bz2
+cd perl-5.18.1
+patch -Np1 -i ../perl-5.18.1-libc-1.patch
+sh Configure -des -Dprefix=/tools
+make
+cp -v perl cpan/podlators/pod2man /tools/bin
+mkdir -pv /tools/lib/perl5/5.18.1
+cp -Rv lib/* /tools/lib/perl5/5.18.1
+cd ..
+rm -rf perl-5.18.1
+
+27. Sed-4.2.2
+tar xf sed-4.2.2.tar.bz2
+cd sed-4.2.2
+./configure --prefix=/tools
+make
+make check
+make install
+cd ..
+rm -rf sed-4.2.2
+
+28. Tar-1.26
+tar xf tar-1.26.tar.bz2
+cd tar-1.26
+sed -i -e '/gets is a/d' gnu/stdio.in.h
+./configure --prefix=/tools
+make 
+make check
+make install
+cd ..
+rm -rf tar-1.26
+
+
+29. Texinfo-5.1
+tar xf texinfo-5.1.tar.xz
+cd texinfo-5.1
+./configure --prefix=/tools
+make 
+make check
+make install
+cd ..
+rm -rf texinfo-5.1
+
+30. Xz-5.0.5
+tar xf xz-5.0.5.tar.xz
+cd xz-5.0.5
+./configure --prefix=/tools
+make
+make check
+make install
+cd ..
+rm -rf xz-5.0.5
+
+
+C. Build fsdev compile tool-chain.
+
+1. Create build environment.
+su -c root
+export LFS=/mnt/lfs
+mkdir -v $LFS/{dev,proc,sys,bin,etc,tmp}
+mknod -m 600 $LFS/dev/console c 5 1
+mknod -m 666 $LFS/dev/null c 1 3
+mount -v --bind /dev $LFS/dev
+mount -vt devpts devpts $LFS/dev/pts -o gid=5,mode=620
+mount -vt proc proc $LFS/proc
+mount -vt sysfs sysfs $LFS/sys
+mount -vt tmpfs tmpfs $LFS/tmp
+if [ -h $LFS/dev/shm ]; then
+  link=$(readlink $LFS/dev/shm)
+  mkdir -p $LFS/$link
+  mount -vt tmpfs shm $LFS/$link
+  unset link
+else
+  mount -vt tmpfs shm $LFS/dev/shm
+fi
+
+chroot "$LFS" /tools/bin/env -i \
+    HOME=/root                  \
+    TERM="$TERM"                \
+    PS1='\u:\w\$ '              \
+    PATH=/fsdev64/bin:/fsdev64/sbin:/tools/bin:/bin \
+    /tools/bin/bash --login +h
+
+mkdir -pv /fsdev64
+mkdir -pv /fsdev64/{etc,bin,sbin,lib,share,include}
+mkdir -pv /fsdev64/share/{zoneinfo,terminfo,man}
+mkdir -pv /fsdev64/share/man/man{1..8}
+
+case $(uname -m) in
+ x86_64) ln -sv lib /fsdev64/lib64 ;;
+esac
+
+ln -sv /tools/bin/{bash,cat,echo,pwd,stty} /bin
+ln -sv bash /bin/sh
+
+ln -sv /tools/bin/perl /fsdev64/bin
+ln -sv /tools/lib/libgcc_s.so{,.1} /fsdev64/lib
+ln -sv /tools/lib/libstdc++.so{,.6} /fsdev64/lib
+sed 's/tools/fsdev64/' /tools/lib/libstdc++.la > /fsdev64/lib/libstdc++.la
+
+ln -sv /proc/self/mounts /etc/mtab
+
+cat > /etc/passwd << "EOF"
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/dev/null:/bin/false
+nobody:x:99:99:Unprivileged User:/dev/null:/bin/false
+EOF
+
+
+
+cat > /etc/group << "EOF"
+root:x:0:
+bin:x:1:
+sys:x:2:
+kmem:x:3:
+tape:x:4:
+tty:x:5:
+daemon:x:6:
+floppy:x:7:
+disk:x:8:
+lp:x:9:
+dialout:x:10:
+audio:x:11:
+video:x:12:
+utmp:x:13:
+usb:x:14:
+cdrom:x:15:
+mail:x:34:
+nogroup:x:99:
+EOF
+
+exec /tools/bin/bash --login +h
+
+2. Linux-3.10.10 API Headers 
+tar xf linux-3.10.10.tar.xz
+cd linux-3.10.10
+make mrproper
+make headers_check
+make INSTALL_HDR_PATH=dest headers_install
+find dest/include \( -name .install -o -name ..install.cmd \) -delete
+cp -rv dest/include/* /fsdev64/include
+cd ..
+rm -rf linux-3.10.10
+
+3. Glibc-2.18 
+tar xf glibc-2.18.tar.xz
+cd glibc-2.18
+sed -i -e 's/static __m128i/inline &/' sysdeps/x86_64/multiarch/strstr.c
+mkdir -v ../glibc-build
+cd ../glibc-build
+../glibc-2.18/configure    \
+    --prefix=/fsdev64      \
+    --disable-profile      \
+    --enable-kernel=2.6.32 \
+    --with-headers=/fsdev64/include \
+    --libexecdir=/fsdev64/lib/glibc
+make
+make -k check 2>&1 | tee glibc-check-log
+grep Error glibc-check-log
+touch /fsdev64/etc/ld.so.conf
+make install
+
+cp -v ../glibc-2.18/sunrpc/rpc/*.h /fsdev64/include/rpc
+cp -v ../glibc-2.18/sunrpc/rpcsvc/*.h /fsdev64/include/rpcsvc
+cp -v ../glibc-2.18/nis/rpcsvc/*.h /fsdev64/include/rpcsvc
+
+make localedata/install-locales
+
+cat > /fsdev64/etc/nsswitch.conf << "EOF"
+# Begin /etc/nsswitch.conf
+
+passwd: files
+group: files
+shadow: files
+
+hosts: files dns
+networks: files
+
+protocols: files
+services: files
+ethers: files
+rpc: files
+
+# End /etc/nsswitch.conf
+EOF
+
+tar -xf ../tzdata2013d.tar.gz
+
+ZONEINFO=/fsdev64/share/zoneinfo
+mkdir -pv $ZONEINFO/{posix,right}
+
+for tz in etcetera southamerica northamerica europe africa antarctica  \
+          asia australasia backward pacificnew solar87 solar88 solar89 \
+          systemv; do
+    zic -L /dev/null   -d $ZONEINFO       -y "sh yearistype.sh" ${tz}
+    zic -L /dev/null   -d $ZONEINFO/posix -y "sh yearistype.sh" ${tz}
+    zic -L leapseconds -d $ZONEINFO/right -y "sh yearistype.sh" ${tz}
+done
+
+cp -v zone.tab iso3166.tab $ZONEINFO
+zic -d $ZONEINFO -p America/New_York
+unset ZONEINFO
+
+cd ..
+rm -rf glibc-build glibc-2.18
+
+
+4. Adjusting the Toolchain 
+mv -v /tools/bin/{ld,ld-old}
+mv -v /tools/$(gcc -dumpmachine)/bin/{ld,ld-old}
+cp -v /tools/bin/{ld-new,ld}
+ln -sv /tools/bin/ld /tools/$(gcc -dumpmachine)/bin/ld
+
+gcc -dumpspecs | sed -e 's@/tools@/fsdev64@g'                   \
+    -e '/\*startfile_prefix_spec:/{n;s@.*@/fsdev64/lib/ @}' \
+    -e '/\*cpp:/{n;s@$@ -isystem /fsdev64/include@}' >      \
+    `dirname $(gcc --print-libgcc-file-name)`/specs
+
+echo 'main(){}' > dummy.c
+cc dummy.c -v -Wl,--verbose &> dummy.log
+readelf -l a.out | grep ': /fsdev64'
+	[Requesting program interpreter: /fsdev64/lib64/ld-linux-x86-64.so.2]
+
+grep -o '/fsdev64/lib.*/crt[1in].*succeeded' dummy.log
+	/fsdev64/lib/../lib64/crt1.o succeeded
+	/fsdev64/lib/../lib64/crti.o succeeded
+	/fsdev64/lib/../lib64/crtn.o succeeded
+
+grep -B1 '^ /fsdev64/include' dummy.log
+	#include <...> search starts here:
+	 /fsdev64/include
+
+grep 'SEARCH.*/fsdev64/lib' dummy.log |sed 's|; |\n|g'
+	SEARCH_DIR("/fsdev64/lib");
+
+grep "/fsdev64/lib.*/libc.so.6 " dummy.log
+	attempt to open /fsdev64/lib/libc.so.6 succeeded
+
+grep found dummy.log
+	found ld-linux-x86-64.so.2 at /fsdev64/lib/ld-linux-x86-64.so.2
+
+rm -v dummy.c a.out dummy.log
+
+5. Zlib-1.2.8 
+tar xf zlib-1.2.8.tar.xz
+cd zlib-1.2.8
+./configure --prefix=/fsdev64
+make
+make check
+make install
+cd ..
+rm -rf zlib-1.2.8
+
+6. File-5.14 
+tar xf file-5.14.tar.gz
+cd file-5.14
+./configure --prefix=/fsdev64
+make
+make check
+make install
+cd ..
+rm -rf file-5.14
+
+7. Binutils-2.23.2
+tar xf binutils-2.23.2.tar.bz2
+cd binutils-2.23.2
+
+expect -c "spawn ls"
+	spawn ls
+
+rm -fv etc/standards.info
+sed -i.bak '/^INFO/s/standards.info //' etc/Makefile.in
+
+sed -i -e 's/@colophon/@@colophon/' \
+       -e 's/doc@cygnus.com/doc@@cygnus.com/' bfd/doc/bfd.texinfo
+
+mkdir -v ../binutils-build
+cd ../binutils-build
+
+../binutils-2.23.2/configure --prefix=/fsdev64 --enable-shared
+make tooldir=/fsdev64
+make check
+make tooldir=/fsdev64 install
+
+cp -v ../binutils-2.23.2/include/libiberty.h /fsdev64/include
+
+cd ..
+rm -rf binbinutils-build utils-2.23.2
+
+8. GMP-5.1.2
+tar xf gmp-5.1.2.tar.xz
+cd gmp-5.1.2
+./configure --prefix=/fsdev64 --enable-cxx
+make
+make check 2>&1 | tee gmp-check-log
+awk '/tests passed/{total+=$2} ; END{print total}' gmp-check-log
+	185
+make install
+cd ..
+rm -rf gmp-5.1.2
+
+9. MPFR-3.1.2 
+tar xf mpfr-3.1.2.tar.xz
+cd mpfr-3.1.2
+./configure  --prefix=/fsdev64 --enable-thread-safe
+make
+make check
+make install
+cd ..
+rm -rf mpfr-3.1.2
+
+10. MPC-1.0.1 
+tar xf mpc-1.0.1.tar.gz
+cd mpc-1.0.1
+./configure --prefix=/fsdev64
+make
+make check
+make install
+cd ..
+rm -rf mpc-1.0.1
+
+11. GCC-4.8.1
+tar xf gcc-4.8.1.tar.bz2
+cd gcc-4.8.1
+case `uname -m` in
+  i?86) sed -i 's/^T_CFLAGS =$/& -fomit-frame-pointer/' gcc/Makefile.in ;;
+esac
+sed -i 's/install_to_$(INSTALL_DEST) //' libiberty/Makefile.in
+sed -i -e /autogen/d -e /check.sh/d fixincludes/Makefile.in 
+mv -v libmudflap/testsuite/libmudflap.c++/pass41-frag.cxx{,.disable}
+
+for file in \
+ $(find gcc/config -name linux64.h -o -name linux.h -o -name sysv4.h)
+do
+  cp -uv $file{,.orig}
+  sed -e 's@/lib\(64\)\?\(32\)\?/ld@/fsdev64&@g' \
+  -e 's@/usr@/fsdev64@g' $file.orig > $file
+  echo '
+#undef STANDARD_STARTFILE_PREFIX_1
+#undef STANDARD_STARTFILE_PREFIX_2
+#define STANDARD_STARTFILE_PREFIX_1 "/fsdev64/lib/"
+#define STANDARD_STARTFILE_PREFIX_2 ""' >> $file
+  touch $file.orig
+done
+
+mkdir -v ../gcc-build
+cd ../gcc-build
+../gcc-4.8.1/configure --prefix=/fsdev64           \
+		       --with-local-prefix=/fsdev64 \
+		       --with-native-system-header-dir=/fsdev64/include \
+                       --libexecdir=/fsdev64/lib   \
+                       --enable-shared             \
+                       --enable-threads=posix      \
+                       --enable-__cxa_atexit       \
+                       --enable-clocale=gnu        \
+                       --enable-languages=c,c++    \
+                       --disable-multilib          \
+                       --disable-bootstrap         \
+                       --disable-install-libiberty \
+                       --with-system-zlib
+make
+ulimit -s 32768
+make -k check
+../gcc-4.8.1/contrib/test_summary
+make install
+ln -sv gcc /fsdev64/bin/cc
+
+echo 'main(){}' > dummy.c
+cc dummy.c -v -Wl,--verbose &> dummy.log
+readelf -l a.out | grep ': /fsdev64'
+	[Requesting program interpreter: /fsdev64/lib64/ld-linux-x86-64.so.2]
+
+grep -o '/fsdev64/lib.*/crt[1in].*succeeded' dummy.log
+	/fsdev64/lib/gcc/x86_64-unknown-linux-gnu/4.8.1/../../../../lib64/crt1.o succeeded
+	/fsdev64/lib/gcc/x86_64-unknown-linux-gnu/4.8.1/../../../../lib64/crti.o succeeded
+	/fsdev64/lib/gcc/x86_64-unknown-linux-gnu/4.8.1/../../../../lib64/crtn.o succeeded
+
+grep -B4 '^ /fsdev64/include' dummy.log
+	#include "..." search starts here:
+	#include <...> search starts here:
+	 /fsdev64/lib/gcc/x86_64-unknown-linux-gnu/4.8.1/include
+	 /fsdev64/include
+
+grep 'SEARCH.*/fsdev64/lib' dummy.log |sed 's|; |\n|g'
+	SEARCH_DIR("/fsdev64/x86_64-unknown-linux-gnu/lib64")
+	SEARCH_DIR("/fsdev64/lib64")
+	SEARCH_DIR("/usr/local/lib64")
+	SEARCH_DIR("/lib64")
+	SEARCH_DIR("/usr/lib64")
+	SEARCH_DIR("/fsdev64/x86_64-unknown-linux-gnu/lib")
+	SEARCH_DIR("/fsdev64/lib")
+	SEARCH_DIR("/usr/local/lib")
+	SEARCH_DIR("/lib")
+	SEARCH_DIR("/usr/lib");
+
+grep "/lib.*/libc.so.6 " dummy.log
+	attempt to open /fsdev64/lib/libc.so.6 succeeded
+
+grep found dummy.log
+	found ld-linux-x86-64.so.2 at /fsdev64/lib/ld-linux-x86-64.so.2
+
+rm -v dummy.c a.out dummy.log
+
+mkdir -pv /fsdev64/share/gdb/auto-load/fsdev64/lib
+mv -v /fsdev64/lib/*gdb.py /fsdev64/share/gdb/auto-load/fsdev64/lib
+
+cd ..
+rm -rf gcc-build/ gcc-4.8.1
+
+D. Install basic library/tools.
+1. Pkg-config-0.28 
+tar xf pkg-config-0.28.tar.gz
+cd pkg-config-0.28
+./configure --prefix=/fsdev64         \
+            --with-internal-glib  \
+            --disable-host-tool   \
+            --docdir=/fsdev64/share/doc/pkg-config-0.28
+make
+make check
+make install
+rm -rf pkg-config-0.28
+
+2. Ncurses-5.9
+tar xf ncurses-5.9.tar.gz
+cd ncurses-5.9
+./configure --prefix=/fsdev64           \
+            --mandir=/fsdev64/share/man \
+            --with-shared           \
+            --without-debug         \
+            --enable-pc-files       \
+            --enable-widec
+make
+make install
+
+for lib in ncurses form panel menu ; do
+    rm -vf                    /fsdev64/lib/lib${lib}.so
+    echo "INPUT(-l${lib}w)" > /fsdev64/lib/lib${lib}.so
+    ln -sfv lib${lib}w.a      /fsdev64/lib/lib${lib}.a
+    ln -sfv ${lib}w.pc        /fsdev64/lib/pkgconfig/${lib}.pc
+done
+
+ln -sfv libncurses++w.a /fsdev64/lib/libncurses++.a
+
+cd ..
+rm -rf ncurses-5.9
+
+3. Readline-6.2 
+tar xf readline-6.2.tar.gz
+cd readline-6.2
+sed -i '/MV.*old/d' Makefile.in
+sed -i '/{OLDSUFF}/c:' support/shlib-install
+patch -Np1 -i ../readline-6.2-fixes-1.patch
+./configure --prefix=/fsdev64
+make SHLIB_LIBS=-lncurses
+make install
+cd ..
+rm -rf readline-6.2
+
+4. Libtool-2.4.2 
+tar xf libtool-2.4.2.tar.gz
+cd libtool-2.4.2
+./configure --prefix=/fsdev64
+make
+make check
+make install
+cd ..
+rm -rf libtool-2.4.2
+
+5. Bzip2-1.0.6
+tar xf bzip2-1.0.6.tar.gz
+cd bzip2-1.0.6
+patch -Np1 -i ../bzip2-1.0.6-install_docs-1.patch
+sed -i 's@\(ln -s -f \)$(PREFIX)/bin/@\1@' Makefile
+sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
+make -f Makefile-libbz2_so
+make clean
+make
+make PREFIX=/fsdev64 install
+cp -v bzip2-shared /fsdev64/bzip2
+cp -av libbz2.so* /fsdev64/lib
+ln -sv libbz2.so.1.0 /fsdev64/lib/libbz2.so
+rm -v /fsdev64/bin/{bunzip2,bzcat,bzip2}
+ln -sv bzip2 /bin/bunzip2
+ln -sv bzip2 /bin/bzcat
+
+6. Util-linux-2.23.2 
+tar xf util-linux-2.23.2.tar.xz
+cd util-linux-2.23.2
+./configure --prefix=/fsdev64 --disable-su --disable-sulogin --disable-login
+make
+make install
+cd ..
+rm -rf util-linux-2.23.2
+
+7. E2fsprogs-1.42.8 
+tar xf e2fsprogs-1.42.8.tar.gz
+cd e2fsprogs-1.42.8
+sed -i -e 's/mke2fs/$MKE2FS/' -e 's/debugfs/$DEBUGFS/' tests/f_extent_oobounds/script
+mkdir -v build
+cd build
+../configure --prefix=/fsdev64     \
+             --enable-elf-shlibs   \
+             --disable-libblkid    \
+             --disable-libuuid     \
+             --disable-uuidd       \
+             --disable-fsck
+make
+make check
+make install
+make install-libs
+cd ../..
+rm -rf e2fsprogs-1.42.8
+
+8. Coreutils-8.21
+tar xf coreutils-8.21.tar.xz
+coreutils-8.21
+patch -Np1 -i ../coreutils-8.21-i18n-1.patch
+FORCE_UNSAFE_CONFIGURE=1 ./configure \
+            --prefix=/fsdev64            \
+            --libexecdir=/fsdev64/lib    \
+            --enable-no-install-program=kill,uptime
+make
+make install
+cd ..
+rm -rf coreutils-8.21
+
+9. Iana-Etc-2.30
+tar xf iana-etc-2.30.tar.bz2
+cd iana-etc-2.30
+make
+cp -v services /fsdev64/etc/
+cp -v protocols /fsdev64/etc/
+cd ..
+rm -rf iana-etc-2.30
+
+10. M4-1.4.16 
+tar xf m4-1.4.16.tar.bz2
+cd m4-1.4.16
+sed -i -e '/gets is a/d' lib/stdio.in.h
+./configure --prefix=/fsdev64
+make
+sed -i -e '41s/ENOENT/& || errno == EINVAL/' tests/test-readlink.h
+make check
+make install
+cd ..
+rm -rf m4-1.4.16
+
+11. Flex-2.5.37 
+tar xf flex-2.5.37.tar.bz2
+cd flex-2.5.37
+sed -i -e '/test-bison/d' tests/Makefile.in
+./configure --prefix=/fsdev64
+make 
+make check
+make install
+
+cat > /fsdev64/bin/lex << "EOF"
+#!/bin/sh
+# Begin /usr/bin/lex
+
+exec /usr/bin/flex -l "$@"
+
+# End /usr/bin/lex
+EOF
+chmod -v 755 /fsdev64/bin/lex
+
+cd ..
+rm -rf flex-2.5.37
+
+12. Bison-3.0 
+tar xf bison-3.0.tar.xz
+cd bison-3.0
+./configure --prefix=/fsdev64
+make
+make check
+make install
+cd ..
+rm -rf bison-3.0
+
+13. Autoconf-2.69
+tar xf autoconf-2.69.tar.xz
+cd autoconf-2.69
+./configure --prefix=/fsdev64
+make
+make check
+make install
+cd ..
+rm -rf autoconf-2.69
+
+14. Automake-1.14
+tar xf automake-1.14.tar.xz
+cd automake-1.14
+patch -Np1 -i ../automake-1.14-test-1.patch
+./configure --prefix=/fsdev64
+make
+make check
+make install
+cd ..
+rm -rf automake-1.14
+
+15.  Gettext-0.18.3
+tar xf gettext-0.18.3.tar.gz
+cd gettext-0.18.3
+./configure --prefix=/fsdev64
+make
+make check
+make install
+cd ..
+rm -rf gettext-0.18.3
+
+16. Xz-5.0.5 
+tar xf xz-5.0.5.tar.xz
+cd xz-5.0.5
+./configure --prefix=/fsdev64
+make 
+make check
+make pkgconfigdir=/fsdev64/lib/pkgconfig install
+cd ..
+rm -rf xz-5.0.5
+
+17. Gzip-1.6
+tar xf gzip-1.6.tar.xz
+cd gzip-1.6
+./configure --prefix=/fsdev64
+make
+make check
+make install
+cd ..
+rm -rf gzip-1.6
+
+18. Tar-1.26
+tar xf tar-1.26.tar.bz2
+cd tar-1.26
+patch -Np1 -i ../tar-1.26-manpage-1.patch
+sed -i -e '/gets is a/d' gnu/stdio.in.h
+FORCE_UNSAFE_CONFIGURE=1  \
+./configure --prefix=/fsdev64 --libexecdir=/fsdev64/sbin
+make
+make check
+make install
+cd ..
+
+18. Make-3.82 
+tar xf make-3.82.tar.bz2
+cd make-3.82
+patch -Np1 -i ../make-3.82-upstream_fixes-3.patch
+./configure --prefix=/fsdev64
+make
+make check
+make install
+cd ..
+rm -rf make-3.82
+
+19. Tcl-8.6.0
+tar xf tcl8.6.0-src.tar.gz
+cd tcl8.6.0
+cd unix &&
+./configure --prefix=/fsdev64           \
+	    --mandir=/fsdev64/share/man \
+            --without-tzdata        \
+            --enable-64bit &&
+make 
+sed -e "s@^\(TCL_SRC_DIR='\).*@\1/fsdev64/include'@" \
+    -e "/TCL_B/s@='\(-L\)\?.*unix@='\1/fsdev64/lib@" \
+    -i tclConfig.sh
+make test
+
+make install
+make install-private-headers
+ln -v -sf tclsh8.6 /fsdev64/bin/tclsh
+chmod -v 755 /fsdev64/lib/libtcl8.6.so
+cd ../..
+rm -rf tcl8.6.0
+
+20. Expect-5.45 
+tar xf expect5.45.tar.gz
+cd expect5.45
+./configure --prefix=/fsdev64       \
+            --with-tcl=/fsdev64/lib \
+            --enable-shared     \
+            --with-tclinclude=/fsdev64/include &&
+make
+make install
+ln -svf expect5.45/libexpect5.45.so /fsdev64/lib
+cd ..
+rm -rf expect5.45
+
+21. DejaGnu-1.5.1 
+tar xf dejagnu-1.5.1.tar.gz
+cd dejagnu-1.5.1
+./configure --prefix=/fsdev64
+make check
+make install
+cd ..
+rm -rf dejagnu-1.5.1
+
+22. GDB-7.6.1 
+tar xf gdb-7.6.1.tar.bz2
+cd gdb-7.6.1
+./configure --prefix=/fsdev64 --with-separate-debug-dir
+make
+make -C gdb install
+cd ..
+rm -rf gdb-7.6.1
+
+23. valgrind
+tar xf valgrind-3.9.0.tar.bz2
+cd valgrind-3.9.0
+./configure --prefix=/fsdev64 --enable-only64bit --enable-tls
+make
+make install
+cd ..
+rm -rf valgrind-3.9.0
+
+24. popt-1.16
+tar xf popt-1.16.tar.gz
+cd popt-1.16
+./configure --prefix=/fsdev64 --disable-static
+make
+make install
+cd ..
+rm -rf popt-1.16
+
+26. numactl-2.0.9
+tar xf numactl-2.0.9.tar.gz
+cd numactl-2.0.9/
+make PREFIX=/fsdev64
+make PREFIX=/fsdev64 install
+
+27. elfutils-0.157
+tar xf elfutils-0.157.tar.bz2
+cd elfutils-0.157/
+./configure --prefix=/fsdev64 --program-prefix="eu-"
+make
+make check
+make install
+
+
+E. Add addition software/files.
+
+
+F. Good luck.
+
+
+

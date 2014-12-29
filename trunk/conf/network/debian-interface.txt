@@ -1,0 +1,50 @@
+##	Begin of /etc/network/interface
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The STATIC config
+allow-hotplug eth0
+auto eth0
+iface eth0 inet static
+	address 172.22.14.65
+	netmask 255.255.255.0  
+	broadcast 172.22.14.255  
+	gateway 172.22.14.1
+	up ip route add 172.22.16.0/24 via 172.22.14.1 dev eth0
+	up ip route del 172.22.16.0/24 via 172.22.14.1 dev eth0
+
+# The multi IP setting
+auto eth0:0
+iface eth0:0 inet static
+	address 192.168.1.65
+	netmask 255.255.255.0
+	broadcast 192.168.1.255
+
+auto eth0:1
+iface eth0:1 inet static
+	address 192.168.2.65
+	netmask 255.255.255.0
+	broadcast 192.168.2.255
+
+# bridge setting
+auto br0
+iface br0 inet static
+	bridge_ports	eth0 eth1
+
+
+# The DHCP config
+allow-hotplug eth0
+auto eth0
+iface eth0 inet dhcp
+
+# the WEP wifi config
+auto ath0
+iface ath0 inet dhcp
+	wireless-essid Forrest
+	wireless-channel 1
+	wireless-key "NNNN"
+
+## 	End of /etc/network/interface
+

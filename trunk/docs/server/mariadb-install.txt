@@ -1,0 +1,92 @@
+安装MariaDB:
+BUILD/autorun.sh
+./configure --prefix=/opt/mariadb/
+make
+sudo make install
+
+配置MariaDB.
+a. 初始化数据库
+/opt/mariadb/scripts/mysql_install_db --basedir=/opt/mariadb --datadir=/opt/mariadb/data --user=forrest
+mkdir /opt/mariadb/etc
+cp /opt/mariadb/support-files/my-large.cnf /opt/mariadb/etc/my.cnf
+
+b. 运行MariaDB.
+/opt/mariadb/bin/mysqld --defaults-file=/opt/mariadb/etc/my.cnf
+
+c. MariDB配置文件, 配置目录
+/opt/mariadb/etc/my.cnf
+
+使用MariaDB.
+
+1. 数据库用户:
+a.当前用户: 
+mysql> select user();
+
+b.所有用户: 
+mysql> use mysql;
+mysql> select User from user;
+
+c. 添加/修改用户, 修改权限
+mysql> grant all on 数据库名.* to 用户名@'机器名' identified by '密码'; 
+mysql> grant all on 数据库名.* to 用户名@'%' identified by '密码'; 
+mysql> grant all on 数据库名.* to 用户名@'localhost' identified by '密码'; 
+mysql> insert into mysql.user(Host,User,Password) values("localhost","test",password("test"));
+mysql> flush privileges;
+
+d. 删除用户
+mysql> drop user test@主机名;
+mysql> delete from mysql.user where user = "用户名" and host = "主机名";
+
+e. 更改密码
+mysqladmin -u <用户名> [-p] password <新密码>
+mysql> update mysql.user set password=password('新密码') where User='用户名';
+
+f. 查看权限.
+mysql> show grants [for <用户名>];
+
+g. 删除权限.
+mysql> revoke all on <数据库名.*> from <用户名@'机器名'>;
+
+4. 数据据库
+a. 创建数据库:
+mysql> create database <数据库名称>;
+mysql> create database if not exists <数据库名称>;
+mysqladmin create <数据库名称>
+
+b. 删除数据库:
+mysql> drop database <数据库名称>;
+mysql> drop database if exists <数据库名称>;
+mysqladmin -u <用户名> -p drop <数据库名称>
+
+5. 数据库表
+a. 创建表:
+mysql> create table <表名> (<字段名1> <字段类型(长度)> [属性], ...); 
+mysql> create table if not exists <表名> (<字段名1> <字段类型(长度)> [属性], ...); 
+其中属性有:
+[not null | null]	指出该列是否允许空值
+[default default_value]	默认值
+[auto_increment]	自动增长, 每个表只能有一个AUTO_INCREMENT列，并且必须被索引
+[primary key]		主键, 它是一个惟一的key，还有一个约束，即所有键列必须被定义为not null.
+[unique|fulltext|spatial] [index|key] [索引别名] (<字段名>[(长度)] [asc|desc], ...)
+			创建需要索引的字段.
+b. 删除表:
+mysql> drop table <表名>;
+mysql> drop table if exists <表名>;
+
+c. 创建表的索引
+mysql> create index <索引名> on <表名> (<字段名> [asc|desc], ...);
+
+d. 删除索引:
+mysql> drop index <索引名> on <表名>;
+
+e. 插入表数据:
+mysql> insert into <表名> (字段名, ...) values (字段值,...);
+
+f. 加载数据文件:
+mysql> load data infile '文件名称' into table <表名> fields terminated by '字段分隔符';
+
+g. 显示创建表的语句:
+mysql> show create table <表名>;
+
+
+

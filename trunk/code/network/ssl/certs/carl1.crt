@@ -1,0 +1,43 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1 (0x1)
+    Signature Algorithm: ecdsa-with-SHA1
+        Issuer: C=CN, ST=Beijing, L=Haidian, O=carl, OU=carl, CN=www.carl.org/emailAddress=admin@carl.org
+        Validity
+            Not Before: Oct 19 15:01:53 2014 GMT
+            Not After : Oct 16 15:01:53 2024 GMT
+        Subject: C=CN, ST=Beijing, O=carl1, OU=carl1, CN=www.carl1.org
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (239 bit)
+                pub: 
+                    04:0a:6b:6a:a0:04:4d:f6:bb:79:20:e5:44:7e:a0:
+                    0c:27:e0:6b:4e:a6:af:d1:07:be:0a:0b:0f:3b:68:
+                    50:05:b8:0b:7a:d1:2b:4d:c2:14:9a:07:38:43:3e:
+                    ca:15:05:44:bf:bb:7e:75:bf:1a:76:33:56:99:68:
+                    8a
+                ASN1 OID: prime239v1
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Subject Alternative Name: 
+                DNS:www.carl1.com
+    Signature Algorithm: ecdsa-with-SHA1
+         30:44:02:20:62:6f:f1:39:64:7d:91:29:3f:e2:9b:4a:64:34:
+         c7:46:1c:4f:fe:8f:11:b6:cc:b2:30:71:d9:5d:04:a6:02:27:
+         02:20:5f:35:3a:21:55:72:41:7c:4a:3d:a2:64:d6:88:b8:0b:
+         2d:2c:3a:ea:50:ff:e9:6c:93:ca:c8:f1:1d:1b:ba:d0
+-----BEGIN CERTIFICATE-----
+MIIB7DCCAZSgAwIBAgIBATAJBgcqhkjOPQQBMIGFMQswCQYDVQQGEwJDTjEQMA4G
+A1UECAwHQmVpamluZzEQMA4GA1UEBwwHSGFpZGlhbjENMAsGA1UECgwEY2FybDEN
+MAsGA1UECwwEY2FybDEVMBMGA1UEAwwMd3d3LmNhcmwub3JnMR0wGwYJKoZIhvcN
+AQkBFg5hZG1pbkBjYXJsLm9yZzAeFw0xNDEwMTkxNTAxNTNaFw0yNDEwMTYxNTAx
+NTNaMFcxCzAJBgNVBAYTAkNOMRAwDgYDVQQIDAdCZWlqaW5nMQ4wDAYDVQQKDAVj
+YXJsMTEOMAwGA1UECwwFY2FybDExFjAUBgNVBAMMDXd3dy5jYXJsMS5vcmcwVTAT
+BgcqhkjOPQIBBggqhkjOPQMBBAM+AAQKa2qgBE32u3kg5UR+oAwn4GtOpq/RB74K
+Cw87aFAFuAt60StNwhSaBzhDPsoVBUS/u351vxp2M1aZaIqjJzAlMAkGA1UdEwQC
+MAAwGAYDVR0RBBEwD4INd3d3LmNhcmwxLmNvbTAJBgcqhkjOPQQBA0cAMEQCIGJv
+8TlkfZEpP+KbSmQ0x0YcT/6PEbbMsjBx2V0EpgInAiBfNTohVXJBfEo9omTWiLgL
+LSw66lD/6WyTysjxHRu60A==
+-----END CERTIFICATE-----
