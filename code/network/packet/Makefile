@@ -34,7 +34,7 @@ ssldump : ssldump.o \
 	  packet_ipv4.o \
 	  packet_ipv6.o \
 	  packet_tcp.o \
-	  ssl_decode.o \
+	  dssl_util.o \
 	  objpool.o
 
 # for test target

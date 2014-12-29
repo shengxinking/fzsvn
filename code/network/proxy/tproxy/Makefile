@@ -14,7 +14,7 @@ endif
 
 TARGET = tproxyd
 OBJECTS = ip_addr.o sock_util.o ssl_util.o objpool.o \
-	  mempool.o cpu_util.o fd_epoll.o thread.o task.o \
+	  cpu_util.o fd_epoll.o thread.o task.o \
 	  certset.o listener.o connection.o session.o \
 	  trapt_util.o tproxy_util.o \
 	  proxy_config.o svrpool.o policy.o \
