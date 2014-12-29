@@ -1,7 +1,0 @@
-/*
- *
- *
- *
- */
-
-#include "Window.hpp"

@@ -1,3 +1,0 @@
-GET /test.html HTTP/1.1
-HOST: www.fz.org
-Content-Type: text/xml

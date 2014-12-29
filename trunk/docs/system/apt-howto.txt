@@ -1,5 +1,0 @@
-
-	APT build package from source code
-
-1. download source code.
-   If the source code is from 

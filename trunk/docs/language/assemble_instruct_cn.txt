@@ -1,9 +1,0 @@
-
-指令系统:
-
-数据传输指令:
-MOV, MOVSX, MOVZX, PUSH, POP, PUSHA, PUSHAD, POPA, POPAD, XCHG.
-
-1. MOV:
-格式: MOV DST, SRC
-操作: SRC -> DST, 
