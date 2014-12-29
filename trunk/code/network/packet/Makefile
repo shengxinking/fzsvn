@@ -4,7 +4,7 @@
 
 CC = gcc
 CFLAGS = -Wall -ggdb
-LDFLAGS = -lpcap
+LDFLAGS = -lpcap -lpthread
 
 ifneq (".deps", "$(wildcard .deps)")
 	DEPS = .deps
@@ -34,8 +34,10 @@ ssldump : ssldump.o \
 	  packet_ipv4.o \
 	  packet_ipv6.o \
 	  packet_tcp.o \
-	  dssl_util.o \
-	  objpool.o
+	  ip_addr.o \
+	  objpool.o \
+	  tcp_stream.o \
+	  dssl_util.o
 
 # for test target
 test : $(TEST)

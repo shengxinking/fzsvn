@@ -30,7 +30,8 @@
 #include "packet_icmpv6.h"
 #include "packet_udp.h"
 #include "packet_tcp.h"
-#include "ssl_decode.h"
+#include "dssl_util.h"
+#include "tcp_stream.h"
 
 static volatile int	_g_stop;		/* stop vairable */
 static pcap_t		*_g_pcap;		/* pcap object */
@@ -42,8 +43,7 @@ static char		_g_infile[PATH_MAX];
 static char		_g_outfile[PATH_MAX];
 static char		_g_errbuf[PCAP_ERRBUF_SIZE];
 static char		_g_keyfile[PATH_MAX];
-static shash_t		*_t_tcphash;
-static shash_t		*_g_sslhash;
+static shash_t		*_g_tcphash;
 static dssl_ctx_t	*_g_dssl_ctx;
 
 /**
@@ -200,15 +200,11 @@ _initiate(void)
 	if (!_g_dssl_ctx) 
 		ERR_RET(-1, "dssl_ctx_new failed\n");
 	
-	if (dssl_ctx_set_pkey(_g_dssl_ctx, _g_keyfile))
+	if (dssl_ctx_load_pkey(_g_dssl_ctx, _g_keyfile, NULL))
 		ERR_RET(-1, "dssl_ctx_set_pkey failed\n");
 
-	_g_tcp_hash = shash_alloc(1000);
-	if (!_g_tcp_hash)
-		ERR_RET(-1, "shash_alloc failed\n");
-
-	_g_ssl_hash = shash_alloc(1000);
-	if (!_g_ssl_hash)
+	_g_tcphash = shash_alloc(1000, tcp_tup_cmp, tcp_stream_free);
+	if (!_g_tcphash)
 		ERR_RET(-1, "shash_alloc failed\n");
 
 	return 0;
@@ -229,27 +225,146 @@ _release(void)
 }
 
 static int 
+_tcp_init_tup(tcp_tup_t *t, const netpkt_t *pkt, int dir)
+{
+	ip_port_t *src;
+	ip_port_t *dst;
+
+	if (dir) {
+		src = &t->dst;
+		dst = &t->src;
+	}
+	else {
+		src = &t->src;
+		dst = &t->dst;
+	}
+
+	if (pkt->hdr3_type == ETHERTYPE_IP) {
+		src->family = AF_INET;
+		dst->family = AF_INET;
+		src->_addr4.s_addr = pkt->hdr3_ipv4->saddr;
+		dst->_addr4.s_addr = pkt->hdr3_ipv4->daddr;
+	}
+	else if (pkt->hdr3_type == ETHERTYPE_IPV6) {
+		src->family = AF_INET6;
+		dst->family = AF_INET6;
+		src->_addr6 = pkt->hdr3_ipv6->ip6_src;
+		dst->_addr6 = pkt->hdr3_ipv6->ip6_dst;
+	}
+	else 
+		return -1;
+
+	if (pkt->hdr4_type == IPPROTO_TCP) {
+		src->port = pkt->hdr4_tcp->source;
+		dst->port = pkt->hdr4_tcp->dest;
+	}
+	else
+		return -1;
+
+	return 0;
+}
+
+static int 
 _tcp_flow(const netpkt_t *pkt)
 {
+	int dir;
+	int ret = 0;
+	u_int8_t *data;
+	u_int32_t hval;
+	tcp_tup_t tup;
+	tcp_stream_t *t = NULL;
 	struct tcphdr *h;
 
 	h = pkt->hdr4_tcp;
 
+	/* is server packet? */
+	dir = 1;
+	if (_tcp_init_tup(&tup, pkt, dir))
+		return -1;
+	if (tcp_tup_hash(&tup, &hval))
+		return -1;
+	t = shash_find(_g_tcphash, &tup, hval);
+
+	/* not server packet */
+	if (!t) {
+		dir = 0;
+		if (_tcp_init_tup(&tup, pkt, dir))
+			return -1;
+		if (tcp_tup_hash(&tup, &hval))
+			return -1;
+	}
+
+	/* RST packet */
+	if (h->rst) {
+		t = shash_del(_g_tcphash, &tup, hval);
+		if (!t) {
+			return -1;
+		}
+
+		tcp_stream_free(t);
+		return 0;
+	}
+
 	/* SYN packet */
 	if (h->syn) {
-		
+		/* not syn ack */
+		if (!h->ack) {
+			t = tcp_stream_alloc();
+			if (!t)
+				return -1;
+			t->state = TCP_ST_SYN;
+			ret = shash_add(_g_tcphash, &tup, hval, 1);
+			if (ret)
+				return -1;
+		}
+		else {
+			t = shash_find(_g_tcphash, &tup, hval);
+			if (!t)
+				return -1;
 
+			/* current state is not SYN */
+			if (t->state != TCP_ST_SYN)
+				return -1;
+
+			t->state = TCP_ST_SYN_ACK;
+		}
 	}
+
+	/* FIN packet */
+	if (h->fin) {
+		t = shash_find(_g_tcphash, &tup, hval);
+		if (!t)
+			return -1;
+		if (dir)
+			t->state = TCP_ST_FIN2;
+		else
+			t->state = TCP_ST_FIN1;
+	}
+
+	/* PSH packet */
+	if (h->psh) {
+		data = pkt->head + pkt->hdr2_len + pkt->hdr3_len + pkt->hdr4_len;
+		//ssl_decode(t->ssl, data, buf); 
+	}
+
+	/* ACK packet */
+	if (h->ack) {
+		t = shash_find(_g_tcphash, &tup, hval);
+		if (!t)
+			return -1;
+
+		if (t->state == TCP_ST_SYN_ACK)
+			t->state = TCP_ST_EST;
+	}
+
+	return 0;
 }
 
 static void 
 _decode(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes)
 {
 	netpkt_t *pkt;
-	sniffex_stat_t *stat;
 	
-	stat = (sniffex_stat_t *)user;
-
 	pkt = netpkt_alloc(h->len);
 	if (!pkt) {
 		_g_stop = 1;
@@ -257,30 +372,28 @@ _decode(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes)
 		return;
 	}
 
-	printf("========================================\n");
-
 	if (netpkt_add_data(pkt, bytes, h->len))
 		ERR("add data failed\n");
 
 	if (eth_decode(pkt)) 
 		exit(0);
 	
-	printf(">--------eth header--------<\n");
-	eth_print(pkt, "\t");
+	//printf(">--------eth header--------<\n");
+	//eth_print(pkt, "\t");
 
 	/* layer 3 */
 	switch (pkt->hdr3_type) {
 		case ETHERTYPE_IP:
 			if (ipv4_decode(pkt))
 				goto out_free;
-			printf(">--------ipv4 header--------<\n");
-			ipv4_print(pkt, "\t");
+			//printf(">--------ipv4 header--------<\n");
+			//ipv4_print(pkt, "\t");
 			break;
 		case ETHERTYPE_IPV6:
 			if (ipv6_decode(pkt))
 				goto out_free;
-			printf(">--------ipv6 header--------<\n");
-			ipv6_print(pkt, "\t");
+			//printf(">--------ipv6 header--------<\n");
+			//ipv6_print(pkt, "\t");
 			break;
 		default:
 			goto out_free;
@@ -291,18 +404,16 @@ _decode(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes)
 		case IPPROTO_TCP:
 			if (tcp_decode(pkt))
 				goto out_free;
-			printf(">--------tcp header--------<\n");
-			tcp_print(pkt, "\t");
+			//printf(">--------tcp header--------<\n");
+			//tcp_print(pkt, "\t");
 			break;
 		default:
 			goto out_free;
 			break;
 	}
 
-	if (_tcp_flow(netpkt))
+	if (_tcp_flow(pkt))
 		goto out_free;
-
-	
 
 
 out_free:
@@ -316,11 +427,9 @@ static int
 _process(void)
 {
 	int ret;
-	sniffex_stat_t stat;
 	
-	memset(&stat, 0, sizeof(stat));
 	while (!_g_stop) {
-		ret = pcap_dispatch(_g_pcap, 1, _decode, (u_char *)&stat);
+		ret = pcap_dispatch(_g_pcap, 1, _decode, NULL);
 		if (ret < 0)
 			break;
 	}
