@@ -41,7 +41,7 @@ _spdata_calc_gcd(svrpool_data_t *spdata)
 	int gcd = 0;
 	server_cfg_t *svrcfg;
 
-	if (!spdata)
+	if (unlikely(!spdata))
 		ERR_RET(-1, "invalid argument\n");
 
         for (i = 0; i < spdata->nserver; i++) {
@@ -63,7 +63,7 @@ server_alloc(void)
 	server_t *svr;
 
 	svr = calloc(1, sizeof(*svr));
-	if (!svr)
+	if (unlikely(!svr))
 		ERR_RET(NULL, "calloc memory for server_t failed\n");
 
 	CBLIST_INIT(&svr->list);
@@ -74,7 +74,7 @@ server_alloc(void)
 server_t * 
 server_clone(server_t *svr)
 {
-	if (!svr) 
+	if (unlikely(!svr)) 
 		ERR_RET(NULL, "invalid argument\n");
 	
 	__sync_fetch_and_add(&svr->refcnt, 1);
@@ -87,7 +87,7 @@ server_free(server_t *svr)
 {
 	int refcnt;
 
-	if (!svr)
+	if (unlikely(!svr))
 		ERR_RET(-1, "invalid argument\n");
 
 	refcnt = __sync_fetch_and_sub(&svr->refcnt, 1);
@@ -103,11 +103,11 @@ server_alloc_data(server_t *svr)
 {
 	server_data_t *svrdata;
 
-	if (!svr)
+	if (unlikely(!svr))
 		ERR_RET(NULL, "invalid argument\n");
 
 	svrdata = calloc(1, sizeof(*svrdata));
-	if (!svrdata)
+	if (unlikely(!svrdata))
 		ERR_RET(NULL, "calloc memory for server data failed\n");
 
 	CBLIST_INIT(&svrdata->ssnlist);
@@ -132,7 +132,7 @@ server_alloc_data(server_t *svr)
 server_data_t * 
 server_clone_data(server_data_t *svrdata)
 {
-	if (!svrdata)
+	if (unlikely(!svrdata))
 		ERR_RET(NULL, "invalid argument\n");
 
 	__sync_fetch_and_add(&svrdata->refcnt, 1);
@@ -145,7 +145,7 @@ server_free_data(server_data_t *svrdata)
 {
 	int refcnt;
 
-	if (!svrdata)
+	if (unlikely(!svrdata))
 		ERR_RET(-1, "invalid argument");
 
 	refcnt = __sync_fetch_and_sub(&svrdata->refcnt, 1);
@@ -161,7 +161,7 @@ server_free_data(server_data_t *svrdata)
 int 
 server_inc_conn(server_data_t *svrdata)
 {
-	if (!svrdata)
+	if (unlikely(!svrdata))
 		ERR_RET(-1, "invalid argument\n");
 
 	__sync_fetch_and_add(&svrdata->stat.nconn, 1);
@@ -173,7 +173,7 @@ server_inc_conn(server_data_t *svrdata)
 int 
 server_dec_conn(server_data_t *svrdata)
 {
-	if (!svrdata)
+	if (unlikely(!svrdata))
 		ERR_RET(-1, "invalid argument\n");
 
 	__sync_fetch_and_sub(&svrdata->stat.nconn, 1);
@@ -188,7 +188,7 @@ svrpool_alloc(void)
 	svrpool_t *sp;
 
 	sp = calloc(1, sizeof(*sp));
-	if (!sp)
+	if (unlikely(!sp))
 		ERR_RET(NULL, "calloc memory for svrpool_t failed\n");
 
 	CBLIST_INIT(&sp->list);
@@ -200,7 +200,7 @@ svrpool_alloc(void)
 svrpool_t * 
 svrpool_clone(svrpool_t *sp)
 {
-	if (!sp)
+	if (unlikely(!sp))
 		ERR_RET(NULL, "invalid argument\n");
 
 	__sync_fetch_and_add(&sp->refcnt, 1);
@@ -213,7 +213,7 @@ svrpool_free(svrpool_t *sp)
 	int refcnt;
 	server_t *svr, *bk;
 
-	if (!sp)
+	if (unlikely(!sp))
 		ERR_RET(-1, "invalid argument\n");
 
 	refcnt = __sync_fetch_and_sub(&sp->refcnt, 1);
@@ -240,7 +240,7 @@ svrpool_print(const svrpool_t *sp, const char *prefix)
 	const svrpool_cfg_t *spcfg;
 	char ipstr[IP_STR_LEN];
 
-	if (!sp || !prefix)
+	if (unlikely(!sp || !prefix))
 		ERR_RET(-1, "invalid argument\n");
 
 	spcfg = &sp->cfg;
@@ -265,11 +265,11 @@ svrpool_alloc_data(svrpool_t *sp)
 	server_t *svr;
 	svrpool_data_t *spdata;
 
-	if (!sp)
+	if (unlikely(!sp))
 		ERR_RET(NULL, "invalid agrument\n");
 
 	spdata = calloc(1, sizeof(*spdata));
-	if (!spdata)
+	if (unlikely(!spdata))
 		ERR_RET(NULL, "malloc memory for svrpool data failed\n");
 
 	i = 0;
@@ -287,7 +287,7 @@ svrpool_alloc_data(svrpool_t *sp)
 svrpool_data_t *
 svrpool_clone_data(svrpool_data_t *spdata)
 {
-	if (!spdata)
+	if (unlikely(!spdata))
 		ERR_RET(NULL, "invalid argument\n");
 	
 	__sync_fetch_and_add(&spdata->refcnt, 1);
@@ -301,7 +301,7 @@ svrpool_free_data(svrpool_data_t *spdata)
 	int i;
 	int refcnt;
 
-	if (!spdata)
+	if (unlikely(!spdata))
 		ERR_RET(-1, "invalid argument\n");
 
 	refcnt = __sync_fetch_and_sub(&spdata->refcnt, 1);
@@ -326,7 +326,7 @@ svrpool_get_rp_server(svrpool_data_t *spdata)
 	int pos;
 	server_data_t *svrdata = NULL;
 
-	if (!spdata)
+	if (unlikely(!spdata))
 		ERR_RET(NULL, "invalid argument\n");
 
 	/* rr algorithm */
@@ -344,7 +344,7 @@ svrpool_get_tp_server(svrpool_data_t *spdata, ip_port_t *dest)
 	int i;
 	server_data_t *svrdata = NULL;
 
-	if (!spdata || !dest)
+	if (unlikely(!spdata || !dest))
 		ERR_RET(NULL, "invalid argument\n");
 
 	for (i = 0; i < spdata->nserver; i++) {
