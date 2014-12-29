@@ -11,6 +11,10 @@
 #ifndef FZ_DBUFFER_H
 #define FZ_DBUFFER_H
 
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+
 #include "gcc_common.h"
 
 /* get data in dbuf @buf */
@@ -24,10 +28,10 @@
 /**
  *	Dynamic buffer structure
  */
-typedef dbuf {
-	u_int8_t	*buf;
+typedef struct dbuf {
 	u_int32_t	max;
 	u_int32_t	len;
+	u_int8_t	*buf;
 } dbuf_t;
 
 
@@ -37,40 +41,31 @@ typedef dbuf {
  *
  * 	Return pointer if success, NULL on error.
  */
-static inline dbuf_t * 
-dbuf_alloc(u_int32_t max)
+static inline int  
+dbuf_init(dbuf_t *buf, u_int32_t max)
 {
-	dbuf_t *buf;
-
 	if (unlikely(max < 1))
-		return NULL;
-
-	buf = malloc(sizeof(dbuf_t));
-	if (unlikely(!buf))
-		return NULL;
+		return -1;
 
 	buf->buf = malloc(max);
-	if (unlikely(!buf->buf)) {
-		free(buf);
-		return NULL;
-	}
-	buf->flags = DBUF_IS_ALLOCED;
+	if (unlikely(!buf->buf)) 
+		return -1;
 	buf->len = 0;
 	buf->max = max;
 
-	return buf;
+	return 0;
 }
 
-static inline int 
+static inline void 
 dbuf_free(dbuf_t *buf)
 {
 	if (unlikely(!buf))
-		return -1;
+		return;
 
 	if (buf->buf)
 		free(buf->buf);
 
-	return 0;
+	memset(buf, 0, sizeof(*buf));
 }
 
 static inline int 
@@ -78,7 +73,7 @@ dbuf_resize(dbuf_t *buf, u_int32_t max)
 {
 	u_int8_t *p;
 
-	if (unlikely(!buf || max < 1)
+	if (unlikely(!buf || max < 1))
 		return -1;
 
 	if (max < buf->len)
@@ -94,9 +89,7 @@ dbuf_resize(dbuf_t *buf, u_int32_t max)
 	if (buf->buf && buf->len > 0)
 		memcpy(p, buf->buf, buf->len);
 
-	if (buf->buf != ((u_int8_t *)buf + sizeof(dbuf_t)))
-		free(buf->buf);
-
+	free(buf->buf);
 	buf->buf = p;
 
 	return 0;
@@ -118,8 +111,6 @@ dbuf_put(dbuf_t *buf, const u_int8_t *d, u_int32_t len)
 	return 0;
 }
 
-static inline int 
-dbuf_join()
 
 #endif /* end of FZ_DBUFFER_H */
 

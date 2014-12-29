@@ -14,6 +14,8 @@
 #include <sys/types.h>
 #include <openssl/evp.h>
 
+#include "shash.h"
+#include "dbuffer.h"
 
 #define	DSSL_REC_MAX		20480
 
@@ -37,7 +39,7 @@
 #define	DSSL_HT_SVR_DONE	0xe
 #define	DSSL_HT_CLI_CERTVRY	0xf
 #define	DSSL_HT_CLI_KEYEXG	0x10
-#define	DSSL_HT_FINISHED		0x14
+#define	DSSL_HT_FINISHED	0x14
 
 /* change cipher spec type */
 #define	DSSL_CT_CCS		0x1
@@ -68,14 +70,14 @@ typedef struct dssl_ssn {
 
 /* SSL decode context */
 typedef struct dssl_ctx {
-	EVP_PKEY	*key;		/* RSA private key */
+	EVP_PKEY	*pkey;		/* server private key */
 	u_int32_t	refcnt;		/* reference count */
 	shash_t		*ssnhash;	/* session hash */
 } dssl_ctx_t;
 
 /* SSL session */
 typedef struct dssl {
-	ssl_dctx_t	*ctx;		/* the context of this session */
+	dssl_ctx_t	*ctx;		/* the context of this session */
 	dbuf_t		domain;		/* client domain name */
 	dbuf_t		sid;		/* client session id */
 	dbuf_t		random[2];	/* client random */
@@ -100,7 +102,7 @@ dssl_ctx_new(void);
  *
  *	Return 0 if success, -1 on error.
  */
-extern int
+extern void  
 dssl_ctx_free(dssl_ctx_t *ctx);
 
 /**
@@ -111,7 +113,7 @@ dssl_ctx_free(dssl_ctx_t *ctx);
  *	Return 0 if success, -1 on error.
  */
 extern int 
-dssl_ctx_set_pkey(dssl_ctx_t *ctx, const char *pkey, const char *pw);
+dssl_ctx_load_pkey(dssl_ctx_t *ctx, const char *pkey, const char *pw);
 
 /**
  *	Alloc a new DSSL object.
@@ -135,7 +137,7 @@ dssl_free(dssl_t *ssl);
  * 	Return >0 if success, -1 on error.
  */
 extern int 
-dssl_decode(dssl_t *s, const u_int8_t *buf, size_t siz);
+dssl_decode(dssl_t *s, const u_int8_t *buf, size_t siz, int dir);
 
 
 #endif /* end of FZ_DSSL_UTIL_H */

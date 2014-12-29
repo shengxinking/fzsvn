@@ -20,16 +20,11 @@
 #include <openssl/engine.h>
 #include <openssl/err.h>
 
-#include "ssl_util.h"
 #include "gcc_common.h"
+#include "dbg_common.h"
 
-#define	_SU_ERR(f, a...)	printf("<%s-%d>: "f, __FILE__, __LINE__, ##a)
-#define	_SU_ERR_RET(r, f, a...)					\
-	({							\
-		printf("<%s-%d>: "f, __FILE__, __LINE__, ##a);	\
-		return r;					\
-	})
-#define	_SU_ERR_STR		strerror(errno)
+#include "ssl_util.h"
+
 
 #define	_SU_VRY_FLAGS		\
 	(SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE|SSL_VERIFY_FAIL_IF_NO_PEER_CERT)
@@ -258,25 +253,25 @@ _su_tmpdh_alloc(int index)
 	DH *dh = NULL;
 	
 	if (unlikely(index < 0 || index >= _SU_DH_MAX))
-		_SU_ERR_RET(NULL, "invalid index %d\n", index);
+		ERR_RET(NULL, "invalid index %d\n", index);
 
 	dh = DH_new();
 	if (unlikely(!dh))
-		_SU_ERR_RET(NULL, "DH_new failed\n");
+		ERR_RET(NULL, "DH_new failed\n");
 
 	if (BN_hex2bn(&dh->p, _su_dhgps[index].prime) == 0) {
 		DH_free(dh);
-		_SU_ERR_RET(NULL, "set DH prime failed\n");
+		ERR_RET(NULL, "set DH prime failed\n");
 	}
 
 	if (BN_hex2bn(&dh->g, _su_dhgps[index].generator) == 0) {
 		DH_free(dh);
-		_SU_ERR_RET(NULL, "set DH generator failed\n");
+		ERR_RET(NULL, "set DH generator failed\n");
 	}
 
 	if (unlikely(DH_generate_key(dh) != 1)) {
 		DH_free(dh);
-		_SU_ERR_RET(NULL, "DH_generate_key failed\n");
+		ERR_RET(NULL, "DH_generate_key failed\n");
 	}
 
 	return dh;
@@ -341,12 +336,12 @@ _su_tmpec_alloc(int oid)
 
 	ec = EC_KEY_new();
 	if (ec == NULL)
-		_SU_ERR_RET(NULL, "EC_KEY_new failed\n");
+		ERR_RET(NULL, "EC_KEY_new failed\n");
 
 	group = EC_GROUP_new_by_curve_name(oid);
 	if (group == NULL) {
 		EC_KEY_free(ec);
-		_SU_ERR_RET(NULL, "EC_GROUP_new_by_curve_name failed\n");
+		ERR_RET(NULL, "EC_GROUP_new_by_curve_name failed\n");
 	}
 
 	EC_GROUP_set_asn1_flag(group, OPENSSL_EC_NAMED_CURVE);
@@ -355,13 +350,13 @@ _su_tmpec_alloc(int oid)
 	if (EC_KEY_set_group(ec, group) == 0) {
 		EC_GROUP_free(group);
 		EC_KEY_free(ec);
-		_SU_ERR_RET(NULL, "EC_KEY_set_group failed\n");
+		ERR_RET(NULL, "EC_KEY_set_group failed\n");
 	}
 
 	if (!EC_KEY_generate_key(ec)) {
 		EC_GROUP_free(group);
 		EC_KEY_free(ec);
-		_SU_ERR_RET(NULL, "EC_KEY_generate_key failed\n");
+		ERR_RET(NULL, "EC_KEY_generate_key failed\n");
 	}
 
 	EC_GROUP_free(group);
@@ -400,13 +395,13 @@ _su_tmprsa_init(void)
 
 	rsa = RSA_generate_key(512, RSA_F4, NULL, NULL);
 	if (!rsa) {
-		_SU_ERR("generate 512bit RSA failed\n");
+		ERR("generate 512bit RSA failed\n");
 	}
 	_su_tmprsas[SSL_KEY_512] = rsa;
 
 	rsa = RSA_generate_key(1024, RSA_F4, NULL, NULL);
 	if (!rsa) {
-		_SU_ERR("generate 1024bit RSA failed\n");
+		ERR("generate 1024bit RSA failed\n");
 	}
 	_su_tmprsas[SSL_KEY_1024] = rsa;
 }
@@ -462,11 +457,11 @@ _su_set_rdrand(void)
 
 	rc = ENGINE_init(_su_engrand);
 	if (rc != 1) 
-		_SU_ERR_RET(-1, "Engine rdrand init failed\n");
+		ERR_RET(-1, "Engine rdrand init failed\n");
 	
 	rc = ENGINE_set_default(_su_engrand, ENGINE_METHOD_RAND);
 	if (rc != 1)
-		_SU_ERR_RET(-1, "Engine rdrand set default failed\n");
+		ERR_RET(-1, "Engine rdrand set default failed\n");
 
 	return 0;
 }
@@ -625,21 +620,21 @@ _su_info_cb_print(const SSL *ssl, int type, int val)
 	int side = type & ~SSL_ST_MASK;
 
 	if (unlikely(!ssl)) {
-		_SU_ERR("no SSL object\n");
+		ERR("no SSL object\n");
 		return;
 	}
 	
 	/* check ssl_info object */
 	si = SSL_get_app_data(ssl);
 	if (unlikely(!si)) {
-		_SU_ERR("no ssl_info object\n");
+		ERR("no ssl_info object\n");
 		return;
 	}
 
 	/* check ssl_ctx object */
 	sc = si->ctx;
 	if (unlikely(!sc)) {
-		_SU_ERR("no ssl_ctx object\n");
+		ERR("no ssl_ctx object\n");
 		return;
 	}
 
@@ -724,21 +719,21 @@ _su_info_cb(const SSL *ssl, int type, int val)
 
 	/* check ssl */
 	if (unlikely(!ssl)) {
-		_SU_ERR("no SSL object\n");
+		ERR("no SSL object\n");
 		return;
 	}
 	
 	/* check ssl_info */
 	si = SSL_get_app_data(ssl);
 	if (unlikely(!si)) {
-		_SU_ERR("no ssl_info object\n");
+		ERR("no ssl_info object\n");
 		return;
 	}
 
 	/* check ssl_ctx */
 	sc = si->ctx;
 	if (unlikely(!sc)) {
-		_SU_ERR("no ssl_ctx object\n");
+		ERR("no ssl_ctx object\n");
 		return;
 	}
 
@@ -782,15 +777,15 @@ _su_sni_cb(SSL *ssl, int *ad, void *arg)
 	const char *sname;
 
 	if (unlikely(!ssl)) 
-		_SU_ERR_RET(SSL_TLSEXT_ERR_NOACK, "not found ssl\n");
+		ERR_RET(SSL_TLSEXT_ERR_NOACK, "not found ssl\n");
 	
 	si = SSL_get_app_data(ssl);
 	if (unlikely(!si)) 
-		_SU_ERR_RET(SSL_TLSEXT_ERR_NOACK, "not found ssl_info\n");
+		ERR_RET(SSL_TLSEXT_ERR_NOACK, "not found ssl_info\n");
 	
 	sc = si->ctx;
 	if (unlikely(!sc)) 
-		_SU_ERR_RET(SSL_TLSEXT_ERR_NOACK, "not found ssl_ctx\n");
+		ERR_RET(SSL_TLSEXT_ERR_NOACK, "not found ssl_ctx\n");
 
 	sname = SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
 	if (!sname) {
@@ -830,12 +825,12 @@ _su_load_x509(const char *certfile)
 	FILE *fp = NULL;
 	
 	if (unlikely(!certfile))
-		_SU_ERR_RET(NULL, "invalid argument\n");
+		ERR_RET(NULL, "invalid argument\n");
 
 	fp = fopen(certfile, "r");
 	if (unlikely(!fp))
-		_SU_ERR_RET(NULL, "open certfile %s failed: %s\n", 
-			    certfile, _SU_ERR_STR);
+		ERR_RET(NULL, "open certfile %s failed: %s\n", 
+			    certfile, ERRSTR);
 
 	/* try to decode PEM format certificate */
 	x509 = PEM_read_X509(fp, NULL, NULL, NULL);
@@ -866,15 +861,15 @@ _su_load_pkey(const char *keyfile, const char *password)
 	pem_password_cb *cb = NULL;
 	
 	if (unlikely(!keyfile))
-		_SU_ERR_RET(NULL, "invalid argument @keyfile\n");
+		ERR_RET(NULL, "invalid argument @keyfile\n");
 
 	if (password)
 		cb = _su_pem_password_cb;
 
 	fp = fopen(keyfile, "r");
 	if (unlikely(!fp))
-		_SU_ERR_RET(NULL, "open keyfile %s failed: %s\n", 
-			    keyfile, _SU_ERR_STR);
+		ERR_RET(NULL, "open keyfile %s failed: %s\n", 
+			    keyfile, ERRSTR);
 
 	/* try to read PEM format private key file */
 	pkey = PEM_read_PrivateKey(fp, NULL, cb, (char *)password);
@@ -903,12 +898,12 @@ _su_load_x509_crl(const char *crlfile)
 	FILE *fp = NULL;
 
 	if (unlikely(!crlfile))
-		_SU_ERR_RET(NULL, "invalid argument @crlfile\n");
+		ERR_RET(NULL, "invalid argument @crlfile\n");
 
 	fp = fopen(crlfile, "r");
 	if (unlikely(!fp))
-		_SU_ERR_RET(NULL, "open crlfile %s failed: %s\n", 
-			    crlfile, _SU_ERR_STR);
+		ERR_RET(NULL, "open crlfile %s failed: %s\n", 
+			    crlfile, ERRSTR);
 
 	crl = PEM_read_X509_CRL(fp, NULL, NULL, NULL);
 	if (crl) {
@@ -933,11 +928,11 @@ ssl_ctx_alloc(ssl_sd_e side)
 	const SSL_METHOD *mt;
 
 	if (unlikely(_su_locks == NULL))
-		_SU_ERR_RET(NULL, "init pthread safe lock failed\n");
+		ERR_RET(NULL, "init pthread safe lock failed\n");
 
 	sc = calloc(1, sizeof(ssl_ctx_t));
 	if (unlikely(!sc))
-		_SU_ERR_RET(NULL, "calloc failed: %s\n", _SU_ERR_STR);
+		ERR_RET(NULL, "calloc failed: %s\n", ERRSTR);
 
 	if (side == SSL_SD_CLIENT)
 		mt = SSLv23_client_method();
@@ -945,13 +940,13 @@ ssl_ctx_alloc(ssl_sd_e side)
 		mt = SSLv23_server_method();
 	else {
 		free(sc);
-		_SU_ERR_RET(NULL, "invalid @side value %d\n", side);
+		ERR_RET(NULL, "invalid @side value %d\n", side);
 	}
 	
 	sc->ctx = SSL_CTX_new(mt);
 	if (unlikely(!sc->ctx)) {
 		free(sc);
-		_SU_ERR_RET(NULL, "SSL_CTX_new failed\n");
+		ERR_RET(NULL, "SSL_CTX_new failed\n");
 	}
 	
 	/* set auto-reply for renegoatiate */
@@ -966,7 +961,7 @@ ssl_ctx_alloc(ssl_sd_e side)
 	if (SSL_CTX_set_session_id_context(sc->ctx, sid, len) != 1) {
 		SSL_CTX_free(sc->ctx);
 		free(sc);
-		_SU_ERR_RET(NULL, "SSL_CTX_set_session_id_context failed\n");
+		ERR_RET(NULL, "SSL_CTX_set_session_id_context failed\n");
 	}
 
 	if (side == SSL_SD_SERVER) {
@@ -1014,7 +1009,7 @@ ssl_ctx_set_protocol(ssl_ctx_t *sc, int protocol)
 	long oldopt;
 
 	if (unlikely(!sc || !sc->ctx))
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 
 	/* get current options */
 	opt = oldopt = SSL_CTX_get_options(sc->ctx);
@@ -1060,11 +1055,11 @@ ssl_ctx_set_ciphers(ssl_ctx_t *sc, const char *ciphers)
 	int ret;
 
 	if (unlikely(!sc || !sc->ctx || !ciphers))
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 
 	ret = SSL_CTX_set_cipher_list(sc->ctx, ciphers);
 	if (unlikely(ret != 1))
-		_SU_ERR_RET(-1, "set cipher list %s failed\n", ciphers);
+		ERR_RET(-1, "set cipher list %s failed\n", ciphers);
 
 	strncpy(sc->ciphers, ciphers, SSL_CIPHER_MAX);
 
@@ -1075,7 +1070,7 @@ int
 ssl_ctx_set_renegotiate(ssl_ctx_t *sc, int renegotiate)
 {
 	if (unlikely(!sc || !sc->ctx || renegotiate < 0)) 
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 
 	sc->renegotiate = renegotiate;
 
@@ -1086,10 +1081,10 @@ int
 ssl_ctx_set_pfs(ssl_ctx_t *sc, int pfs)
 {
 	if (unlikely(!sc || !sc->ctx))
-		_SU_ERR_RET(-1, "invalid argument");
+		ERR_RET(-1, "invalid argument");
 	
 	if (sc->side != SSL_SD_SERVER)
-		_SU_ERR_RET(-1, "only server side support PFS\n");
+		ERR_RET(-1, "only server side support PFS\n");
 
 	if (pfs) {
 
@@ -1122,7 +1117,7 @@ int
 ssl_ctx_set_domain(ssl_ctx_t *sc, const char *domain)
 {
 	if (unlikely(!sc || !domain))
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 
 	strncpy(sc->domain, domain, sizeof(sc->domain) - 1);
 
@@ -1133,10 +1128,10 @@ int
 ssl_ctx_add_sni(ssl_ctx_t *sc, ssl_ctx_t *sni)
 {
 	if (unlikely(!sc || !sni))
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 
 	if (!sni->domain[0])
-		_SU_ERR_RET(-1, "sni didn't have domain\n");
+		ERR_RET(-1, "sni didn't have domain\n");
 
 	CBLIST_ADD_TAIL(&sc->list, &sni->list);
 
@@ -1203,7 +1198,7 @@ ssl_ctx_load_intmedcert(ssl_ctx_t *sc, const char *certfile)
 
 	if (SSL_CTX_add_extra_chain_cert(sc->ctx, x509) != 1) {
 		X509_free(x509);
-		_SU_ERR_RET(-1, "load intermedia certificate %s failed\n", 
+		ERR_RET(-1, "load intermedia certificate %s failed\n", 
 			    certfile);
 	}
 
@@ -1216,11 +1211,11 @@ ssl_ctx_load_cacert(ssl_ctx_t *sc, const char *cafile)
 	int ret;
 
 	if (unlikely(!sc || !sc->ctx || !cafile))
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 	
 	ret = SSL_CTX_load_verify_locations(sc->ctx, (char *)cafile, NULL);
 	if (unlikely(ret != 1))
-		_SU_ERR_RET(-1, "load CA certificate %s failed\n", cafile);
+		ERR_RET(-1, "load CA certificate %s failed\n", cafile);
 
 	if (!(sc->flags & SSL_VRY_CA)) {
 		SSL_CTX_set_verify_depth(sc->ctx, 100);
@@ -1243,7 +1238,7 @@ ssl_ctx_load_crl(ssl_ctx_t *sc, const char *crlfile)
 	X509_STORE *st;
 
 	if (!sc || !sc->ctx || !crlfile)
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 	
 	crl = _su_load_x509_crl(crlfile);
 	if (!crl)
@@ -1258,7 +1253,7 @@ ssl_ctx_load_crl(ssl_ctx_t *sc, const char *crlfile)
 	ret = X509_STORE_add_crl(st, crl);
 	if (unlikely(ret != 1)) {
 		X509_CRL_free(crl);
-		_SU_ERR_RET(-1, "load CRL certificate %s failed\n", 
+		ERR_RET(-1, "load CRL certificate %s failed\n", 
 			    crlfile);
 	}
 	
@@ -1281,7 +1276,7 @@ ssl_ctx_free(ssl_ctx_t *sc)
 	ssl_ctx_t *sc1, *bak;
 
 	if (unlikely(!sc)) 
-		_SU_ERR_RET(-1, "invalid argument");
+		ERR_RET(-1, "invalid argument");
 
 	refcnt = __sync_fetch_and_sub(&sc->refcnt, 1);
 
@@ -1310,19 +1305,19 @@ ssl_alloc(ssl_ctx_t *sc)
 	ssl_info_t *si;
 
 	if (unlikely(!sc || !sc->ctx))
-		_SU_ERR_RET(NULL, "invalid argument\n");
+		ERR_RET(NULL, "invalid argument\n");
 
 	/* alloc new SSL object */
 	ssl = SSL_new(sc->ctx);
 	if (unlikely(!ssl))
-		_SU_ERR_RET(NULL, "SSL_new failed\n");
+		ERR_RET(NULL, "SSL_new failed\n");
 
 	/* set domain name on client side */
 	if (sc->side == SSL_SD_CLIENT && sc->domain[0]) {
 		ret = SSL_set_tlsext_host_name(ssl, sc->domain);
 		if (unlikely(ret != 1)) {
 			SSL_free(ssl);
-			_SU_ERR_RET(NULL, "SSL_set_tlsext_host_name failed\n");
+			ERR_RET(NULL, "SSL_set_tlsext_host_name failed\n");
 		}
 	}
 
@@ -1335,7 +1330,7 @@ ssl_alloc(ssl_ctx_t *sc)
 	si = OPENSSL_malloc(sizeof(ssl_info_t));
 	if (unlikely(!si)) {
 		SSL_free(ssl);
-		_SU_ERR_RET(NULL, "OPENSSL_malloc failed\n");
+		ERR_RET(NULL, "OPENSSL_malloc failed\n");
 	}
 
 	/* set ssl_info value */
@@ -1350,7 +1345,7 @@ ssl_alloc(ssl_ctx_t *sc)
 	if (unlikely(ret != 1)) {
 		SSL_free(ssl);
 		OPENSSL_free(si);
-		_SU_ERR_RET(NULL, "SSL_set_app_data failed\n");
+		ERR_RET(NULL, "SSL_set_app_data failed\n");
 	}
 
 	__sync_fetch_and_add(&sc->refcnt, 1);
@@ -1365,11 +1360,11 @@ ssl_set_fd(SSL *ssl, int fd)
 	int oldfd;
 
 	if (unlikely(!ssl || fd < 0))
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 
 	oldfd = SSL_get_fd(ssl);
 	if (unlikely(oldfd >= 0))
-		_SU_ERR_RET(-1, "already set fd %d\n", oldfd);
+		ERR_RET(-1, "already set fd %d\n", oldfd);
 
 	ret = SSL_set_fd(ssl, fd);
 	if (unlikely(ret != 1))
@@ -1387,21 +1382,21 @@ ssl_accept(SSL *ssl, int fd, ssl_wt_e *wait)
 	ssl_info_t *si;
 
 	if (unlikely(!ssl || fd < 0 || !wait))
-		_SU_ERR_RET(-1, "invalid argument\n");;
+		ERR_RET(-1, "invalid argument\n");;
 
 	*wait = SSL_WT_NONE;
 
 	si = SSL_get_app_data(ssl);
 	if (unlikely(!si))
-		_SU_ERR_RET(-1, "get app data failed\n");
+		ERR_RET(-1, "get app data failed\n");
 
 	sc = si->ctx;
 	if (unlikely(!sc))
-		_SU_ERR_RET(-1, "get ssl_ctx failed\n");
+		ERR_RET(-1, "get ssl_ctx failed\n");
 
 	ret = ssl_set_fd(ssl, fd);
 	if (unlikely(ret))
-		_SU_ERR_RET(-1, "ssl_set_fd failed\n");
+		ERR_RET(-1, "ssl_set_fd failed\n");
 
 	ret = SSL_accept(ssl);
 	
@@ -1411,7 +1406,7 @@ ssl_accept(SSL *ssl, int fd, ssl_wt_e *wait)
 	}
 
 	if (unlikely(ret == 0))
-		_SU_ERR_RET(-1, "SSL accept IO failed\n");
+		ERR_RET(-1, "SSL accept IO failed\n");
 	
 	/* check error */
 	err = SSL_get_error(ssl, ret);
@@ -1423,7 +1418,7 @@ ssl_accept(SSL *ssl, int fd, ssl_wt_e *wait)
 		if (si->error == 0)
 			si->error = ERR_peek_error();
 
-		_SU_ERR_RET(-1, "SSL accept failed: %d(%s)\n", 
+		ERR_RET(-1, "SSL accept failed: %d(%s)\n", 
 			    ERR_GET_REASON(si->error), 
 			    ERR_reason_error_string(si->error));
 	}
@@ -1440,21 +1435,21 @@ ssl_connect(SSL *ssl, int fd, ssl_wt_e *wait)
 	ssl_info_t *si;
 
 	if (unlikely(!ssl || fd < 0 || !wait))
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 
 	*wait = SSL_WT_NONE;
 
 	si = SSL_get_app_data(ssl);
 	if (!si)
-		_SU_ERR_RET(-1, "get app data failed\n");
+		ERR_RET(-1, "get app data failed\n");
 
 	sc = si->ctx;
 	if (!sc)
-		_SU_ERR_RET(-1, "get ssl_ctx failed\n");
+		ERR_RET(-1, "get ssl_ctx failed\n");
 
 	ret = ssl_set_fd(ssl, fd);
 	if (unlikely(ret))
-		_SU_ERR_RET(-1, "ssl_set_fd failed\n");
+		ERR_RET(-1, "ssl_set_fd failed\n");
 
 	ret = SSL_connect(ssl);
 
@@ -1466,7 +1461,7 @@ ssl_connect(SSL *ssl, int fd, ssl_wt_e *wait)
 
 	/* low-layer I/O closed or SSL shutdowned */
 	if (unlikely(ret == 0))
-		_SU_ERR_RET(-1, "SSL connect IO failed\n");
+		ERR_RET(-1, "SSL connect IO failed\n");
 
 	/* check error */
 	err = SSL_get_error(ssl, ret);
@@ -1478,7 +1473,7 @@ ssl_connect(SSL *ssl, int fd, ssl_wt_e *wait)
 		if (si->error == 0)
 			si->error = ERR_peek_error();
 
-		_SU_ERR_RET(-1, "SSL connect failed: %d(%s)\n", 
+		ERR_RET(-1, "SSL connect failed: %d(%s)\n", 
 			    ERR_GET_REASON(si->error), 
 			    ERR_reason_error_string(si->error));
 	}
@@ -1495,17 +1490,17 @@ ssl_handshake(SSL *ssl, ssl_wt_e *wait)
 	ssl_info_t *si;
 
 	if (unlikely(!ssl || !wait)) 
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 
 	*wait = SSL_WT_NONE;
 
 	si = SSL_get_app_data(ssl);
 	if (unlikely(!si))
-		_SU_ERR_RET(-1, "get app data failed\n");
+		ERR_RET(-1, "get app data failed\n");
 
 	sc = si->ctx;
 	if (unlikely(!sc))
-		_SU_ERR_RET(-1, "get ssl_ctx failed\n");
+		ERR_RET(-1, "get ssl_ctx failed\n");
 
 	ret = SSL_do_handshake(ssl);
 	
@@ -1528,7 +1523,7 @@ ssl_handshake(SSL *ssl, ssl_wt_e *wait)
 	}
 
 	if (unlikely(ret == 0)) 
-		_SU_ERR_RET(-1, "SSL handshake IO failed\n");
+		ERR_RET(-1, "SSL handshake IO failed\n");
 
 	/* check error */
 	err = SSL_get_error(ssl, ret);
@@ -1540,7 +1535,7 @@ ssl_handshake(SSL *ssl, ssl_wt_e *wait)
 		if (si->error == 0)
 			si->error = ERR_peek_error();
 
-		_SU_ERR_RET(-1, "SSL handshake failed: %d(%s)\n", 
+		ERR_RET(-1, "SSL handshake failed: %d(%s)\n", 
 			    ERR_GET_REASON(si->error), 
 			    ERR_reason_error_string(si->error));
 	}
@@ -1556,17 +1551,17 @@ ssl_renegotiate(SSL *ssl, ssl_wt_e *wait)
 	ssl_info_t *si;
 
 	if (unlikely(!ssl || !wait)) 
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 
 	*wait = SSL_WT_NONE;
 
 	si = SSL_get_app_data(ssl);
 	if (unlikely(!si))
-		_SU_ERR_RET(-1, "get app data failed\n");
+		ERR_RET(-1, "get app data failed\n");
 
 	sc = si->ctx;
 	if (unlikely(!sc))
-		_SU_ERR_RET(-1, "get ssl_ctx failed\n");
+		ERR_RET(-1, "get ssl_ctx failed\n");
 	
 	/* enable renegotiate caused by self */
 	si->renegotiate = 1;
@@ -1574,7 +1569,7 @@ ssl_renegotiate(SSL *ssl, ssl_wt_e *wait)
 	/* do SSL renegotiate */
 	ret = SSL_renegotiate(ssl);
 	if (unlikely(ret < 1)) 
-		_SU_ERR_RET(-1, "SSL renegotiate failed\n");
+		ERR_RET(-1, "SSL renegotiate failed\n");
 
 	/* call SSL handshake finished work */
 	return ssl_handshake(ssl, wait);
@@ -1589,7 +1584,7 @@ ssl_recv(SSL *ssl, void *buf, int len, int *closed, int *handshake)
 	ssl_info_t *si;
 
 	if (unlikely(!ssl || !buf || len < 1 || !closed || !handshake))
-		_SU_ERR_RET(-1, "invalid argument");
+		ERR_RET(-1, "invalid argument");
 
 	*closed = 0;
 	*handshake = 0;
@@ -1597,18 +1592,18 @@ ssl_recv(SSL *ssl, void *buf, int len, int *closed, int *handshake)
 	/* check renegotiate */
 	si = SSL_get_app_data(ssl);
 	if (unlikely(!si)) {
-		_SU_ERR_RET(-1, "get app data failed\n");
+		ERR_RET(-1, "get app data failed\n");
 	}
 	sc = si->ctx;
 	if (unlikely(!sc)) {
-		_SU_ERR_RET(-1, "get ssl_ctx failed\n");
+		ERR_RET(-1, "get ssl_ctx failed\n");
 	}
 
 	n = SSL_read(ssl, buf, len);
 
 	if (si->in_handshake) {
 		if (sc->renegotiate == 0 && si->renegotiate == 0)
-			_SU_ERR_RET(-1, "peer renegotiate not enabled\n");
+			ERR_RET(-1, "peer renegotiate not enabled\n");
 		*handshake = 1;
 		return 0;
 	}
@@ -1626,7 +1621,7 @@ ssl_recv(SSL *ssl, void *buf, int len, int *closed, int *handshake)
 	/* check blocked by read */
 	err = SSL_get_error(ssl, n);
 	if (err != SSL_ERROR_WANT_READ) {
-		_SU_ERR_RET(-1, "SSL recv error: %d\n", err);
+		ERR_RET(-1, "SSL recv error: %d\n", err);
 	}
 
 	return n;
@@ -1642,23 +1637,23 @@ ssl_send(SSL *ssl, const void *buf, int len)
 	ssl_info_t *si;
 
 	if (unlikely(!ssl || !buf || len < 0))
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 
 	/* check renegotiate */
 	si = SSL_get_app_data(ssl);
 	if (unlikely(!si)) 
-		_SU_ERR_RET(-1, "get app data failed\n");
+		ERR_RET(-1, "get app data failed\n");
 	
 	sc = si->ctx;
 	if (unlikely(!sc)) 
-		_SU_ERR_RET(-1, "get ssl_ctx failed\n");
+		ERR_RET(-1, "get ssl_ctx failed\n");
 
 	/* not enable renegotiate but renegotiate occured */
 	if (sc->renegotiate == 0 && 
 	    si->renegotiate == 0 && 
 	    si->in_handshake) 
 	{
-		_SU_ERR_RET(-1, "renegotiate not enabled\n");
+		ERR_RET(-1, "renegotiate not enabled\n");
 	}
 
 	n = SSL_write(ssl, buf, len);
@@ -1695,7 +1690,7 @@ ssl_shutdown(SSL *ssl, ssl_wt_e *wait)
 	int err;
 
 	if (unlikely(!ssl || !wait))
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 
 	*wait = SSL_WT_NONE;
 
@@ -1715,7 +1710,7 @@ ssl_shutdown(SSL *ssl, ssl_wt_e *wait)
 	else if (err == SSL_ERROR_WANT_WRITE)
 		*wait = SSL_WT_WRITE;
 	else 
-		_SU_ERR_RET(-1, "SSL shutdown failed\n");
+		ERR_RET(-1, "SSL shutdown failed\n");
 
 	return 0;
 }
@@ -1728,16 +1723,16 @@ ssl_free(SSL *ssl)
 	ssl_info_t *si;
 
 	if (unlikely(!ssl))
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 
 	/* check renegotiate */
 	si = SSL_get_app_data(ssl);
 	if (unlikely(!si))
-		_SU_ERR_RET(-1, "get app data failed\n");
+		ERR_RET(-1, "get app data failed\n");
 	
 	sc = si->ctx;
 	if (unlikely(!sc))
-		_SU_ERR_RET(-1, "get ssl_ctx failed\n");
+		ERR_RET(-1, "get ssl_ctx failed\n");
 
 	OPENSSL_free(si);
 	SSL_free(ssl);
@@ -1771,17 +1766,17 @@ ssl_get_error(const SSL *ssl)
 	ssl_info_t *si;
 
 	if (unlikely(!ssl))
-		_SU_ERR_RET(-1, "invalid argument\n");
+		ERR_RET(-1, "invalid argument\n");
 	
 	/* get ssl_info object */
 	si = SSL_get_app_data(ssl);
 	if (unlikely(!si))
-		_SU_ERR_RET(-1, "get app data failed\n");
+		ERR_RET(-1, "get app data failed\n");
 	
 	/* get ssl_ctx object */
 	sc = si->ctx;
 	if (unlikely(!sc))
-		_SU_ERR_RET(-1, "get ssl_ctx failed\n");
+		ERR_RET(-1, "get ssl_ctx failed\n");
 
 	/* get verify result */
 	vryerr = SSL_get_verify_result(ssl);

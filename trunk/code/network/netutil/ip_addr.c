@@ -873,3 +873,4 @@ ip_port_compare(const ip_port_t *ip1, const ip_port_t *ip2)
 	return (ntohs(ip1->port) - ntohs(ip2->port));
 }
 
+

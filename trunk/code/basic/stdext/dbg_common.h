@@ -12,6 +12,7 @@
 #define FZ_DBG_COMMON_H
 
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 
 /* ERRSTR for get errno string in glibc functions */
