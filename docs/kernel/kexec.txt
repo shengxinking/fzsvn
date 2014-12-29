@@ -1,0 +1,14 @@
+1. 概述
+
+本文档介绍了在不重启Linux系统的情况下启动新的Linux内核.
+
+2. Kexec介绍
+kexec是Linux-2.6.13后内核的一个新功能, 它能在当前内核下运行一个新的内核. 要启用Kexec, 需要在运行的内核里面开启KEXEC system call(CONFIG_KEXEC=y ).
+然后在安装kexec-tools的工具.
+
+3. 运行Kexec
+
+1. 编译新的内核， 加入CONFIG_KEXEC=y
+
+2. 用kexec运行新的内核
+# kexec -l 内核文件 --append=“内核命令行参数” 

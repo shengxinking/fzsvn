@@ -1,0 +1,12 @@
+#!/bin/sh
+
+## the root window should have this color
+#display -window root /etc/X11/xdm/arch-xdm/archblack.png
+display -window root -resize 1440x900 /etc/X11/xdm/xdm-horse/horse.png &
+#feh --bg-scale /etc/X11/xdm/xdm-horse/horse.png 
+## these are all optional
+/etc/X11/xdm/xdm-horse/buttons -geometry -0-0 &
+/usr/bin/import -display :0.0 -window root -pause 5 /tmp/xdm_login.png &
+#xclock -bg black -fg white &
+# xconsole -daemon -geometry 640x200-0+0
+

@@ -1,0 +1,19 @@
+1. net_families[NPROTO] (net/socket.h)(创建sock)
+所有的3层协议的数组, 用sock_register()注册.
+
+IPv4协议.
+inet_init() (net/ipv4/af_inet.c)
+
+2. proto_list(list_head) (net/core/sock.c)(基于socket的处理函数)
+所有的4层协议的数组, 用proto_register()注册.
+
+3. net_namespace_list(struct list_head)net的命名空间列表.
+init_net (net/core/net_namespace.c)默认的net namespace. net_ns_init初始化net namespace.
+
+4. ptype_base[PTYPE_HASH_SIZE]3层协议的数组(接收数据)
+dev_add_pack()添加3层协议. inet_init()(net/ipv4/af_inet.c)IP协议初始化.
+
+5. inet_protos[MAX_INET_PROTOS](net/ipv4/protocol.c)基于IP的4层协议(接收数据).
+inet_add_protocol()添加新的4层协议.
+
+

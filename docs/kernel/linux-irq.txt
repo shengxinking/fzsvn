@@ -1,0 +1,11 @@
+1. IRQ介绍
+
+
+2. IRQ函数:
+local_irq_disable();
+local_irq_enable();
+local_irq_save();
+local_irq_restore();
+request_irq();
+
+

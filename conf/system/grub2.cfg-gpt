@@ -1,0 +1,65 @@
+### Install modules
+insmod vbe
+insmod vga
+insmod part_gpt
+insmod btrfs
+insmod ext2
+
+### set variable
+set default="0"
+set timeout=10
+set root=(hd0,gpt2)
+
+### set fonts and terminal output
+if loadfont /grub/fonts/unicode.pf2 ; then
+	insmod gfxterm
+	insmod gettext
+	set gfxmode=auto
+	set locale_dir=$prefix/locale
+	set lang=en_US
+	terminal_output gfxterm
+fi
+
+### Set boot menu
+menuentry "Microsoft Windows7" {
+	insmod part_msdos
+        insmod ntfs
+        set root=(hd1,1)
+        drivemap -s (hd1) ${root}
+        chainloader +1
+}
+
+menuentry 'Gentoo' {
+	linux	/gentoo/vmlinuz-3.10.7-r1 root=/dev/sda3 ro quiet
+}
+
+menuentry 'Debian' {
+	linux	/debian/vmlinuz-3.2.0-4-amd64 root=/dev/sda4 ro quiet
+	initrd	/debian/initrd.img-3.2.0-4-amd64
+}
+
+menuentry 'Fedora' {
+        linux   /fedora/vmlinuz-3.10.7-r1 root=/dev/sda5 console.keymap=us rd.luks=0 vconsole.font=latarcyrheb-sun16 rhgb quiet LANG=en_US.UTF-8
+        initrd  /fedora/initramfs-3.10.7-gentoo-r1.img
+}
+
+menuentry 'Arch' {
+        linux   /arch/vmlinuz-linux root=/dev/sda6 ro quiet
+        initrd  /arch/initramfs-linux.img
+}
+
+menuentry 'LFS' {
+        linux   /lfs/vmlinuz-3.10.10 root=/dev/sda7 ro quiet
+}
+
+menuentry 'Ubuntu' {
+	linux   /ubuntu/vmlinuz-3.8.0-19-generic root=/dev/sda10 ro rootflags=subvol=@ quiet splash 
+        initrd  /ubuntu/initrd.img-3.8.0-19-generic
+}
+
+menuentry 'FreeBSD' {
+	set root=(hd0,gpt2)	
+}
+
+
+### END /etc/grub.d/41_custom ###

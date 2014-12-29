@@ -1,0 +1,8 @@
+-----BEGIN EC PARAMETERS-----
+BggqhkjOPQMBAQ==
+-----END EC PARAMETERS-----
+-----BEGIN EC PRIVATE KEY-----
+MF8CAQEEGEadNaggZd5EP+uFRAsPlkbMkQd6a+WWZKAKBggqhkjOPQMBAaE0AzIA
+BBzfdVOwvu6kIe6ls4hhLwTD1yfzor++vykygh1LUG9YB2xkxYcDYOw4e7IzXHFl
+zA==
+-----END EC PRIVATE KEY-----

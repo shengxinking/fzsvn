@@ -1,0 +1,6 @@
+hostname = 
+username = ""
+password = ""
+mda = "/usr/bin/procmail -d %T"
+
+

@@ -1,0 +1,7 @@
+1. HAProxy install
+make TARGET=linux2628 ARCH=x86_64 USE_PCRE=1
+install -D haproxy /opt/haproxy-1.4.24/bin/haproxy
+
+
+2. squid install
+

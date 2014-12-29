@@ -1,0 +1,51 @@
+
+1. 函数attributes:
+
+声明attribute函数
+extern type function(...) __attribute__((x));
+
+定义attribute函数
+__attribute__((x)) 
+type function(...)
+{
+	...
+}
+
+__attribute__((constructor))
+构造函数, 在main()之前, 动态库加载的时候自动执行, gcc > 2.9.5支持
+
+__attribute__((destructor))
+析构函数, 在main()函数执行完, 动态库卸载的时候调用
+
+__attribute__((weak))
+__attribute__((weak,alias("x")))
+若两个或两个以上全局符号（函数或变量名）名字一样，而其中之一声明为weak symbol（弱符号），则这些全局符号不会引发重定义错误。链接器会忽略弱符号，去使用普通的全局符号来解析所有对这些符号的引用，但当普通的全局符号不可用时，链接器会使用弱符号。
+和下面的汇编语句有同样的效果:
+asm(".weak symbol1\n\t .set x, y\n\t");
+
+__attribute__((aligned(N)))
+
+__attribute__((alloc_size))
+
+类型attribute:
+
+struct {
+	...
+} __attribute__((x));
+
+typedef type1 type2 __attribute((x))
+
+__attribute__((packed))
+告诉编译器取消结构在编译过程中的优化对齐. 按照实际占用的字节数对齐
+
+__attribute__((aligned(N)))__
+__attribute__((aligned))
+强制编译器确保结构/类型变量按照N字节对齐.
+
+
+
+变量attribute:
+
+
+
+

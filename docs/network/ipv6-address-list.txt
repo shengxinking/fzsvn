@@ -1,0 +1,42 @@
+GUI:
+system->network->interface
+system->vzone
+system->dns
+router-static
+system->maintenance->Auto update
+server objects->server health check
+server objects->vserver
+server objects->pysical server
+server objects->domain server
+server objects->server farm
+system->config->snmp
+system->maintenance->system time->ntp
+system->config->config sync
+system->admin->trusted Host#[123]
+system->config->operation True Transparent Proxy
+system->status->policy sessions/server status 
+system->maintenance->ftp backup
+
+daemon:
+monitord
+proxyd
+marial DB
+indexd
+miglogd
+alertmaild
+httpsd		
+ntpd		
+snmpd
+sshd
+synconfd
+telnetd
+updated
+wvsd
+wadd
+
+kernel:
+TP module
+share ip
+allowaccess
+
+

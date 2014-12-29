@@ -1,0 +1,13 @@
+1. Linux多媒体键
+XF86AudioMute		静音键
+XF86AudioLowerVolume	降低音量
+XF86AudioRaiseVolume	提高音量
+XF86Mail		打开邮件客户端
+
+
+2. amixer设置音量
+amixer -q set Master 5%+ unmute	增加5%的音量
+amixer -q set Master 5%- unmute	减少5%的音量
+amixer -q set Master mute		静音
+
+

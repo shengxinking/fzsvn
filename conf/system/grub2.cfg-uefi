@@ -1,0 +1,71 @@
+### install modules 
+insmod efi_gop
+insmod efi_uga
+insmod vbe
+insmod vga
+insmod video_bochs
+insmod video_cirrus
+insmod video_fb
+insmod part_gpt
+insmod part_msdos
+insmod ext2
+insmod btrfs
+insmod font
+
+### set default and timeout
+set default="0"
+set timeout=10
+set root=(hd0,gpt2)
+#font="/grub/fonts/unicode.pf2"
+
+### set screen output
+if loadfont "${prefix}/fonts/unicode.pf2"
+then 
+	insmod gfxterm
+	#insmod gettext
+	#set gfxmode=1440x900
+	set gfxmode=auto
+	set gfxpayload=keep
+	terminal_output gfxterm
+fi
+
+menuentry 'Gentoo' {
+	set root=(hd0,gpt2)
+	linux   /gentoo/vmlinuz-3.10.7-r1 root=/dev/sda3 ro quiet
+}
+
+menuentry 'Debian' {
+	set root=(hd0,gpt2)
+	linux	/debian/vmlinuz-3.2.0-4-amd64 root=/dev/sda4 ro quiet
+	initrd	/debian/initrd.img-3.2.0-4-amd64
+}
+
+menuentry 'Fedora' {
+	set root=(hd0,gpt2)
+	linux	/fedora/vmlinuz-3.10.7-r1 root=/dev/sda5 console.keymap=us rd.luks=0 vconsole.font=latarcyrheb-sun16 rhgb quiet LANG=en_US.UTF-8
+	initrd	/fedora/initramfs-3.10.7-gentoo-r1.img
+}
+
+menuentry 'Arch' {
+	set root=(hd0,gpt2)
+	linux   /arch/vmlinuz-linux root=/dev/sda6 ro quiet
+	initrd	/arch/initramfs-linux.img
+}
+
+menuentry 'LFS' {
+	set root=(hd0,gpt2)
+	linux	/lfs/vmlinuz-3.10.10 loglevel=7 root=/dev/sda7 
+}
+
+menuentry 'Ubuntu' {
+	set root=(hd0,gpt2)
+	linux   /ubuntu/vmlinuz-3.8.0-19-generic root=/dev/sda10 ro rootflags=subvol=@ quiet splash 
+	initrd	/ubuntu/initrd.img-3.8.0-19-generic
+}
+
+menuentry 'FreeBSD' {
+	set root=(hd0,gpt2)
+}
+
+
+

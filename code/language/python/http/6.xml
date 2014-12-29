@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<aa:root xmlns:aa='http://www.forrest.org/1'>
+<list>
+    <name>Forrest</name>
+    <age>28</age>
+    <email>33</email>
+</list>
+</aa:root>

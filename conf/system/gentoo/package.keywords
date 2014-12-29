@@ -1,0 +1,9 @@
+app-emulation/vmware-workstation ~amd64
+app-emulation/vmware-modules	~amd64
+sys-boot/grub			~amd64
+#sys-boot/efibootmgr		~amd64
+net-analyzer/netperf		~amd64
+x11-misc/lightdm		~amd64
+x11-misc/lightdm-gtk-greeter	~amd64
+app-i18n/fcitx-sunpinyin	~amd64
+

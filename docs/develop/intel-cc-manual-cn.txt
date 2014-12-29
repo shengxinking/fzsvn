@@ -1,0 +1,17 @@
+Intel CC 编译器使用指南.
+
+1. 简介:
+   Intel 的ICC编译器是Intel公司针对自己的CPU设计的一款高性能编译器, 它的执行性能比GCC高, 生成代码的体积比GCC稍大. 基本上兼容GCC的各种选项, 同时也有一些自己的优化指令. 可以针对CPU的型号做深层次的优化.
+
+2. 安装:
+   在Intel的网站上下载最新的ICC软件(非商业免费版), 它有针对32位和64位的编译器, 针对自己的CPU和系统下载相应的软件, 安装选择默认选项就可以. 默认安装到/opt/intel/cc/版本号/里面. 将ICC的环境变量iccvar.sh加到用户的登陆脚本里面~/.bashrc
+   source /opt/intel/cc/xxxx/bin/iccvars.sh
+
+3. 用ICC编译开源软件:
+   一般的开源软件都是用"configure; make; make install"安装的, 默认的是GCC, 如果要用ICC编译, 运行指令 configure CC=icc CFLAGS="-fast ..." CXX=icpc CXXFLAGS="-fast ..." AR=xiar; make; make install 安装, 一般都能正常编译安装.
+
+4. ICC编译工具:
+   
+
+
+                                                            

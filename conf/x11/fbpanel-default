@@ -1,0 +1,266 @@
+##  Begin of ~/.config/fbpanel/default
+
+# the fbpanel 6.0 config file
+
+# the global config
+Global {
+	edge = buttom 
+	allign = center
+	margin = 0
+	widthtype = percent
+	width = 100
+	heightType = pixel
+	height = 32
+	transparent = true
+	tintcolor = #ffffff
+	alpha = 80
+	setdocktype = true
+	setpartialstrut = true
+	autohide = false
+	heightWhenHidden = 2
+	roundcorners = false
+	roundcornersradius = 8
+	layer = none
+}
+
+
+# the 2 pixel space
+Plugin {
+	type = space
+	config {
+		size = 2
+	}
+}
+
+
+# the menu
+Plugin {
+	type = menu
+	config {
+		# menu icon
+		#icon = start-here
+		icon = logo
+
+		# the top menu item
+		item {
+			name = Terminal
+			icon = terminal
+			action = urxvt
+		}
+		item {
+			name = Emacs
+			icon = emacs
+			action = emacs
+		}
+		item {
+			name = Web Browser
+			icon = web-browser
+			action = firefox
+		}
+
+		separator {
+		}
+
+		# system menu, it's XDG memu in /usr/share/applications/
+		systemmenu {
+		}
+
+		separator {
+		}
+
+		# Restart/Logout menu
+		#item {
+		#	name = Reconfigure
+		#	icon = gnome-session
+		#	action =  --reconfigure
+		#}
+		#item {
+		#	name = Restart
+		#	icon = go-home
+		#	action = killall --restart
+		#}
+		item {
+			name = Lock Screen
+			icon = gnome-lockscreen
+			action = slock
+		}
+		#item {
+		#	name = Logout
+		#	icon = gnome-logout
+		#	#action = openbox --exit
+		#	action = /usr/libexec/fbpanel/xlogout
+		#}
+	}
+}
+
+
+# the 16 pixel space
+Plugin {
+	type = space
+	config {
+		size = 16
+	}
+}
+
+
+# the launchbar.
+Plugin {
+	type = launchbar
+	config {
+		button {
+			icon = file-manager
+			tooltip = File Manager
+			action = xfe
+		}
+		button {
+			icon = terminal
+			tooltip = Terminal
+			action = urxvt
+		}
+		button {
+			icon = emacs
+			tooltip = Emacs
+			action = emacs
+		}
+		button {
+			icon = gvim
+			tooltip = GVim
+			action = gvim
+		}
+		button {
+			icon = firefox
+			tooltip = Web Browser
+			action = firefox
+		}
+		button {
+			icon = chromium-browser
+			tooltip = Google Chrome Browser
+			action = chromium
+		}
+	}
+}
+
+# the space
+Plugin {
+	type = space
+	config {
+		size = 4
+	}
+}
+
+
+# the show-desk icon
+Plugin {
+	type = wincmd
+	config {
+		icon = gnome-fs-desktop
+		tooltip = Left click to iconify all windows. Middle click to shade them.
+	}
+}
+
+
+# the space
+Plugin {
+	type = space
+	config {
+		size = 8
+	}
+}
+
+# the pager
+Plugin {
+	type = pager
+	config {
+		showwallpaper = false
+	}
+}
+
+# the space
+Plugin {
+	type = space
+	config {
+		size = 4
+	}
+}
+
+# the task bar
+Plugin {
+	type = taskbar
+	expand = true
+	config {
+		ShowIconified = true
+		ShowMapped    = true
+		ShowAllDesks  = false
+		tooltips = true
+		IconsOnly = false
+		MaxTaskWidth = 120
+	}
+}
+
+# the space
+Plugin {
+	type = space
+	config {
+		size = 12
+	}
+}
+
+
+# the system tray
+Plugin {
+	type = tray
+}
+
+plugin {
+	type = volume
+}
+
+Plugin {
+	type = mem
+		expand = false
+		padding = 2
+		config {
+			ShowSwap = false
+		}
+}
+
+Plugin {
+	type = cpu
+		config {
+			Color = red
+		}
+}
+
+# the space
+Plugin {
+	type = space
+	config {
+		size = 4
+	}
+}
+
+# Digital Clock
+#Plugin {
+#	type = dclock
+#	config {
+#		ShowSeconds = true
+#		HoursView = 24
+#		TooltipFmt = %A %x
+#       	#Action = xmessage Please define some command &
+#	}
+#}
+
+# Text Clock
+Plugin {
+	type = tclock
+	config {
+		ClockFmt = <b>%k:%M:%S %Y-%m-%d</b>
+		ShowCalendar = true
+		ShowTooltip = true
+		TooltipFmt = %A %x
+        #Action = xmessage Please define some command &
+	}
+}
+
+
+

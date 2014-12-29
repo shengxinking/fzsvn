@@ -1,0 +1,66 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1 (0x1)
+    Signature Algorithm: md5WithRSAEncryption
+        Issuer: C=CN, ST=Beijing, L=Haidian, O=alice, OU=alice, CN=www.alice.org/emailAddress=admin@alice.org
+        Validity
+            Not Before: Oct 19 13:50:39 2014 GMT
+            Not After : Oct 16 13:50:39 2024 GMT
+        Subject: C=CN, ST=Beijing, O=alice1, OU=alice1, CN=www.alice1.org
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:b1:70:85:8b:b4:77:0e:6f:5d:e2:9b:a3:25:b6:
+                    5c:7c:13:f8:c8:ba:5f:e1:65:9b:e4:86:31:16:c6:
+                    6a:58:4f:4a:46:f6:9a:df:62:6b:49:cc:4e:2e:fe:
+                    fc:e4:c1:d3:6c:70:26:66:93:ba:e0:8e:a9:1d:4f:
+                    f5:99:8b:9b:c7:0d:3d:e2:03:a5:97:55:86:24:fb:
+                    46:23:e5:cc:17:83:29:fb:d5:b0:21:63:2a:18:38:
+                    a2:d7:1f:f1:17:4c:d4:f4:23:2b:87:d3:40:d6:75:
+                    9c:71:20:ac:f0:1c:32:76:e2:6e:65:ce:a3:e5:f9:
+                    4b:6e:f4:ce:60:0f:63:a1:e1:76:15:ef:20:0b:28:
+                    0f:23:83:bc:a5:f5:7d:97:fc:54:0f:e5:34:6f:61:
+                    86:73:a6:2b:45:f8:86:d6:49:a9:55:8a:ea:fe:55:
+                    77:38:43:9d:4d:d2:47:b8:ae:a5:53:5a:e4:22:33:
+                    29:21:ad:9e:f2:9f:ae:82:02:56:50:b2:10:3f:88:
+                    41:db:94:40:5b:91:8e:03:7d:23:6a:c7:22:66:57:
+                    9f:78:c2:f1:3e:7c:16:58:d8:91:1e:86:d3:8f:93:
+                    0c:26:01:ff:af:9f:d5:4e:b4:c0:45:43:d1:5e:0e:
+                    12:fc:03:fd:7a:4f:dd:e1:82:39:27:79:06:24:13:
+                    6a:63
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Subject Alternative Name: 
+                DNS:www.alice1.com
+    Signature Algorithm: md5WithRSAEncryption
+         10:ec:80:7d:16:4d:32:d2:98:d5:db:52:3f:75:6d:55:a2:83:
+         a4:2b:2e:ee:da:61:1a:c8:ac:cc:41:53:ad:1a:98:6f:69:2a:
+         7e:a4:c9:62:de:e2:c7:de:3a:cc:81:6b:a3:29:25:48:02:e8:
+         94:92:3a:06:16:a2:e9:82:9e:de:c2:9c:aa:4f:5c:4b:d7:e7:
+         16:d8:02:52:5c:cf:72:d3:7b:de:89:d1:15:0f:ce:d3:b1:66:
+         94:91:7f:4f:6f:fc:a1:cf:e2:40:81:5d:34:1b:a9:58:9e:35:
+         38:19:99:9e:b5:df:7c:81:83:3d:b1:ba:40:4d:dd:f5:af:04:
+         71:44
+-----BEGIN CERTIFICATE-----
+MIIDBjCCAm+gAwIBAgIBATANBgkqhkiG9w0BAQQFADCBiTELMAkGA1UEBhMCQ04x
+EDAOBgNVBAgMB0JlaWppbmcxEDAOBgNVBAcMB0hhaWRpYW4xDjAMBgNVBAoMBWFs
+aWNlMQ4wDAYDVQQLDAVhbGljZTEWMBQGA1UEAwwNd3d3LmFsaWNlLm9yZzEeMBwG
+CSqGSIb3DQEJARYPYWRtaW5AYWxpY2Uub3JnMB4XDTE0MTAxOTEzNTAzOVoXDTI0
+MTAxNjEzNTAzOVowWjELMAkGA1UEBhMCQ04xEDAOBgNVBAgMB0JlaWppbmcxDzAN
+BgNVBAoMBmFsaWNlMTEPMA0GA1UECwwGYWxpY2UxMRcwFQYDVQQDDA53d3cuYWxp
+Y2UxLm9yZzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALFwhYu0dw5v
+XeKboyW2XHwT+Mi6X+Flm+SGMRbGalhPSkb2mt9ia0nMTi7+/OTB02xwJmaTuuCO
+qR1P9ZmLm8cNPeIDpZdVhiT7RiPlzBeDKfvVsCFjKhg4otcf8RdM1PQjK4fTQNZ1
+nHEgrPAcMnbibmXOo+X5S270zmAPY6HhdhXvIAsoDyODvKX1fZf8VA/lNG9hhnOm
+K0X4htZJqVWK6v5VdzhDnU3SR7iupVNa5CIzKSGtnvKfroICVlCyED+IQduUQFuR
+jgN9I2rHImZXn3jC8T58FljYkR6G04+TDCYB/6+f1U60wEVD0V4OEvwD/XpP3eGC
+OSd5BiQTamMCAwEAAaMoMCYwCQYDVR0TBAIwADAZBgNVHREEEjAQgg53d3cuYWxp
+Y2UxLmNvbTANBgkqhkiG9w0BAQQFAAOBgQAQ7IB9Fk0y0pjV21I/dW1VooOkKy7u
+2mEayKzMQVOtGphvaSp+pMli3uLH3jrMgWujKSVIAuiUkjoGFqLpgp7ewpyqT1xL
+1+cW2AJSXM9y03veidEVD87TsWaUkX9Pb/yhz+JAgV00G6lYnjU4GZmetd98gYM9
+sbpATd31rwRxRA==
+-----END CERTIFICATE-----

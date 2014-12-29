@@ -1,0 +1,15 @@
+1. Wireshark non-root priviledge
+
+# groupadd wireshark
+# usermod -a -G wireshark <user name>
+<username> $ newgrp wireshark
+# chgrp wireshark /usr/bin/dumpcap
+# chmod 750 /usr/bin/dumpcap
+# setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
+# getcap /usr/bin/dumpcap
+/usr/bin/dumpcap = cap_net_admin,cap_net_raw+eip
+<username> $ /usr/bin/dumpcap
+
+2. 
+
+

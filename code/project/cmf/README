@@ -1,0 +1,29 @@
+1. Introduce
+
+  The CLI project is similar with FortiGate's CLI, but it's code from scratch. I have two choices to implement CLI:
+  1. using C/S design, the server side(named clid) to accept client's request, do the work, and return the response, it's like Mysql.
+  2. using share memory to store all meta data and real data, and provide a set of API to manipulate this data.
+  I using 2) implement CLI.
+
+2. The goal
+  The CLI need finished following functions:
+  1. save config file like FortiGate's CLI config file.
+  2. implement following function in FGT's CLI:
+     a. user&privilege manager.
+     c. implement "config" "get" "show" "exit" "edit" "set" "unset" "delete" "purge" "rename" commands.
+
+3. The structure:
+  It have 3 component:
+  1. libcli.so: the library which implement object management, CLI query, and all plugins is here.
+  2. confd: the CLI daemon, which recv client request, and return the result.
+  3. cli: the CLI client program.
+
+3. The difficults:
+  1. 
+
+
+
+
+
+
+

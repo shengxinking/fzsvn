@@ -1,0 +1,9 @@
+GET /Html/Book/64/7404/1405083.shtml HTTP/1.1
+Host: 172.22.14.200:8088
+User-Agent: Apache-2.2.4   Tomcat-1.1   
+Reference: /Html/Book   
+Location:    /Html/Book/64   
+Set-Cookie:    setcookie=myvalue    
+X-Forworded-For:    172.22.14.200    
+Cookie: 1=2 22=333        4444=5555
+Cookie: aaaa=bbbb ccccc=ddddd        eee=fff

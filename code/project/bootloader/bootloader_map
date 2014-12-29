@@ -1,0 +1,45 @@
+
+Following is the new image struct on flash card if use a PC BIOS.
+It's a bootloader which origin from GRUB-legacy(grub-0.x.x).
+
+It's have something change:
+1. the root disk is decide acording MBR's partition table's 
+   bootable flags.
+2. the kernel name is alway (root)/vmlinuz
+3. it's only support initrd mode, file is (root)/rootfs.gz
+4. it remove stage1_5, because stage2 is stored on fixed place.
+5. it don't need any configure file
+6. it support serial port output/input message.
+7. it support TFTP upload image file and write to flash disk. 
+
+
+--------------------------------|
+|   446 byte stage1         	|
+|-------------------------------|
+|   64 byte patition table     	|
+|-------------------------------|
+|   0x55AA end tag          	|
+|-------------------------------|
+|   stage2 (1XXk byte)      	|
+|-------------------------------|
+|   up to sector 400 for future	|
+|   usage      	       	       	|
+|-------------------------------|
+|	 	            	|
+|   patition 1 from sector 401	|
+|      	       	       	      	|
+|-------------------------------|
+|      	       	               	|
+|   ..........................	|
+|	 	              	|
+|-------------------------------|
+       	       	               	
+ 	 	        
+ 	 	        
+ 	 	        
+ 		        
+ 		        
+ 		        
+ 		        
+ 		        
+       	       	       

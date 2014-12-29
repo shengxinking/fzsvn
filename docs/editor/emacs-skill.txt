@@ -1,0 +1,56 @@
+Emacs 
+
+1. 输入'\r'
+C-q C-m
+
+2. Emacs自带的中文输入法.
+
+a. 选择自带的中文输入法:
+C-x RET C-\ chinese-py-punct
+
+b. 启用/停用输入法:
+C-\
+
+c. 候选汉字选择:
+C-@	但前汉字
+C-b	前一个汉字
+C-f	后一个汉字
+C-n	后一屏
+C-p	前一屏
+
+3. 使用Cscope
+
+在emacs的配置文件里面加入
+(add-hook 'c-mode-common-hook
+	  '(lambda ()
+	  (require 'xcscope)))
+
+cscope-indexer 使用：
+生成文件列表: find . -type f -name "*.[ch]" > cscope.files
+生成索引文件: cscope-indexer -b -i cscope.files -f cscope.out
+
+Cscope的快捷键(C-c s)
+
+C-c s s		找到所有的符号
+C-c s d		找到所有的全局定义
+C-c s g		找到所有的全局定义
+C-c s G		找到符号的全局定义， 不提示直接跳转到全局定义
+C-c s c		找到函数的定义
+C-c s C		找到被调用的函数
+
+C-c s t		找到字符串
+C-c s e		查找egrep模式
+C-c s i		查找在#include里的文件名
+C-c s f		查找文件名
+
+C-c s b		显示*cscope*缓冲区
+C-c s B		自动显示*cscope*缓冲区的开关
+C-c s n		自动转到下一个符号处
+C-c s N		自动跳到下一个文件处
+C-c s p		自动跳到前一个符号处
+C-c s P		自动跳到前一个文件处
+C-c s u		回跳到上一个位置
+
+
+
+

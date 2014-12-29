@@ -1,0 +1,81 @@
+LFS-6.4安装说明:
+
+1. 安装LFS-6.4完整版.
+
+2. 系统软件.
+bc
+pth
+openssl
+reiserfsprogs
+cracklib
+pam
+shadow
+sudo
+reiserfsprogs
+pcre
+libxml2
+pkg-config
+glib2
+expat
+libesmtp
+libusb
+libjpeg
+libpng
+libtiff
+giflib
+imagemagick
+screen
+gpm
+fcron
+which
+unzip
+zip
+unrar
+pciutils
+usbutils
+slang
+mc
+alsa-lib
+alsa-plugins
+alsa-utils
+mpg123
+db
+
+3. 网络软件
+net-tools
+ppp
+pppoe
+dhcp
+libpcap
+tcpdump
+w3m
+lftp
+vsftpd
+subversion
+net-tools
+ntp
+openssh
+wget
+wireless tools
+traceroute
+mutt
+procmail
+esmtp
+fetchmail
+xinetd
+
+4. 编辑器
+emacs-nox
+vim
+ed
+
+5. 编程
+doxygen
+nasm
+tcl
+python 
+berkeley DB
+valgrind
+gdb
+
+

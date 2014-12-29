@@ -1,0 +1,53 @@
+1. virsh的命令行方式.
+virsh -c qemu:///system 'command' 'args'
+virsh 'command 'args' (在配置里设置好uri_default)
+virsh help 'command'
+
+2. virsh的交互式方式.
+virsh -c qemu:///system
+
+3. virsh的配置文件.
+root用户: /etc/libvirt/libvirt.conf
+非root用户: ~/.config/libvirt/libvirt.conf
+里面添加:
+uri_default = "qemu:///system"
+就可以用virsh自动连接qemu:///system.
+ 
+3. KVM客户端的串口支持.
+a. 进入虚拟机, 修改: /etc/inittab, 添加下面的行.
+#s0:2345:respawn:/sbin/getty -L 115200 ttyS0 xterm
+s0:2345:respawn:/sbin/getty 115200 ttyS0 xterm
+b. 在虚拟机里运行.
+# init q
+c. 让GRUB2支持串口输出, 添加下面的行到: /etc/default/grub
+GRUB_CMDLINE_LINUX_DEFAULT="console=tty0 console=ttyS0,38400n8"
+GRUB_TERMINAL=serial
+GRUB_SERIAL_COMMAND="serial --speed=38400 --unit=0 --word=8 --parity=no
+--stop=1"
+d. using virsh connect to console.
+virsh -c qemu:///system console 'vm name'
+virsh console 'vm name'
+
+
+4. 创建pool(虚拟机存储池)
+
+
+5. 创建volume(虚拟机磁盘)
+
+
+
+6. 创建net(switch)
+
+
+
+7. 创建domain(虚拟机)
+a. 查看当前所有domain.
+virsh list --all
+
+8. 管理domain(虚拟机)
+
+
+
+
+
+
