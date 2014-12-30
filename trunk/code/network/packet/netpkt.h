@@ -44,7 +44,6 @@
 typedef struct netpkt {
 	cblist_t		list;	/* in list */
 
-	/* layer 2 */
 	struct ether_header	*eth;	/* ether header */
 	u_int32_t		hdr2_len;/* layer 2 length */
 

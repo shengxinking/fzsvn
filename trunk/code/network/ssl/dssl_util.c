@@ -125,4 +125,23 @@ dssl_decode(dssl_t *s, const u_int8_t *buf, size_t len, int dir)
 	return 0;
 }
 
+u_int8_t *
+dssl_data(dssl_t *s, int dir)
+{
+	dbuf_t *buf;
+	
+	if (unlikely(!s))
+		ERR_RET(NULL, "invalid argument\n");
+
+	buf = &s->bufs[dir % 2];
+	return DBUF_DATA(buf);
+}
+
+int 
+dssl_drop_data(dssl_t *s, int n, int dir)
+{
+	return 0;
+}
+
+
 

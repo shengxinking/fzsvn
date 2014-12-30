@@ -276,14 +276,13 @@ _do_tcp_recv(int fd)
 			return -1;
 		}
 
+		FLOW(1, "client %d recv %d bytes: %s\n", fd, n, buf);
+		len += n;
+
 		if (closed) {
 			FLOW(1, "client %d recv closed\n", fd);
 			return 0;
 		}
-
-		FLOW(1, "client %d recv %d bytes: %s\n", fd, n, buf);
-
-		len += n;
 	}
 
 	return 0;
@@ -350,14 +349,7 @@ _do_client(void)
 
 		buflen = sizeof(buf);
 		memset(buf, 0, buflen);
-		n = sk_recv(fd, buf, buflen, &wait);
-		if (n < 0) {
-			FLOW(1, "client %d recv failed\n", fd);
-			close(fd);
-			return -1;
-		}
-
-		FLOW(1, "client %d recv %d bytes: %s\n", fd, n, buf);		
+		//_do_tcp_recv(fd);
 	}
 
 	close(fd);
