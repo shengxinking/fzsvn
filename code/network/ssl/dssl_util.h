@@ -80,13 +80,13 @@ typedef struct dssl {
 	dssl_ctx_t	*ctx;		/* the context of this session */
 	dbuf_t		domain;		/* client domain name */
 	dbuf_t		sid;		/* client session id */
-	dbuf_t		random[2];	/* client random */
+	dbuf_t		randoms[2];	/* client random */
 	dbuf_t		pms;		/* pre master security */
 	dbuf_t		ms;		/* master security */
-	EVP_CIPHER_CTX	*key[2];	/* client decrypt key */
-	EVP_MD_CTX	*md[2];		/* client message digest */
-	dbuf_t		rec[2];		/* SSL record buffer */
-	dbuf_t		pdata[2];	/* SSL plain data */
+	EVP_CIPHER_CTX	*keys[2];	/* client decrypt key */
+	EVP_MD_CTX	*mds[2];	/* client message digest */
+	dbuf_t		recs[2];	/* SSL record buffer */
+	dbuf_t		bufs[2];	/* SSL plain data */
 } dssl_t;
 
 /**
@@ -139,6 +139,8 @@ dssl_free(dssl_t *ssl);
 extern int 
 dssl_decode(dssl_t *s, const u_int8_t *buf, size_t siz, int dir);
 
+extern u_int8_t * 
+dssl_data(dssl_t *s, int dir);
 
 #endif /* end of FZ_DSSL_UTIL_H */
 

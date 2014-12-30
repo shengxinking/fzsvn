@@ -179,7 +179,7 @@ shash_del(shash_t *h, void *d, u_int32_t hval)
 static inline void *
 shash_find(shash_t *h, void *d, u_int32_t hval)
 {
-	shash_item_t *item, *bak;
+	shash_item_t *item;
 	shash_bucket_t *b;
 
 	if (unlikely(!h || !d))
@@ -188,11 +188,9 @@ shash_find(shash_t *h, void *d, u_int32_t hval)
 	hval %= h->nbucket;
 	b = &h->buckets[hval];
 	
-	CBLIST_FOR_EACH_SAFE(&b->list, item, bak, list) {
-		if (h->cmp_func(item->data, d) == 0) {
-			CBLIST_DEL(&item->list);
+	CBLIST_FOR_EACH(&b->list, item, list) {
+		if (h->cmp_func(item->data, d) == 0) 
 			return item->data;
-		}
 	}
 
 	return NULL;	

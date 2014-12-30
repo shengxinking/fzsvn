@@ -156,6 +156,12 @@ _sig_stop(int signo)
 	_g_stop = 1;
 }
 
+static void 
+_tcp_free(void *tcp)
+{
+	return tcp_stream_free(tcp);
+}
+
 /**
  *	Init some global resource used in program.	
  *
@@ -200,10 +206,11 @@ _initiate(void)
 	if (!_g_dssl_ctx) 
 		ERR_RET(-1, "dssl_ctx_new failed\n");
 	
-	if (dssl_ctx_load_pkey(_g_dssl_ctx, _g_keyfile, NULL))
-		ERR_RET(-1, "dssl_ctx_set_pkey failed\n");
+	if (_g_keyfile[0])
+		if (dssl_ctx_load_pkey(_g_dssl_ctx, _g_keyfile, NULL))
+			ERR_RET(-1, "dssl_ctx_set_pkey failed\n");
 
-	_g_tcphash = shash_alloc(1000, tcp_tup_cmp, tcp_stream_free);
+	_g_tcphash = shash_alloc(1000, tcp_tup_cmp, _tcp_free);
 	if (!_g_tcphash)
 		ERR_RET(-1, "shash_alloc failed\n");
 
@@ -225,139 +232,64 @@ _release(void)
 }
 
 static int 
-_tcp_init_tup(tcp_tup_t *t, const netpkt_t *pkt, int dir)
+_decode_tcp(const netpkt_t *pkt)
 {
-	ip_port_t *src;
-	ip_port_t *dst;
-
-	if (dir) {
-		src = &t->dst;
-		dst = &t->src;
-	}
-	else {
-		src = &t->src;
-		dst = &t->dst;
-	}
-
-	if (pkt->hdr3_type == ETHERTYPE_IP) {
-		src->family = AF_INET;
-		dst->family = AF_INET;
-		src->_addr4.s_addr = pkt->hdr3_ipv4->saddr;
-		dst->_addr4.s_addr = pkt->hdr3_ipv4->daddr;
-	}
-	else if (pkt->hdr3_type == ETHERTYPE_IPV6) {
-		src->family = AF_INET6;
-		dst->family = AF_INET6;
-		src->_addr6 = pkt->hdr3_ipv6->ip6_src;
-		dst->_addr6 = pkt->hdr3_ipv6->ip6_dst;
-	}
-	else 
-		return -1;
-
-	if (pkt->hdr4_type == IPPROTO_TCP) {
-		src->port = pkt->hdr4_tcp->source;
-		dst->port = pkt->hdr4_tcp->dest;
-	}
-	else
-		return -1;
-
-	return 0;
-}
-
-static int 
-_tcp_flow(const netpkt_t *pkt)
-{
+	int n;
+	int m;
 	int dir;
-	int ret = 0;
-	u_int8_t *data;
-	u_int32_t hval;
 	tcp_tup_t tup;
-	tcp_stream_t *t = NULL;
+	u_int32_t hval;
 	struct tcphdr *h;
+	tcp_stream_t *t = NULL;
 
 	h = pkt->hdr4_tcp;
 
-	/* is server packet? */
+	/* is server packet ? server packet must in hash */
 	dir = 1;
-	if (_tcp_init_tup(&tup, pkt, dir))
-		return -1;
+	if (tcp_tup_init(&tup, pkt, dir))
+		ERR_RET(-1, "tup init failed\n");
 	if (tcp_tup_hash(&tup, &hval))
-		return -1;
+		ERR_RET(-1, "tup hash failed\n");
 	t = shash_find(_g_tcphash, &tup, hval);
-
-	/* not server packet */
+	/* client packet */
 	if (!t) {
 		dir = 0;
-		if (_tcp_init_tup(&tup, pkt, dir))
+		if (tcp_tup_init(&tup, pkt, dir))
 			return -1;
 		if (tcp_tup_hash(&tup, &hval))
 			return -1;
+		t = shash_find(_g_tcphash, &tup, hval);
 	}
 
-	/* RST packet */
-	if (h->rst) {
-		t = shash_del(_g_tcphash, &tup, hval);
-		if (!t) {
-			return -1;
+	/* already exist TCP stream, parse TCP flow */
+	if (t) {
+		printf("<%d>hval %u find stream (%p)\n", dir, hval, t);
+		n = tcp_flow(t, pkt, dir);
+		if (n > 0) {
+			printf("tcp flow return %d\n", n);
 		}
 
-		tcp_stream_free(t);
-		return 0;
+		return n;
 	}
-
-	/* SYN packet */
-	if (h->syn) {
-		/* not syn ack */
-		if (!h->ack) {
+	else {	
+		/* new tcp stream */
+		if (h->syn && !h->ack && !h->fin && !h->psh && !h->rst) {
 			t = tcp_stream_alloc();
 			if (!t)
-				return -1;
+				ERR_RET(-1, "tcp stream alloc failed\n");
 			t->state = TCP_ST_SYN;
-			ret = shash_add(_g_tcphash, &tup, hval, 1);
-			if (ret)
-				return -1;
-		}
-		else {
-			t = shash_find(_g_tcphash, &tup, hval);
-			if (!t)
-				return -1;
-
-			/* current state is not SYN */
-			if (t->state != TCP_ST_SYN)
-				return -1;
-
-			t->state = TCP_ST_SYN_ACK;
+			t->seqacks[0].seq = ntohl(h->seq);
+			t->seqacks[0].ack = ntohl(h->seq) + 1;
+			if (tcp_tup_init((tcp_tup_t *)t, pkt, dir)) {
+				tcp_stream_free(t);
+				ERR_RET(-1, "tcp_tup_init failed\n");
+			}
+			shash_add(_g_tcphash, t, hval, 0);
+			printf("<%d>hval %u add stream (%p)\n", dir, hval, t);
 		}
 	}
 
-	/* FIN packet */
-	if (h->fin) {
-		t = shash_find(_g_tcphash, &tup, hval);
-		if (!t)
-			return -1;
-		if (dir)
-			t->state = TCP_ST_FIN2;
-		else
-			t->state = TCP_ST_FIN1;
-	}
-
-	/* PSH packet */
-	if (h->psh) {
-		data = pkt->head + pkt->hdr2_len + pkt->hdr3_len + pkt->hdr4_len;
-		//ssl_decode(t->ssl, data, buf); 
-	}
-
-	/* ACK packet */
-	if (h->ack) {
-		t = shash_find(_g_tcphash, &tup, hval);
-		if (!t)
-			return -1;
-
-		if (t->state == TCP_ST_SYN_ACK)
-			t->state = TCP_ST_EST;
-	}
-
-	return 0;
+	return -1;
 }
 
 static void 
@@ -409,12 +341,10 @@ _decode(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes)
 			break;
 		default:
 			goto out_free;
-			break;
 	}
 
-	if (_tcp_flow(pkt))
-		goto out_free;
-
+	_decode_tcp(pkt);
+	return;
 
 out_free:
 
