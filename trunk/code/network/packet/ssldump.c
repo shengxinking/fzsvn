@@ -264,7 +264,7 @@ _decode_tcp(const netpkt_t *pkt)
 	/* already exist TCP stream, parse TCP flow */
 	if (t) {
 		printf("<%d>hval %u find stream (%p)\n", dir, hval, t);
-		n = tcp_flow(t, pkt, dir);
+		n = tcp_stream_flow(t, pkt, dir);
 		if (n > 0) {
 			printf("tcp flow return %d\n", n);
 		}
