@@ -15,8 +15,12 @@
 #include "ip_addr.h"
 #include "netpkt.h"
 
-#define	TCP_PKTQ_MAX	16384
+#define	TCP_PKTQ_MAX	128
+#define	TCP_PKTQ_INC	16
 
+/**
+ *	TCP state.
+ */
 enum {
 	TCP_ST_SYN,
 	TCP_ST_SYN_ACK,
@@ -47,7 +51,9 @@ typedef struct tcp_seqack {
  *	TCP packet include netpkt_t @pkt.
  */
 typedef struct tcp_pkt {
-	tcp_seqack_t	seqack;
+	u_int32_t	seq;
+	u_int16_t	len;
+	u_int16_t	off;
 	netpkt_t	*pkt;	
 } tcp_pkt_t;
 
@@ -57,8 +63,10 @@ typedef struct tcp_pkt {
 typedef struct tcp_pktq {
 	tcp_pkt_t	*pkts;
 	u_int16_t	npkt;
-	u_int16_t	max;
-	u_int32_t	len;
+	u_int16_t	max;		/* max pkts can store in @pkts */
+	u_int32_t	len;		/* length of continuous data */
+	u_int32_t	nassembly;	/* assembly packet number */
+	u_int32_t	first_seq;	/* first seq number for reassemble */
 } tcp_pktq_t;
 
 /**
@@ -86,12 +94,6 @@ tcp_tup_cmp(const void *tcp1, const void *tcp2);
 extern const char * 
 tcp_tup_to_str(const tcp_tup_t *tup, char *buf, size_t len);
 
-extern int 
-tcp_pktq_init(tcp_pktq_t *q, int max);
-
-extern void 
-tcp_pktq_free(tcp_pktq_t *q);
-
 extern tcp_stream_t * 
 tcp_stream_alloc(void); 
 
@@ -99,13 +101,13 @@ extern void
 tcp_stream_free(tcp_stream_t *t);
 
 extern int 
-tcp_flow(tcp_stream_t *t, const netpkt_t *pkt, int dir);
+tcp_stream_flow(tcp_stream_t *t, const netpkt_t *pkt, int dir);
 
 extern int 
-tcp_data_len(const tcp_stream_t *t, int dir);
+tcp_stream_data_len(const tcp_stream_t *t, int dir);
 
-extern u_int8_t * 
-tcp_get_data(tcp_stream_t *t, u_int8_t *buf, size_t len, int dir);
+extern int
+tcp_stream_get_data(tcp_stream_t *t, u_int8_t *buf, size_t len, int dir);
 
 extern void 
 tcp_stream_print(void *tcp);

@@ -33,17 +33,77 @@ _tcp_check_seq(tcp_stream_t *t, struct tcphdr *h, int dir)
 }
 
 static int 
-_tcp_pktq_pos(tcp_pktq_t *q, u_int32_t seq)
+_tcp_pktq_init(tcp_pktq_t *q, int max)
+{
+	tcp_pkt_t *ptr;
+	
+	ptr = realloc(q->pkts, max * sizeof(tcp_pkt_t));
+	if (!ptr)
+		return -1;
+
+	if (q->pkts && q->pkts != ptr)
+		free(q->pkts);
+
+	q->pkts = ptr;
+	return 0;
+}
+
+static void  
+_tcp_pktq_free(tcp_pktq_t *q)
+{
+	int i;
+	netpkt_t *pkt;
+
+	if (!q)
+		return;
+
+	for (i = 0; i < q->npkt; i++) {
+		pkt = q->pkts[i].pkt;
+		if (pkt)
+			free(pkt);
+	}
+
+	if (q->pkts)
+		free(q->pkts);
+}
+
+static int 
+_tcp_pktq_find_pos(tcp_pktq_t *q, u_int32_t seq, u_int32_t size)
 {
 	int l, h, m;
+	tcp_pkt_t *pkt;
 
-	if (q->npkt = 0)
+	if (q->npkt == 0)
 		return 0;
 
 	l = 0;
 	h = q->npkt;
-	m = h / 2;
+	while (1) {
+		m = (l + h) / 2;
+		pkt = &q->pkts[m];
+		/* after @pkt */
+		if (seq > pkt->seq) {
+			/* data overlap, drop it */
+			if (seq < (pkt->seq + pkt->len))
+				return -1;
+			l = m + 1;
+		}
+		/* before @pkt */
+		else if (seq < pkt->seq) {
+			/* data overlap, drop it */
+			if ((seq + size) > pkt->seq)
+				return -1;
+			h = m - 1;
+		}
+		/* seq is same as @pkt, drop packet */
+		else
+			return -1;
+		/* find correct pos */
+		if (l == h)
+			return l;
+	}
 
+	return -1;
 }
 
 static int 
@@ -51,10 +111,10 @@ _tcp_pktq_add(tcp_pktq_t *q, const netpkt_t *pkt)
 {
 	int n;
 	int m;
+	int pos;
 	int size;
-	int max;
+	u_int32_t seq;
 	tcp_pkt_t *tp;
-	//int high, low, mid;
 
 	n = pkt->tail - pkt->head;
 	m = pkt->hdr2_len + pkt->hdr3_len + pkt->hdr4_len;
@@ -66,28 +126,92 @@ _tcp_pktq_add(tcp_pktq_t *q, const netpkt_t *pkt)
 	else if (size == 0)
 		return 0;
 	
-	if (tf->npkt >= TCP_PKTQ_MAX)
+	if (q->npkt >= TCP_PKTQ_MAX)
 		ERR_RET(-1, "too many pkt in frag\n");
 
-	if (tf->npkt == q->max) {
-		if (max == 0)
-			max = 10;
-		if (tcp_pktq_init(q, max))
-			return -1;
+	/* increase @q->pkts to store new @pkt */
+	if (q->npkt == q->max && _tcp_pktq_init(q, q->max + TCP_PKTQ_INC))
+		return -1;
+
+	/* get pos which @pkt need insert */
+	seq = ntohl(pkt->hdr4_tcp->seq);
+	pos = _tcp_pktq_find_pos(q, seq, size);
+	/* drop packet */
+	if (pos < 0)
+		return -1;
+
+	tp = &q->pkts[pos];
+
+	/* insert packet into correct pos */
+	m = (q->npkt - pos) * sizeof(tcp_pkt_t);
+	if (m > 0)
+		memmove(tp + 1, tp, m);
+
+	/* set packet value */
+	tp->seq = seq;
+	tp->len = size;
+	tp->pkt = (netpkt_t *)pkt;
+
+	/* check data in sequence */
+	if (q->first_seq == seq) {
+		q->nassembly++;
+		q->len += size;
+		q->first_seq = seq + size;
 	}
 
-	
-
-	return size;
+	return q->len;
 }
 
 static int 
-_tcp_pktq_get_data(tcp_pktq_t *pktq, u_int8_t *buf, size_t len)
+_tcp_pktq_get_data(tcp_pktq_t *q, u_int8_t *buf, size_t size)
 {
-	return 0;
+	int i;
+	int m;
+	int n;
+	int pos;
+	int off;
+	int len;
+	int nfree;
+	netpkt_t *pkt;
+	u_int8_t *data;
+
+	nfree = 0;
+	pos = 0;
+	m = size;
+	for (i = 0; i < q->nassembly; i++) {
+		pkt = q->pkts[i].pkt;
+		off = q->pkts[i].off;
+		len = q->pkts[i].len - off;
+		if (!pkt)
+			return -1;
+		n = m > len ? len : m;
+		data = pkt->head + NETPKT_HLEN(pkt) + off;
+		memcpy(buf + pos, data, n);
+		pos += len;
+		m -= n;
+		if (m == 0) {
+			if (n == len)
+				nfree++;
+			else
+				q->pkts[i].off += n;
+			break;
+		}
+		nfree++;
+	}
+
+	/* free netpkt and clear all unused slot in q->pkts */
+	if (nfree > 0) {
+		for (i = 0; i < nfree; i++)
+			free(q->pkts[i].pkt);
+		m = (q->npkt - nfree) * sizeof(tcp_pkt_t);
+		if (m > 0)
+			memmove(q->pkts, &q->pkts[nfree], m);
+		q->npkt -= nfree;
+		q->nassembly -= nfree;
+	}
+
+	return size;
 }
-
-
 
 int 
 tcp_tup_init(tcp_tup_t *tup, const netpkt_t *pkt, int dir)
@@ -204,51 +328,6 @@ tcp_tup_to_str(const tcp_tup_t *tup, char *buf, size_t len)
 	return buf;
 }
 
-int 
-tcp_pktq_init(tcp_pktq_t *q, int max)
-{
-	tcp_pktq_t *p;
-
-	if (unlikely(!q || max < q->max))
-		ERR_RET(-1, "invalid argument\n");
-
-	if (max == q->max)
-		return 0;
-
-	if (max > TCP_PKTQ_MAX)
-		return -1;
-	
-	p = realloc(q->pkts, max * sizeof(tcp_pkt_t));
-	if (!p)
-		return -1;
-
-	if (q->pkts && q->pkts != p)
-		free(q->pkts);
-
-	q->pkts = p;
-
-	return 0;
-}
-
-int 
-tcp_pktq_free(tcp_pktq_t *q)
-{
-	int i;
-	netpkt_t *pkt;
-
-	if (!q)
-		return;
-
-	for (i = 0; i < q->npkt; i++) {
-		pkt = q->pkts[i].pkt;
-		if (pkt)
-			free(pkt);
-	}
-
-	if (q->pkts)
-		free(q->pkts);
-}
-
 tcp_stream_t * 
 tcp_stream_alloc(void)
 {
@@ -268,8 +347,8 @@ tcp_stream_free(tcp_stream_t *t)
 	if (unlikely(!t))
 		return;
 
-	tcp_pktq_free(t->pktqs[0]);
-	tcp_pktq_free(t->pktqs[1]);
+	_tcp_pktq_free(&t->pktqs[0]);
+	_tcp_pktq_free(&t->pktqs[1]);
 
 	free(t);
 }
@@ -292,7 +371,7 @@ tcp_stream_print(void *tcp)
 }
 
 int 
-tcp_flow(tcp_stream_t *t, const netpkt_t *pkt, int dir)
+tcp_stream_flow(tcp_stream_t *t, const netpkt_t *pkt, int dir)
 {
 	int ret;
 	struct tcphdr *h;
@@ -336,7 +415,7 @@ tcp_flow(tcp_stream_t *t, const netpkt_t *pkt, int dir)
 			if (h->fin)
 				t->state = TCP_ST_FIN1;
 			if (h->psh) {
-				ret = _tcp_pktq_add(t, pkt, dir);
+				ret = _tcp_pktq_add(&t->pktqs[dir], pkt);
 			}
 			break;
 		case TCP_ST_FIN1:
@@ -345,7 +424,7 @@ tcp_flow(tcp_stream_t *t, const netpkt_t *pkt, int dir)
 			if (h->fin)
 				t->state = TCP_ST_FIN2;
 			if (h->psh) {
-				ret = _tcp_pktq_add(t, pkt, dir);
+				ret = _tcp_pktq_add(&t->pktqs[dir], pkt);
 			}
 			break;
 		case TCP_ST_FIN1_ACK:
@@ -368,25 +447,30 @@ tcp_flow(tcp_stream_t *t, const netpkt_t *pkt, int dir)
 }
 
 int 
-tcp_data_len(const tcp_stream_t *t, int dir)
+tcp_stream_data_len(const tcp_stream_t *t, int dir)
 {
 	if (unlikely(!t))
 		ERR_RET(-1, "invalid argument\n");
 
-	return t->frags[dir % 2].len;
+	return t->pktqs[dir % 2].len;
 }
 
 int 
-tcp_get_data(tcp_stream_t *t, char *buf, size_t len, int dir)
+tcp_stream_get_data(tcp_stream_t *t, u_int8_t *buf, size_t size, int dir)
 {
-	int n;
-	dbuf_t *buf;
+	int tot;
+	tcp_pktq_t *q;
 
-	if (unlikely(!t || !buf || len < 1))
-		return NULL;
+	if (unlikely(!t || !buf || size < 1))
+		ERR_RET(-1, "invalid argument\n");
 
-	n = _tcp_frag_get_data(t->frags[dir % 2], buf, len);
-	return n;
+	q = &t->pktqs[dir % 2];
+
+	tot = q->len > size ? size : q->len;
+	if (tot == 0)
+		return 0;
+
+	return _tcp_pktq_get_data(q, buf, tot);
 }
 
 

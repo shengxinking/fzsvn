@@ -37,6 +37,8 @@
 #define	IPV6_FRAG_MF(off)	((off) & IP6F_MORE_FRAG >> 15)
 #define	IPV6_FRAG_OFF(off)	((off) & IP6F_OFF_MASK)
 
+#define	NETPKT_HLEN(p)		((p)->hdr2_len + (p)->hdr3_len + (p)->hdr4_len)
+
 /**
  *	The network packet common structure.
  *
